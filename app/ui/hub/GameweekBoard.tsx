@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import {
   Clock3,
   Flame,
@@ -9,71 +8,41 @@ import {
   Sparkles,
   Vote,
 } from "lucide-react";
-
-type ProposalCard = {
-  id: string;
-  title: string;
-  tone: "safe" | "balanced" | "aggressive";
-  odds: string;
-  legs: number;
-  statusLabel: string;
-  aiRecommended?: boolean;
-};
-
-const proposalCards: ProposalCard[] = [
-  {
-    id: "defensive",
-    title: "Defensive Accumulator",
-    tone: "safe",
-    odds: "+200",
-    legs: 3,
-    statusLabel: "Safe",
-  },
-  {
-    id: "neutral",
-    title: "Neutral Accumulator",
-    tone: "balanced",
-    odds: "+450",
-    legs: 5,
-    statusLabel: "Balanced",
-    aiRecommended: true,
-  },
-  {
-    id: "aggressive",
-    title: "Aggressive Accumulator",
-    tone: "aggressive",
-    odds: "+900",
-    legs: 7,
-    statusLabel: "High Risk",
-  },
-];
+import type { GameWeekProposalRecord } from "../../../data/gameWeeks";
+import { getUserVoteForGameWeek } from "../../../repositories/gameWeekRepository";
+import { useCurrentGameWeek } from "./GameWeekProvider";
 
 export function GameweekBoard() {
-  const [selectedCardId, setSelectedCardId] = useState("neutral");
+  const { currentGameWeek, loggedInUserId, castVote } = useCurrentGameWeek();
+  const selectedCardId =
+    (loggedInUserId
+      ? getUserVoteForGameWeek(currentGameWeek, loggedInUserId)
+      : null) ??
+    currentGameWeek.proposals.find((proposal) => proposal.aiRecommended)?.id ??
+    currentGameWeek.proposals[0]?.id ??
+    "";
 
   return (
     <>
       <div className="hub-section-head">
         <div>
-          <h1 className="hub-title">Gameweek 24 Action Board</h1>
-          <p className="hub-subtitle">
-            AI analysis complete. Review legs and cast your syndicate vote.
-          </p>
+          <h1 className="hub-title">{currentGameWeek.name}</h1>
+          <p className="hub-subtitle">{currentGameWeek.description}</p>
         </div>
 
         <div className="hub-timer">
           <Clock3 size={16} />
-          <span>Starts in 2d 14h</span>
+          <span>{currentGameWeek.startsIn}</span>
         </div>
       </div>
 
       <div className="hub-card-stack">
-        {proposalCards.map((card) => (
+        {currentGameWeek.proposals.map((card) => (
           <AccumulatorCard
             key={card.id}
             card={card}
             selected={card.id === selectedCardId}
-            onVote={() => setSelectedCardId(card.id)}
+            onVote={() => castVote(card.id)}
           />
         ))}
       </div>
@@ -86,16 +55,20 @@ function AccumulatorCard({
   selected,
   onVote,
 }: {
-  card: ProposalCard;
+  card: GameWeekProposalRecord;
   selected: boolean;
   onVote: () => void;
 }) {
   const Icon =
-    card.tone === "safe" ? Shield : card.tone === "balanced" ? Scale : Flame;
+    card.riskLevel === "safe"
+      ? Shield
+      : card.riskLevel === "balanced"
+        ? Scale
+        : Flame;
   const voteLabel =
-    card.tone === "safe"
+    card.riskLevel === "safe"
       ? "Vote Defensive"
-      : card.tone === "balanced"
+      : card.riskLevel === "balanced"
         ? "Vote Neutral"
         : "Vote Aggressive";
 
@@ -103,13 +76,17 @@ function AccumulatorCard({
     <article className={`hub-proposal-card${selected ? " is-selected" : ""}`}>
       <div className="hub-proposal-top">
         <div className="hub-proposal-title-wrap">
-          <div className={`hub-proposal-icon hub-proposal-icon-${card.tone}`}>
+          <div
+            className={`hub-proposal-icon hub-proposal-icon-${card.riskLevel}`}
+          >
             <Icon size={20} />
           </div>
           <div>
             <div className="hub-proposal-heading-row">
               <h2 className="hub-proposal-title">{card.title}</h2>
-              <span className={`hub-tag hub-tag-${card.tone}`}>{card.statusLabel}</span>
+              <span className={`hub-tag hub-tag-${card.riskLevel}`}>
+                {card.statusLabel}
+              </span>
               {card.aiRecommended ? (
                 <span className="hub-ai-tag">
                   <Sparkles size={12} />

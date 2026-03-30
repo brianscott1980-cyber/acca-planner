@@ -1,4 +1,4 @@
-import { getMemberCount, getMembers } from "./userService";
+import { getMemberCount, getMembers } from "../../../repositories/userService";
 
 export type LedgerActivity = {
   title: string;
@@ -22,7 +22,7 @@ type LedgerSnapshot = {
 };
 
 const memberDepositEntries: LedgerActivity[] = getMembers().map((member) => ({
-  title: member.name,
+  title: member.displayName,
   date: "Mar 23, 2026",
   amount: 10,
   tone: "positive",

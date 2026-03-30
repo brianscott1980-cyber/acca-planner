@@ -17,17 +17,17 @@ import {
 } from "./ledgerService";
 import { MiniSparkline } from "./MiniSparkline";
 import {
-  getCurrentUser,
   getMemberCount,
   getUserInitials,
-} from "./userService";
+} from "../../../repositories/userService";
+import { getLoggedInUser } from "../../../repositories/authenticationService";
 
 type HubAppShellProps = {
   children: ReactNode;
 };
 
 const navItems = [
-  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/dashboard", label: "Gameweek", icon: LayoutDashboard },
   { href: "/timeline", label: "Timeline", icon: History },
   { href: "/ledger", label: "Ledger", icon: Wallet },
 ];
@@ -35,7 +35,7 @@ const navItems = [
 export function HubAppShell({ children }: HubAppShellProps) {
   const pathname = usePathname();
   const ledgerSummary = getLedgerSummary();
-  const currentUser = getCurrentUser();
+  const currentUser = getLoggedInUser();
   const equityShare = 100 / getMemberCount();
 
   return (
@@ -72,13 +72,17 @@ export function HubAppShell({ children }: HubAppShellProps) {
           })}
         </nav>
 
-        <div className="hub-profile">
-          <div className="hub-avatar">{getUserInitials(currentUser.name)}</div>
-          <div>
-            <p className="hub-profile-name">{currentUser.name}</p>
-            <p className="hub-profile-meta">Eq: {equityShare.toFixed(1)}%</p>
+        {currentUser ? (
+          <div className="hub-profile">
+            <div className="hub-avatar">
+              {getUserInitials(currentUser.displayName)}
+            </div>
+            <div>
+              <p className="hub-profile-name">{currentUser.displayName}</p>
+              <p className="hub-profile-meta">Eq: {equityShare.toFixed(1)}%</p>
+            </div>
           </div>
-        </div>
+        ) : null}
       </aside>
 
       <div className="hub-main">

@@ -727,6 +727,21 @@ button {
   border-color: var(--hub-border);
 }
 
+.hub-avatar-badge-defensive {
+  background: linear-gradient(135deg, #10b981, #047857);
+  color: #fff;
+}
+
+.hub-avatar-badge-neutral {
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  color: #fff;
+}
+
+.hub-avatar-badge-aggressive {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: #fff;
+}
+
 .hub-rule-box {
   border: 1px solid var(--hub-border);
   background: var(--hub-bg);
@@ -742,6 +757,18 @@ button {
 .hub-rule-box span {
   color: var(--hub-primary-glow);
   font-weight: 700;
+}
+
+.hub-rule-box .hub-consensus-leader-defensive {
+  color: #10b981;
+}
+
+.hub-rule-box .hub-consensus-leader-neutral {
+  color: #3b82f6;
+}
+
+.hub-rule-box .hub-consensus-leader-aggressive {
+  color: #f59e0b;
 }
 
 .hub-wide {
