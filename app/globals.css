@@ -490,6 +490,11 @@ button {
   border-left: 4px solid var(--hub-primary);
 }
 
+.hub-proposal-overview,
+.hub-proposal-side {
+  min-width: 0;
+}
+
 .hub-proposal-title-wrap,
 .hub-leg-title {
   display: flex;
@@ -659,11 +664,34 @@ button {
 }
 
 .hub-proposal-top {
-  flex-wrap: wrap;
-  align-items: flex-start;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 1rem;
+}
+
+.hub-proposal-side {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
 }
 
 @media (min-width: 641px) {
+  .hub-proposal-top {
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(20rem, 0.9fr);
+    align-items: start;
+    gap: 1.25rem;
+  }
+
+  .hub-proposal-overview {
+    align-self: start;
+  }
+
+  .hub-proposal-side {
+    align-self: start;
+  }
+
   .hub-risk-indicator {
     display: none;
   }
@@ -718,9 +746,7 @@ button {
 
 .hub-proposal-actions {
   display: flex;
-  flex: 1 1 100%;
   width: 100%;
-  margin-top: 0.85rem;
 }
 
 .hub-proposal-actions .hub-primary-button,
@@ -1014,6 +1040,46 @@ button {
   border-color: var(--hub-border);
   background: var(--hub-surface);
   color: var(--hub-text);
+}
+
+.hub-proposal-actions .hub-secondary-button {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border-color: transparent;
+  background: transparent;
+}
+
+.hub-proposal-actions .hub-secondary-button::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  background:
+    linear-gradient(
+      90deg,
+      transparent,
+      transparent,
+      rgba(178, 102, 255, 0.72),
+      transparent,
+      transparent
+    );
+  background-size: 200% 100%;
+  animation: hub-border-flow 3s linear infinite;
+  z-index: -2;
+}
+
+.hub-proposal-actions .hub-secondary-button::after {
+  content: "";
+  position: absolute;
+  inset: 1px;
+  border-radius: calc(0.85rem - 1px);
+  background: var(--hub-surface);
+  z-index: -1;
+  transition: background-color 160ms ease;
+}
+
+.hub-proposal-actions .hub-secondary-button:hover::after {
+  background: var(--hub-surface-hover);
 }
 
 .hub-secondary-button:hover,

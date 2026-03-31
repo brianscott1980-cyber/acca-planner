@@ -1,25 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import Script from "next/script";
 import { usePathname, useSearchParams } from "next/navigation";
 import { GA_MEASUREMENT_ID, trackPageView } from "../../lib/analytics";
 
 export function GoogleAnalytics() {
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
   const [isReady, setIsReady] = useState(false);
-
-  useEffect(() => {
-    if (!isReady) {
-      return;
-    }
-
-    const query = searchParams.toString();
-    const path = query ? `${pathname}?${query}` : pathname;
-
-    trackPageView(path);
-  }, [isReady, pathname, searchParams]);
 
   return (
     <>
@@ -37,6 +24,27 @@ export function GoogleAnalytics() {
           gtag('config', '${GA_MEASUREMENT_ID}', { send_page_view: false });
         `}
       </Script>
+      <Suspense fallback={null}>
+        <GoogleAnalyticsTracker isReady={isReady} />
+      </Suspense>
     </>
   );
+}
+
+function GoogleAnalyticsTracker({ isReady }: { isReady: boolean }) {
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    if (!isReady) {
+      return;
+    }
+
+    const query = searchParams.toString();
+    const path = query ? `${pathname}?${query}` : pathname;
+
+    trackPageView(path);
+  }, [isReady, pathname, searchParams]);
+
+  return null;
 }

@@ -164,117 +164,121 @@ function AccumulatorCard({
   return (
     <article className={`hub-proposal-card${selected ? " is-selected" : ""}`}>
       <div className="hub-proposal-top">
-        <div className="hub-proposal-title-wrap">
-          <div
-            className={`hub-proposal-icon hub-proposal-icon-${card.riskLevel}`}
-          >
-            <Icon size={20} />
-          </div>
-          <div>
-            <div className="hub-proposal-heading-row">
-              {compactTitle && onPrevious && onNext ? (
-                <>
-                  <div className="hub-carousel-title-row">
-                    <button
-                      className="hub-carousel-button"
-                      type="button"
-                      onClick={onPrevious}
-                      aria-label="Previous accumulator"
-                    >
-                      <ChevronLeft size={20} />
-                    </button>
-                    <h2 className="hub-proposal-title">{displayTitle}</h2>
-                    <button
-                      className="hub-carousel-button"
-                      type="button"
-                      onClick={onNext}
-                      aria-label="Next accumulator"
-                    >
-                      <ChevronRight size={20} />
-                    </button>
-                  </div>
-                  {card.aiRecommended ? (
-                    <span className="hub-ai-tag hub-ai-tag-compact">
-                      <Sparkles size={12} />
-                      AI
-                    </span>
-                  ) : null}
-                </>
-              ) : (
-                <h2 className="hub-proposal-title">{displayTitle}</h2>
-              )}
-            </div>
-            <p className="hub-proposal-summary">{card.summary}</p>
-            <div className="hub-proposal-meta-row">
-              <span
-                className={`hub-tag hub-tag-${card.riskLevel} hub-risk-indicator`}
-              >
-                {card.statusLabel}
-              </span>
-              {card.aiRecommended ? (
-                <span className="hub-ai-tag hub-ai-tag-full">
-                  <Sparkles size={12} />
-                  AI Recommends
-                </span>
-              ) : null}
-            </div>
-          </div>
-          {compactTitle ? (
+        <div className="hub-proposal-overview">
+          <div className="hub-proposal-title-wrap">
             <div
-              className="hub-proposal-icon hub-proposal-icon-spacer"
-              aria-hidden="true"
-            />
-          ) : null}
+              className={`hub-proposal-icon hub-proposal-icon-${card.riskLevel}`}
+            >
+              <Icon size={20} />
+            </div>
+            <div>
+              <div className="hub-proposal-heading-row">
+                {compactTitle && onPrevious && onNext ? (
+                  <>
+                    <div className="hub-carousel-title-row">
+                      <button
+                        className="hub-carousel-button"
+                        type="button"
+                        onClick={onPrevious}
+                        aria-label="Previous accumulator"
+                      >
+                        <ChevronLeft size={20} />
+                      </button>
+                      <h2 className="hub-proposal-title">{displayTitle}</h2>
+                      <button
+                        className="hub-carousel-button"
+                        type="button"
+                        onClick={onNext}
+                        aria-label="Next accumulator"
+                      >
+                        <ChevronRight size={20} />
+                      </button>
+                    </div>
+                    {card.aiRecommended ? (
+                      <span className="hub-ai-tag hub-ai-tag-compact">
+                        <Sparkles size={12} />
+                        AI
+                      </span>
+                    ) : null}
+                  </>
+                ) : (
+                  <h2 className="hub-proposal-title">{displayTitle}</h2>
+                )}
+              </div>
+              <p className="hub-proposal-summary">{card.summary}</p>
+              <div className="hub-proposal-meta-row">
+                <span
+                  className={`hub-tag hub-tag-${card.riskLevel} hub-risk-indicator`}
+                >
+                  {card.statusLabel}
+                </span>
+                {card.aiRecommended ? (
+                  <span className="hub-ai-tag hub-ai-tag-full">
+                    <Sparkles size={12} />
+                    AI Recommends
+                  </span>
+                ) : null}
+              </div>
+            </div>
+            {compactTitle ? (
+              <div
+                className="hub-proposal-icon hub-proposal-icon-spacer"
+                aria-hidden="true"
+              />
+            ) : null}
+          </div>
         </div>
 
-        <div className="hub-proposal-metrics">
-          <div className="hub-approach-metric">
-            <span className="hub-metric-label">Approach</span>
-            <span className={`hub-tag hub-tag-${card.riskLevel}`}>
-              {approachLabel}
-            </span>
+        <div className="hub-proposal-side">
+          <div className="hub-proposal-metrics">
+            <div className="hub-approach-metric">
+              <span className="hub-metric-label">Approach</span>
+              <span className={`hub-tag hub-tag-${card.riskLevel}`}>
+                {approachLabel}
+              </span>
+            </div>
+            <div className="hub-metric-divider hub-approach-divider" />
+            <div>
+              <span className="hub-metric-label">Stake</span>
+              <span className="hub-metric-value">
+                £{getRecommendedStake(gameWeek, card)}
+              </span>
+            </div>
+            <div className="hub-metric-divider" />
+            <div className="hub-metric-block-center">
+              <span className="hub-metric-label">Legs</span>
+              <span className="hub-metric-value">{card.legs}</span>
+            </div>
+            <div className="hub-metric-divider" />
+            <div>
+              <span className="hub-metric-label">Odds</span>
+              <span className="hub-metric-pill">
+                {getProposalDisplayOdds(card)}
+              </span>
+            </div>
           </div>
-          <div className="hub-metric-divider hub-approach-divider" />
-          <div>
-            <span className="hub-metric-label">Stake</span>
-            <span className="hub-metric-value">
-              £{getRecommendedStake(gameWeek, card)}
-            </span>
-          </div>
-          <div className="hub-metric-divider" />
-          <div className="hub-metric-block-center">
-            <span className="hub-metric-label">Legs</span>
-            <span className="hub-metric-value">{card.legs}</span>
-          </div>
-          <div className="hub-metric-divider" />
-          <div>
-            <span className="hub-metric-label">Odds</span>
-            <span className="hub-metric-pill">
-              {getProposalDisplayOdds(card)}
-            </span>
-          </div>
-        </div>
 
-        <div className="hub-proposal-actions">
-          {selected ? (
-            <button
-              className="hub-primary-button"
-              type="button"
-              onClick={handleVote}
-            >
-              <Vote size={16} />
-              You voted
-            </button>
-          ) : (
-            <button
-              className="hub-secondary-button"
-              type="button"
-              onClick={handleVote}
-            >
-              <Vote size={16} />
-              {voteLabel}
-            </button>
-          )}
+          <div className="hub-proposal-actions">
+            {selected ? (
+              <button
+                className="hub-primary-button"
+                type="button"
+                onClick={handleVote}
+              >
+                <Vote size={16} />
+                You voted
+              </button>
+            ) : (
+              <button
+                className="hub-secondary-button"
+                type="button"
+                onClick={handleVote}
+              >
+                <Vote size={16} />
+                {voteLabel}
+              </button>
+            )}
+          </div>
         </div>
       </div>
 
