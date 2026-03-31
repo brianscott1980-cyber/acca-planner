@@ -1,5 +1,7 @@
 import { premierLeagueClubs } from "../data/premierLeagueClubs";
 
+const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
+
 const CLUB_ALIAS_MAP: Record<string, string> = {
   arsenal: "Arsenal",
   "aston villa": "Aston Villa",
@@ -35,11 +37,11 @@ const CLUB_ALIAS_MAP: Record<string, string> = {
 
 export function getClubBadgePath(teamName: string) {
   const canonicalName = CLUB_ALIAS_MAP[normalizeClubName(teamName)] ?? teamName;
-
-  return (
+  const badgePath =
     premierLeagueClubs.find((club) => club.name === canonicalName)?.badgePath ??
-    null
-  );
+    null;
+
+  return badgePath ? withBasePath(badgePath) : null;
 }
 
 export function getFixtureBadgePaths(label: string) {
@@ -90,4 +92,12 @@ function normalizeClubName(value: string) {
     .replace(/&/g, "and")
     .replace(/[^a-z0-9]+/g, " ")
     .trim();
+}
+
+function withBasePath(path: string) {
+  if (!path.startsWith("/") || !BASE_PATH) {
+    return path;
+  }
+
+  return `${BASE_PATH}${path}`;
 }
