@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { X } from "lucide-react";
+import { trackEvent } from "../../../lib/analytics";
 import { getRecentLedgerActivity } from "./ledgerService";
 import { LedgerTable } from "./LedgerTable";
 
@@ -22,7 +23,12 @@ export function LedgerActivityPanel() {
         <button
           className="hub-link-button"
           type="button"
-          onClick={() => setShowAllTransactions(true)}
+          onClick={() => {
+            trackEvent("open_transactions_modal", {
+              surface: "ledger_activity_panel",
+            });
+            setShowAllTransactions(true);
+          }}
         >
           View All Transactions
         </button>
@@ -32,7 +38,12 @@ export function LedgerActivityPanel() {
         <div
           className="hub-modal-backdrop"
           role="presentation"
-          onClick={() => setShowAllTransactions(false)}
+          onClick={() => {
+            trackEvent("close_transactions_modal", {
+              method: "backdrop",
+            });
+            setShowAllTransactions(false);
+          }}
         >
           <div
             className="hub-modal"
@@ -55,7 +66,12 @@ export function LedgerActivityPanel() {
                 className="hub-icon-button"
                 type="button"
                 aria-label="Close transactions dialog"
-                onClick={() => setShowAllTransactions(false)}
+                onClick={() => {
+                  trackEvent("close_transactions_modal", {
+                    method: "button",
+                  });
+                  setShowAllTransactions(false);
+                }}
               >
                 <X size={18} />
               </button>

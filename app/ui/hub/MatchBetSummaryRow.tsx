@@ -5,6 +5,7 @@ import type {
   BetLineInsight,
   ProposalBetLine,
 } from "../../../repositories/gameWeekRepository";
+import { trackEvent } from "../../../lib/analytics";
 import { getFixtureDisplayParts } from "../../../repositories/premierLeagueClubRepository";
 
 type MatchBetSummaryRowProps = {
@@ -28,13 +29,20 @@ export function MatchBetSummaryRow({
     insight?.aiReasoning || insight?.sequenceReasoning,
   );
   const fixtureDisplayParts = getFixtureDisplayParts(betLine.label);
+  const handleToggle = () => {
+    trackEvent("toggle_bet_details", {
+      bet_label: betLine.label,
+      expanded: !isExpanded,
+    });
+    onToggle();
+  };
 
   return (
     <div className={`hub-bet-line${isExpanded ? " is-expanded" : ""}`}>
       <button
         className="hub-bet-line-toggle"
         type="button"
-        onClick={onToggle}
+        onClick={handleToggle}
         aria-expanded={hasExpandableContent ? isExpanded : undefined}
       >
         <div className="hub-bet-line-copy">

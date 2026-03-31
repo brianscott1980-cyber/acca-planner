@@ -2,7 +2,7 @@
 
 import type { ReactNode } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   History,
   LayoutDashboard,
@@ -21,6 +21,7 @@ import {
 } from "../../../repositories/userService";
 import { getLoggedInUser } from "../../../repositories/authenticationService";
 import { getCurrentMatchdayNumber } from "../../../repositories/gameWeekRepository";
+import { trackEvent } from "../../../lib/analytics";
 
 type HubAppShellProps = {
   children: ReactNode;
@@ -34,6 +35,7 @@ const navItems = [
 
 export function HubAppShell({ children }: HubAppShellProps) {
   const pathname = usePathname();
+  const router = useRouter();
   const ledgerSummary = getLedgerSummary();
   const currentUser = getLoggedInUser();
   const equityShare = 100 / getMemberCount();
@@ -42,6 +44,10 @@ export function HubAppShell({ children }: HubAppShellProps) {
       ? 0
       : ledgerSummary.currentPot / ledgerSummary.memberCount;
   const currentMatchdayNumber = getCurrentMatchdayNumber();
+  const navigateToLedgerFromHeader = (source: string) => {
+    trackEvent("navigate_ledger_from_header", { source });
+    router.push("/ledger");
+  };
 
   return (
     <div className="hub-shell">
@@ -76,6 +82,12 @@ export function HubAppShell({ children }: HubAppShellProps) {
                 className={`hub-nav-item${active ? " is-active" : ""}`}
                 href={item.href}
                 aria-current={active ? "page" : undefined}
+                onClick={() =>
+                  trackEvent("navigate_section", {
+                    section: item.label.toLowerCase(),
+                    destination_path: item.href,
+                  })
+                }
               >
                 <span className="hub-nav-icon">
                   <Icon size={18} />
@@ -105,14 +117,22 @@ export function HubAppShell({ children }: HubAppShellProps) {
       <div className="hub-main">
         <header className="hub-header">
           <div className="hub-header-group">
-            <div>
+            <button
+              className="hub-header-stat"
+              type="button"
+              onClick={() => navigateToLedgerFromHeader("current_pot")}
+            >
               <p className="hub-label">Current Pot</p>
               <p className="hub-pot-value">
                 {formatCurrency(ledgerSummary.currentPot)}
               </p>
-            </div>
+            </button>
             <div className="hub-divider" />
-            <div className="hub-roi">
+            <button
+              className="hub-header-stat hub-roi"
+              type="button"
+              onClick={() => navigateToLedgerFromHeader("season_roi")}
+            >
               <p className="hub-label">Season ROI</p>
               <div className="hub-roi-row">
                 <span className="hub-roi-value">
@@ -120,11 +140,15 @@ export function HubAppShell({ children }: HubAppShellProps) {
                 </span>
                 <MiniSparkline />
               </div>
-            </div>
+            </button>
             {currentUser ? (
               <>
                 <div className="hub-divider" />
-                <div>
+                <button
+                  className="hub-header-stat"
+                  type="button"
+                  onClick={() => navigateToLedgerFromHeader("your_share")}
+                >
                   <p className="hub-label">Your Share</p>
                   <p className="hub-pot-value">
                     {formatCurrency(equityShareValue, {
@@ -132,7 +156,7 @@ export function HubAppShell({ children }: HubAppShellProps) {
                       maximumFractionDigits: 2,
                     })}
                   </p>
-                </div>
+                </button>
               </>
             ) : null}
           </div>

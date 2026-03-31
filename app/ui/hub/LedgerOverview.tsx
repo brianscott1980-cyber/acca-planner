@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { TrendingUp } from "lucide-react";
+import { trackEvent } from "../../../lib/analytics";
 import {
   formatCurrency,
   formatPercent,
@@ -69,7 +70,10 @@ function PerformanceChart({
               selectedRange === "1w" ? " is-active" : ""
             }`}
             type="button"
-            onClick={() => setSelectedRange("1w")}
+            onClick={() => {
+              trackEvent("select_ledger_range", { range: "1w" });
+              setSelectedRange("1w");
+            }}
           >
             1W
           </button>
@@ -78,7 +82,10 @@ function PerformanceChart({
               selectedRange === "2w" ? " is-active" : ""
             }`}
             type="button"
-            onClick={() => setSelectedRange("2w")}
+            onClick={() => {
+              trackEvent("select_ledger_range", { range: "2w" });
+              setSelectedRange("2w");
+            }}
           >
             2W
           </button>
@@ -87,7 +94,10 @@ function PerformanceChart({
               selectedRange === "1m" ? " is-active" : ""
             }`}
             type="button"
-            onClick={() => setSelectedRange("1m")}
+            onClick={() => {
+              trackEvent("select_ledger_range", { range: "1m" });
+              setSelectedRange("1m");
+            }}
           >
             1M
           </button>

@@ -23,6 +23,7 @@ import {
   getUserVoteForGameWeek,
 } from "../../../repositories/gameWeekRepository";
 import { formatLadbrokesSourceLabel } from "../../../repositories/ladbrokesOddsRepository";
+import { trackEvent } from "../../../lib/analytics";
 import { useCurrentGameWeek } from "./GameWeekProvider";
 import { MatchBetSummaryRow } from "./MatchBetSummaryRow";
 
@@ -76,20 +77,30 @@ export function GameweekBoard() {
           gameWeek={currentGameWeek}
           selected={mobileCard.id === selectedCardId}
           compactTitle
-          onPrevious={() =>
+          onPrevious={() => {
+            trackEvent("carousel_navigate", {
+              direction: "previous",
+              surface: "matchday_mobile",
+              proposal_id: mobileCard.id,
+            });
             setActiveCardIndex((previous) =>
               previous === 0
                 ? currentGameWeek.proposals.length - 1
                 : previous - 1,
-            )
-          }
-          onNext={() =>
+            );
+          }}
+          onNext={() => {
+            trackEvent("carousel_navigate", {
+              direction: "next",
+              surface: "matchday_mobile",
+              proposal_id: mobileCard.id,
+            });
             setActiveCardIndex((previous) =>
               previous === currentGameWeek.proposals.length - 1
                 ? 0
                 : previous + 1,
-            )
-          }
+            );
+          }}
           onVote={() => castVote(mobileCard.id)}
         />
       </div>
@@ -140,6 +151,15 @@ function AccumulatorCard({
   const displayTitle = compactTitle
     ? getCompactProposalTitle(card.riskLevel)
     : card.title;
+  const handleVote = () => {
+    trackEvent("vote_proposal", {
+      proposal_id: card.id,
+      risk_level: card.riskLevel,
+      proposal_title: card.title,
+      surface: compactTitle ? "matchday_mobile" : "matchday_desktop",
+    });
+    onVote();
+  };
 
   return (
     <article className={`hub-proposal-card${selected ? " is-selected" : ""}`}>
@@ -184,6 +204,7 @@ function AccumulatorCard({
                 <h2 className="hub-proposal-title">{displayTitle}</h2>
               )}
             </div>
+            <p className="hub-proposal-summary">{card.summary}</p>
             <div className="hub-proposal-meta-row">
               <span
                 className={`hub-tag hub-tag-${card.riskLevel} hub-risk-indicator`}
@@ -233,6 +254,28 @@ function AccumulatorCard({
             </span>
           </div>
         </div>
+
+        <div className="hub-proposal-actions">
+          {selected ? (
+            <button
+              className="hub-primary-button"
+              type="button"
+              onClick={handleVote}
+            >
+              <Vote size={16} />
+              You voted
+            </button>
+          ) : (
+            <button
+              className="hub-secondary-button"
+              type="button"
+              onClick={handleVote}
+            >
+              <Vote size={16} />
+              {voteLabel}
+            </button>
+          )}
+        </div>
       </div>
 
       <div className="hub-bet-lines">
@@ -262,9 +305,15 @@ function AccumulatorCard({
           className="hub-cashout-toggle"
           type="button"
           onClick={() =>
-            setExpandedSectionId((previous) =>
-              previous === "cashout" ? null : "cashout",
-            )
+            setExpandedSectionId((previous) => {
+              const isExpanding = previous !== "cashout";
+              trackEvent("toggle_cashout_strategy", {
+                proposal_id: card.id,
+                risk_level: card.riskLevel,
+                expanded: isExpanding,
+              });
+              return previous === "cashout" ? null : "cashout";
+            })
           }
           aria-expanded={expandedSectionId === "cashout"}
         >
@@ -309,27 +358,6 @@ function AccumulatorCard({
         ) : null}
       </div>
 
-      <div className="hub-proposal-actions">
-        {selected ? (
-          <button
-            className="hub-primary-button"
-            type="button"
-            onClick={onVote}
-          >
-            <Vote size={16} />
-            You voted
-          </button>
-        ) : (
-          <button
-            className="hub-secondary-button"
-            type="button"
-            onClick={onVote}
-          >
-            <Vote size={16} />
-            {voteLabel}
-          </button>
-        )}
-      </div>
     </article>
   );
 }

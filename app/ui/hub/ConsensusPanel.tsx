@@ -5,6 +5,7 @@ import {
   getLeadingProposal,
   getProposalVotes,
 } from "../../../repositories/gameWeekRepository";
+import { trackEvent } from "../../../lib/analytics";
 import { getMembers, getUserInitials } from "../../../repositories/userService";
 import { useCurrentGameWeek } from "./GameWeekProvider";
 
@@ -71,8 +72,7 @@ export function ConsensusPanel() {
 
       <div className="hub-voter-block">
         <p className="hub-voter-copy">
-          {leadingProposal?.title.replace(" Accumulator", "") ?? "No"} Votes (
-          {votedMembers.length}/{members.length})
+          Current Votting ({votedMembers.length}/{members.length})
         </p>
         <div className="hub-voters">
           {members.map((member) => (
@@ -103,7 +103,12 @@ export function ConsensusPanel() {
         <button
           className="hub-secondary-button hub-mobile-change-vote"
           type="button"
-          onClick={clearVote}
+          onClick={() => {
+            trackEvent("clear_vote", {
+              surface: "consensus_panel_mobile",
+            });
+            clearVote();
+          }}
         >
           Change vote
         </button>
