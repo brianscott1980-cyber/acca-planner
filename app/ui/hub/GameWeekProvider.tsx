@@ -3,6 +3,7 @@
 import {
   createContext,
   useContext,
+  useEffect,
   useMemo,
   useState,
   type ReactNode,
@@ -28,7 +29,27 @@ type GameWeekProviderProps = {
 
 export function GameWeekProvider({ children }: GameWeekProviderProps) {
   const loggedInUser = getLoggedInUser();
-  const [currentGameWeek, setCurrentGameWeek] = useState(() => getCurrentGameWeek());
+  const [currentGameWeek, setCurrentGameWeek] = useState(() =>
+    getInitialGameWeekState(loggedInUser?.id ?? null),
+  );
+
+  useEffect(() => {
+    if (!loggedInUser) {
+      return;
+    }
+
+    const baseGameWeek = getInitialGameWeekState(loggedInUser.id);
+    const persistedVote = readPersistedVote(baseGameWeek.id, loggedInUser.id);
+
+    if (!persistedVote || !hasProposal(baseGameWeek, persistedVote)) {
+      setCurrentGameWeek(baseGameWeek);
+      return;
+    }
+
+    setCurrentGameWeek(
+      updateUserVoteForGameWeek(baseGameWeek, loggedInUser.id, persistedVote),
+    );
+  }, [loggedInUser]);
 
   const value = useMemo<GameWeekContextValue>(
     () => ({
@@ -39,9 +60,17 @@ export function GameWeekProvider({ children }: GameWeekProviderProps) {
           return;
         }
 
-        setCurrentGameWeek((previous) =>
-          updateUserVoteForGameWeek(previous, loggedInUser.id, proposalId),
-        );
+        setCurrentGameWeek((previous) => {
+          const nextGameWeek = updateUserVoteForGameWeek(
+            previous,
+            loggedInUser.id,
+            proposalId,
+          );
+
+          persistVote(nextGameWeek.id, loggedInUser.id, proposalId);
+
+          return nextGameWeek;
+        });
       },
     }),
     [currentGameWeek, loggedInUser],
@@ -60,4 +89,47 @@ export function useCurrentGameWeek() {
   }
 
   return context;
+}
+
+function getInitialGameWeekState(loggedInUserId: string | null) {
+  const currentGameWeek = getCurrentGameWeek();
+
+  if (!loggedInUserId) {
+    return currentGameWeek;
+  }
+
+  const nextVotesByUserId = { ...currentGameWeek.votesByUserId };
+  delete nextVotesByUserId[loggedInUserId];
+
+  return {
+    ...currentGameWeek,
+    votesByUserId: nextVotesByUserId,
+  };
+}
+
+function hasProposal(gameWeek: GameWeekRecord, proposalId: string) {
+  return gameWeek.proposals.some((proposal) => proposal.id === proposalId);
+}
+
+function getVoteStorageKey(gameWeekId: string, userId: string) {
+  return `caddyshack:matchday-vote:${gameWeekId}:${userId}`;
+}
+
+function readPersistedVote(gameWeekId: string, userId: string) {
+  if (typeof window === "undefined") {
+    return null;
+  }
+
+  return window.localStorage.getItem(getVoteStorageKey(gameWeekId, userId));
+}
+
+function persistVote(gameWeekId: string, userId: string, proposalId: string) {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  window.localStorage.setItem(
+    getVoteStorageKey(gameWeekId, userId),
+    proposalId,
+  );
 }

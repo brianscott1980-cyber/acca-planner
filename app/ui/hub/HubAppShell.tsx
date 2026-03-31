@@ -4,7 +4,6 @@ import type { ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  Bell,
   History,
   LayoutDashboard,
   Sparkles,
@@ -21,13 +20,14 @@ import {
   getUserInitials,
 } from "../../../repositories/userService";
 import { getLoggedInUser } from "../../../repositories/authenticationService";
+import { getCurrentMatchdayNumber } from "../../../repositories/gameWeekRepository";
 
 type HubAppShellProps = {
   children: ReactNode;
 };
 
 const navItems = [
-  { href: "/dashboard", label: "Gameweek", icon: LayoutDashboard },
+  { href: "/dashboard", label: "Matchday", icon: LayoutDashboard },
   { href: "/timeline", label: "Timeline", icon: History },
   { href: "/ledger", label: "Ledger", icon: Wallet },
 ];
@@ -37,6 +37,11 @@ export function HubAppShell({ children }: HubAppShellProps) {
   const ledgerSummary = getLedgerSummary();
   const currentUser = getLoggedInUser();
   const equityShare = 100 / getMemberCount();
+  const equityShareValue =
+    ledgerSummary.memberCount === 0
+      ? 0
+      : ledgerSummary.currentPot / ledgerSummary.memberCount;
+  const currentMatchdayNumber = getCurrentMatchdayNumber();
 
   return (
     <div className="hub-shell">
@@ -54,7 +59,7 @@ export function HubAppShell({ children }: HubAppShellProps) {
         <nav className="hub-nav" aria-label="Primary">
           {navItems.map((item) => {
             const Icon = item.icon;
-            const active = pathname === item.href;
+            const active = isActiveNavItem(pathname, item.href);
 
             return (
               <Link
@@ -67,6 +72,9 @@ export function HubAppShell({ children }: HubAppShellProps) {
                   <Icon size={18} />
                 </span>
                 <span>{item.label}</span>
+                {item.href === "/dashboard" && currentMatchdayNumber ? (
+                  <span className="hub-nav-pill">{currentMatchdayNumber}</span>
+                ) : null}
               </Link>
             );
           })}
@@ -89,7 +97,7 @@ export function HubAppShell({ children }: HubAppShellProps) {
         <header className="hub-header">
           <div className="hub-header-group">
             <div>
-              <p className="hub-label">Total Syndicate Pot</p>
+              <p className="hub-label">Current Pot</p>
               <p className="hub-pot-value">
                 {formatCurrency(ledgerSummary.currentPot)}
               </p>
@@ -104,17 +112,48 @@ export function HubAppShell({ children }: HubAppShellProps) {
                 <MiniSparkline />
               </div>
             </div>
+            {currentUser ? (
+              <>
+                <div className="hub-divider" />
+                <div>
+                  <p className="hub-label">Your Share</p>
+                  <p className="hub-pot-value">
+                    {formatCurrency(equityShareValue, {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    })}
+                  </p>
+                </div>
+              </>
+            ) : null}
           </div>
 
-          <div className="hub-header-actions">
-            <button className="hub-icon-button" type="button" aria-label="Alerts">
-              <Bell size={18} />
-            </button>
-          </div>
         </header>
 
         <main className="hub-content">{children}</main>
       </div>
     </div>
   );
+}
+
+function isActiveNavItem(pathname: string, href: string) {
+  const normalizedPathname = normalizePath(pathname);
+  const normalizedHref = normalizePath(href);
+
+  if (normalizedHref === "/dashboard" && normalizedPathname === "/") {
+    return true;
+  }
+
+  return (
+    normalizedPathname === normalizedHref ||
+    normalizedPathname.startsWith(`${normalizedHref}/`)
+  );
+}
+
+function normalizePath(value: string) {
+  if (!value || value === "/") {
+    return "/";
+  }
+
+  return value.replace(/\/+$/, "");
 }

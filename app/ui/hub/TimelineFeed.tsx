@@ -1,4 +1,9 @@
+"use client";
+
+import { useState } from "react";
 import { ChevronRight } from "lucide-react";
+import type { BetLineInsight, ProposalBetLine } from "../../../repositories/gameWeekRepository";
+import { MatchBetSummaryRow } from "./MatchBetSummaryRow";
 
 type TimelineEntry = {
   title: string;
@@ -9,32 +14,40 @@ type TimelineEntry = {
   odds?: string;
   returnValue: string;
   legs?: number;
-  legTitle?: string;
-  legSubtitle?: string;
-  legOdds?: string;
+  betLines?: Array<{
+    betLine: ProposalBetLine;
+    displayOdds: string;
+    insight?: BetLineInsight | null;
+    settlementStatus?: "won" | "lost";
+  }>;
 };
 
 const timelineEntries: TimelineEntry[] = [
   {
-    title: "Gameweek 23",
+    title: "Matchday 31",
     dateRange: "Feb 10 - Feb 12",
     status: "win",
     label: "Mid-Risk AI Pick",
     stake: "GBP 50.00",
-    odds: "+450",
+    odds: "5.50",
     returnValue: "GBP 275.00",
     legs: 4,
-    legTitle: "Arsenal vs West Ham",
-    legSubtitle: "Arsenal -1.5 Handicap",
-    legOdds: "+110",
-  },
-  {
-    title: "Gameweek 22",
-    dateRange: "Jan 30 - Feb 1",
-    status: "loss",
-    label: "High-Risk AI Pick",
-    stake: "GBP 50.00",
-    returnValue: "GBP 0.00",
+    betLines: [
+      {
+        betLine: {
+          label: "Arsenal vs West Ham: Arsenal -1.5 Handicap",
+          scheduleNote: "Sat 10 Feb, 17:30 GMT",
+          odds: "2.10",
+        },
+        displayOdds: "2.10",
+        insight: {
+          aiReasoning: "Arsenal's home dominance supported a stronger handicap angle.",
+          sequenceReasoning:
+            "This landed as a mid-sequence leg in the archived acca build.",
+        },
+        settlementStatus: "won",
+      },
+    ],
   },
 ];
 
@@ -44,20 +57,23 @@ export function TimelineFeed() {
       <div className="hub-page-copy">
         <h1 className="hub-title">Timeline</h1>
         <p className="hub-subtitle">
-          Chronological record of all syndicate accumulator plays.
+          Chronological record of all syndicate accumulator plays by matchday.
         </p>
       </div>
 
       <div className="hub-timeline">
         {timelineEntries.map((entry) => (
-          <TimelineGameweek key={entry.title} entry={entry} />
+          <TimelineMatchday key={entry.title} entry={entry} />
         ))}
       </div>
     </section>
   );
 }
 
-function TimelineGameweek({ entry }: { entry: TimelineEntry }) {
+function TimelineMatchday({ entry }: { entry: TimelineEntry }) {
+  const [expandedBetLineLabel, setExpandedBetLineLabel] = useState<
+    string | null
+  >(null);
   const isWin = entry.status === "win";
 
   return (
@@ -109,16 +125,23 @@ function TimelineGameweek({ entry }: { entry: TimelineEntry }) {
           </div>
         </div>
 
-        {entry.legTitle ? (
-          <div className="hub-leg-item">
-            <div className="hub-leg-title">
-              <span className={`hub-dot ${isWin ? "is-win" : "is-loss"}`} />
-              <div>
-                <p>{entry.legTitle}</p>
-                <span>{entry.legSubtitle}</span>
-              </div>
-            </div>
-            <span className="hub-inline-meta">{entry.legOdds}</span>
+        {entry.betLines?.length ? (
+          <div className="hub-bet-lines">
+            {entry.betLines.map((item) => (
+              <MatchBetSummaryRow
+                key={item.betLine.label}
+                betLine={item.betLine}
+                displayOdds={item.displayOdds}
+                insight={item.insight}
+                settlementStatus={item.settlementStatus}
+                isExpanded={expandedBetLineLabel === item.betLine.label}
+                onToggle={() =>
+                  setExpandedBetLineLabel((previous) =>
+                    previous === item.betLine.label ? null : item.betLine.label,
+                  )
+                }
+              />
+            ))}
           </div>
         ) : null}
       </div>

@@ -36,6 +36,7 @@ const ledgerSnapshot: LedgerSnapshot = {
 
 export function getLedgerSummary() {
   const memberCount = getMemberCount();
+  const initialPotTotal = getInitialPotTotal();
   const totalDeposits = roundCurrency(
     ledgerSnapshot.recentActivity
       .filter((entry) => entry.kind === "deposit")
@@ -56,17 +57,20 @@ export function getLedgerSummary() {
     sharePerMember,
     roiPercentage,
     memberCount,
+    initialPotTotal,
     totalDeposits,
     totalProfitOverall: ledgerSnapshot.totalProfitOverall,
   };
 }
 
 export function getRecentLedgerActivity(limit?: number) {
+  const normalizedActivity = ledgerSnapshot.recentActivity.map(normalizeLedgerActivity);
+
   if (typeof limit === "number") {
-    return ledgerSnapshot.recentActivity.slice(0, limit);
+    return normalizedActivity.slice(0, limit);
   }
 
-  return ledgerSnapshot.recentActivity;
+  return normalizedActivity;
 }
 
 export function getPotTimelineForRange(
@@ -155,6 +159,33 @@ export function formatPercent(value: number) {
 
 function roundCurrency(value: number) {
   return Math.round(value * 100) / 100;
+}
+
+function normalizeLedgerActivity(entry: LedgerActivity) {
+  return {
+    ...entry,
+    tone: entry.amount >= 0 ? "positive" : "negative",
+  } as LedgerActivity;
+}
+
+function getInitialPotTotal() {
+  const depositEntries = ledgerSnapshot.recentActivity.filter(
+    (entry) => entry.kind === "deposit",
+  );
+
+  if (depositEntries.length === 0) {
+    return 0;
+  }
+
+  const firstDepositDateKey = depositEntries
+    .map((entry) => toDateKey(entry.date))
+    .sort()[0];
+
+  return roundCurrency(
+    depositEntries
+      .filter((entry) => toDateKey(entry.date) === firstDepositDateKey)
+      .reduce((sum, entry) => sum + entry.amount, 0),
+  );
 }
 
 function toDateKey(value: string) {

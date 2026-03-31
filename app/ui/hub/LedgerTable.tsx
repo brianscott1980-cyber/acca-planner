@@ -1,4 +1,4 @@
-import { ArrowDownLeft, ArrowUpRight, Target } from "lucide-react";
+import { ArrowDownRight, ArrowUpRight } from "lucide-react";
 import { formatSignedCurrency, type LedgerActivity } from "./ledgerService";
 
 type LedgerTableProps = {
@@ -28,12 +28,8 @@ export function LedgerTable({ items }: LedgerTableProps) {
 }
 
 function LedgerTableRow({ item }: { item: LedgerActivity }) {
-  const isPositive = item.tone === "positive";
-  const Icon = isPositive
-    ? item.kind === "settlement"
-      ? ArrowUpRight
-      : ArrowDownLeft
-    : Target;
+  const isPositive = item.amount >= 0;
+  const Icon = isPositive ? ArrowUpRight : ArrowDownRight;
 
   return (
     <tr>

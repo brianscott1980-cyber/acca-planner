@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "generate:pl-clubs": "node scripts/premier-league/generate-club-data.mjs"
   },
   "dependencies": {
     "chart.js": "^4.5.1",

@@ -163,6 +163,20 @@ button {
   color: inherit;
 }
 
+.hub-nav-pill {
+  margin-left: auto;
+  min-width: 1.75rem;
+  border: 1px solid rgba(178, 102, 255, 0.28);
+  border-radius: 999px;
+  background: rgba(138, 44, 226, 0.14);
+  padding: 0.18rem 0.5rem;
+  color: var(--hub-primary-glow);
+  font-size: 0.72rem;
+  font-weight: 600;
+  line-height: 1;
+  text-align: center;
+}
+
 .hub-profile {
   display: flex;
   align-items: center;
@@ -212,6 +226,7 @@ button {
 .hub-roi-row,
 .hub-panel-title-row,
 .hub-proposal-heading-row,
+.hub-proposal-meta-row,
 .hub-badge-row,
 .hub-chart-value-row {
   display: flex;
@@ -311,6 +326,7 @@ button {
 }
 
 .hub-section-head {
+  align-items: flex-start;
   margin-bottom: 1.5rem;
   padding-bottom: 1.25rem;
   border-bottom: 1px solid var(--hub-border);
@@ -327,6 +343,12 @@ button {
   margin: 0.45rem 0 0;
   font-size: 0.96rem;
   line-height: 1.65;
+}
+
+.hub-data-note {
+  margin: 0.35rem 0 0;
+  color: var(--hub-muted);
+  font-size: 0.78rem;
 }
 
 .hub-timer,
@@ -477,6 +499,11 @@ button {
   font-weight: 700;
 }
 
+.hub-proposal-meta-row {
+  margin-top: 0.55rem;
+  flex-wrap: wrap;
+}
+
 .hub-tag,
 .hub-ai-tag,
 .hub-metric-pill,
@@ -558,6 +585,10 @@ button {
   font-weight: 700;
 }
 
+.hub-metric-block-center {
+  text-align: center;
+}
+
 .hub-metric-divider {
   height: 2rem;
   width: 1px;
@@ -569,6 +600,212 @@ button {
   margin-top: 1.1rem;
   border-top: 1px solid var(--hub-border);
   padding-top: 1rem;
+}
+
+.hub-bet-lines {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  margin-top: 1rem;
+}
+
+.hub-bet-line {
+  border: 1px solid rgba(39, 39, 42, 0.65);
+  border-radius: 0.9rem;
+  background: rgba(10, 10, 12, 0.72);
+  overflow: hidden;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  gap: 0;
+  padding: 0;
+}
+
+.hub-bet-line-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  width: 100%;
+  border: 0;
+  background: transparent;
+  padding: 0.8rem 0.95rem;
+  color: var(--hub-text);
+  font-size: 0.9rem;
+  line-height: 1.5;
+  text-align: left;
+  cursor: pointer;
+}
+
+.hub-bet-line-copy {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+}
+
+.hub-bet-line-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.hub-bet-line-fixture,
+.hub-bet-line-team {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+}
+
+.hub-bet-line-fixture {
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+
+.hub-bet-line-team {
+  gap: 0.28rem;
+}
+
+.hub-bet-line-fixture-separator,
+.hub-bet-line-colon {
+  color: var(--hub-muted);
+}
+
+.hub-club-badge {
+  height: 1.14rem;
+  width: 1.14rem;
+  object-fit: contain;
+  flex: none;
+}
+
+.hub-bet-line-chevron {
+  flex: none;
+  color: var(--hub-muted);
+  transition: transform 160ms ease;
+}
+
+.hub-bet-line-chevron.is-hidden {
+  opacity: 0;
+}
+
+.hub-bet-line-chevron.is-expanded {
+  transform: rotate(90deg);
+}
+
+.hub-bet-line-note {
+  margin-top: 0.08rem;
+  padding-left: calc(1.05rem + 3px);
+  color: var(--hub-muted);
+  font-size: 0.66rem;
+  line-height: 1.35;
+}
+
+.hub-bet-line-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 3rem;
+  padding: 0.35rem 0.55rem;
+  border-radius: 0.7rem;
+  background: var(--hub-primary);
+  color: #fff;
+  font-family: ui-monospace, "SFMono-Regular", monospace;
+  font-size: 0.68rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.hub-bet-line-pill-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.hub-bet-line-detail {
+  border-top: 1px solid rgba(39, 39, 42, 0.65);
+  padding: 0.8rem 0.95rem 0.9rem;
+  color: var(--hub-muted);
+  font-size: 0.8rem;
+  line-height: 1.55;
+}
+
+.hub-bet-line-detail p {
+  margin: 0;
+}
+
+.hub-bet-line-detail p + p {
+  margin-top: 0.45rem;
+}
+
+.hub-bet-line-detail strong {
+  color: var(--hub-text);
+}
+
+.hub-bet-line-detail-label {
+  display: inline-block;
+  min-width: 4.75rem;
+}
+
+.hub-cashout-panel {
+  margin-top: 1rem;
+  border: 1px solid rgba(39, 39, 42, 0.65);
+  border-radius: 1rem;
+  background: rgba(20, 20, 23, 0.72);
+  overflow: hidden;
+}
+
+.hub-cashout-toggle {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  padding: 1rem;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.hub-cashout-title-row,
+.hub-cashout-inline-stats {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.hub-cashout-title-row {
+  justify-content: space-between;
+  color: var(--hub-text);
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+.hub-cashout-inline-stats {
+  gap: 1.1rem;
+  flex-wrap: wrap;
+}
+
+.hub-cashout-inline-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  text-align: right;
+}
+
+.hub-cashout-watch {
+  border-top: 1px solid rgba(39, 39, 42, 0.65);
+  padding: 0.9rem 1rem 1rem;
+}
+
+.hub-watch-list {
+  margin: 0.45rem 0 0;
+  padding-left: 1rem;
+  color: var(--hub-muted);
+  font-size: 0.84rem;
+  line-height: 1.55;
+}
+
+.hub-watch-list li + li {
+  margin-top: 0.35rem;
 }
 
 .hub-vote-note {
@@ -622,10 +859,18 @@ button {
 .hub-link-button {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 0.5rem;
+  min-height: 2.875rem;
   padding: 0.85rem 1.1rem;
   font-size: 0.88rem;
   font-weight: 700;
+  white-space: nowrap;
+}
+
+.hub-primary-button,
+.hub-secondary-button {
+  min-width: 9.75rem;
 }
 
 .hub-primary-button {
