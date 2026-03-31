@@ -19,6 +19,7 @@ type GameWeekContextValue = {
   currentGameWeek: GameWeekRecord;
   loggedInUserId: string | null;
   castVote: (proposalId: string) => void;
+  clearVote: () => void;
 };
 
 const GameWeekContext = createContext<GameWeekContextValue | null>(null);
@@ -70,6 +71,22 @@ export function GameWeekProvider({ children }: GameWeekProviderProps) {
           persistVote(nextGameWeek.id, loggedInUser.id, proposalId);
 
           return nextGameWeek;
+        });
+      },
+      clearVote() {
+        if (!loggedInUser) {
+          return;
+        }
+
+        setCurrentGameWeek((previous) => {
+          const nextVotesByUserId = { ...previous.votesByUserId };
+          delete nextVotesByUserId[loggedInUser.id];
+          clearPersistedVote(previous.id, loggedInUser.id);
+
+          return {
+            ...previous,
+            votesByUserId: nextVotesByUserId,
+          };
         });
       },
     }),
@@ -132,4 +149,12 @@ function persistVote(gameWeekId: string, userId: string, proposalId: string) {
     getVoteStorageKey(gameWeekId, userId),
     proposalId,
   );
+}
+
+function clearPersistedVote(gameWeekId: string, userId: string) {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  window.localStorage.removeItem(getVoteStorageKey(gameWeekId, userId));
 }

@@ -54,6 +54,15 @@ export function HubAppShell({ children }: HubAppShellProps) {
             <p className="hub-brand-title">Caddyshack</p>
             <p className="hub-brand-subtitle">AI betting hub</p>
           </div>
+          {currentUser ? (
+            <div
+              className="hub-mobile-user-avatar"
+              aria-label={`Logged in as ${currentUser.displayName}`}
+              title={currentUser.displayName}
+            >
+              {getUserInitials(currentUser.displayName)}
+            </div>
+          ) : null}
         </div>
 
         <nav className="hub-nav" aria-label="Primary">
@@ -127,7 +136,6 @@ export function HubAppShell({ children }: HubAppShellProps) {
               </>
             ) : null}
           </div>
-
         </header>
 
         <main className="hub-content">{children}</main>

@@ -9,10 +9,13 @@ import { getMembers, getUserInitials } from "../../../repositories/userService";
 import { useCurrentGameWeek } from "./GameWeekProvider";
 
 export function ConsensusPanel() {
-  const { currentGameWeek } = useCurrentGameWeek();
+  const { currentGameWeek, loggedInUserId, clearVote } = useCurrentGameWeek();
   const members = getMembers();
   const leadingProposal = getLeadingProposal(currentGameWeek);
   const votesByUserId = currentGameWeek.votesByUserId;
+  const hasCurrentUserVote = loggedInUserId
+    ? Boolean(votesByUserId[loggedInUserId])
+    : false;
   const votedMemberIds = new Set(
     leadingProposal ? getProposalVotes(currentGameWeek, leadingProposal.id) : [],
   );
@@ -95,6 +98,16 @@ export function ConsensusPanel() {
           </span>.
         </p>
       </div>
+
+      {hasCurrentUserVote ? (
+        <button
+          className="hub-secondary-button hub-mobile-change-vote"
+          type="button"
+          onClick={clearVote}
+        >
+          Change vote
+        </button>
+      ) : null}
     </section>
   );
 }

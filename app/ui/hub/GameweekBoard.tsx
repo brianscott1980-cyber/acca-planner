@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import {
+  ChevronLeft,
   ChevronRight,
   Clock3,
   Flame,
@@ -27,10 +28,17 @@ import { MatchBetSummaryRow } from "./MatchBetSummaryRow";
 
 export function GameweekBoard() {
   const { currentGameWeek, loggedInUserId, castVote } = useCurrentGameWeek();
+  const [activeCardIndex, setActiveCardIndex] = useState(0);
   const selectedCardId =
     (loggedInUserId
       ? getUserVoteForGameWeek(currentGameWeek, loggedInUserId)
       : null) ?? "";
+  const mobileCard =
+    currentGameWeek.proposals[
+      ((activeCardIndex % currentGameWeek.proposals.length) +
+        currentGameWeek.proposals.length) %
+        currentGameWeek.proposals.length
+    ];
 
   return (
     <>
@@ -49,7 +57,7 @@ export function GameweekBoard() {
         </div>
       </div>
 
-      <div className="hub-card-stack">
+      <div className="hub-card-stack hub-card-stack-desktop">
         {currentGameWeek.proposals.map((card) => (
           <AccumulatorCard
             key={card.id}
@@ -60,6 +68,31 @@ export function GameweekBoard() {
           />
         ))}
       </div>
+
+      <div className="hub-card-carousel-mobile">
+        <AccumulatorCard
+          key={mobileCard.id}
+          card={mobileCard}
+          gameWeek={currentGameWeek}
+          selected={mobileCard.id === selectedCardId}
+          compactTitle
+          onPrevious={() =>
+            setActiveCardIndex((previous) =>
+              previous === 0
+                ? currentGameWeek.proposals.length - 1
+                : previous - 1,
+            )
+          }
+          onNext={() =>
+            setActiveCardIndex((previous) =>
+              previous === currentGameWeek.proposals.length - 1
+                ? 0
+                : previous + 1,
+            )
+          }
+          onVote={() => castVote(mobileCard.id)}
+        />
+      </div>
     </>
   );
 }
@@ -68,11 +101,17 @@ function AccumulatorCard({
   card,
   gameWeek,
   selected,
+  compactTitle = false,
+  onPrevious,
+  onNext,
   onVote,
 }: {
   card: GameWeekProposalRecord;
   gameWeek: ReturnType<typeof useCurrentGameWeek>["currentGameWeek"];
   selected: boolean;
+  compactTitle?: boolean;
+  onPrevious?: () => void;
+  onNext?: () => void;
   onVote: () => void;
 }) {
   const [expandedSectionId, setExpandedSectionId] = useState<string | null>(
@@ -92,6 +131,9 @@ function AccumulatorCard({
       : card.riskLevel === "balanced"
         ? "Vote Neutral"
         : "Vote Aggressive";
+  const displayTitle = compactTitle
+    ? getCompactProposalTitle(card.riskLevel)
+    : card.title;
 
   return (
     <article className={`hub-proposal-card${selected ? " is-selected" : ""}`}>
@@ -104,20 +146,58 @@ function AccumulatorCard({
           </div>
           <div>
             <div className="hub-proposal-heading-row">
-              <h2 className="hub-proposal-title">{card.title}</h2>
+              {compactTitle && onPrevious && onNext ? (
+                <>
+                  <div className="hub-carousel-title-row">
+                    <button
+                      className="hub-carousel-button"
+                      type="button"
+                      onClick={onPrevious}
+                      aria-label="Previous accumulator"
+                    >
+                      <ChevronLeft size={20} />
+                    </button>
+                    <h2 className="hub-proposal-title">{displayTitle}</h2>
+                    <button
+                      className="hub-carousel-button"
+                      type="button"
+                      onClick={onNext}
+                      aria-label="Next accumulator"
+                    >
+                      <ChevronRight size={20} />
+                    </button>
+                  </div>
+                  {card.aiRecommended ? (
+                    <span className="hub-ai-tag hub-ai-tag-compact">
+                      <Sparkles size={12} />
+                      AI
+                    </span>
+                  ) : null}
+                </>
+              ) : (
+                <h2 className="hub-proposal-title">{displayTitle}</h2>
+              )}
             </div>
             <div className="hub-proposal-meta-row">
-              <span className={`hub-tag hub-tag-${card.riskLevel}`}>
+              <span
+                className={`hub-tag hub-tag-${card.riskLevel} hub-risk-indicator`}
+              >
                 {card.statusLabel}
               </span>
               {card.aiRecommended ? (
-                <span className="hub-ai-tag">
+                <span className="hub-ai-tag hub-ai-tag-full">
                   <Sparkles size={12} />
                   AI Recommends
                 </span>
               ) : null}
             </div>
           </div>
+          {compactTitle ? (
+            <div
+              className="hub-proposal-icon hub-proposal-icon-spacer"
+              aria-hidden="true"
+            />
+          ) : null}
         </div>
 
         <div className="hub-proposal-metrics">
@@ -239,4 +319,18 @@ function AccumulatorCard({
       </div>
     </article>
   );
+}
+
+function getCompactProposalTitle(
+  riskLevel: GameWeekProposalRecord["riskLevel"],
+) {
+  if (riskLevel === "safe") {
+    return "Defensive";
+  }
+
+  if (riskLevel === "balanced") {
+    return "Neutral";
+  }
+
+  return "Aggressive";
 }
