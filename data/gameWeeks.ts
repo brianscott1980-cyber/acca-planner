@@ -37,7 +37,7 @@ export const gameWeeks: GameWeekRecord[] = [
       {
         id: "defensive",
         riskLevel: "safe",
-        title: "Defensive Accumulator",
+        title: "Defensive",
         legs: 3,
         betLines: [
           {
@@ -67,7 +67,7 @@ export const gameWeeks: GameWeekRecord[] = [
       {
         id: "neutral",
         riskLevel: "balanced",
-        title: "Neutral Accumulator",
+        title: "Neutral",
         legs: 4,
         betLines: [
           {
@@ -105,7 +105,7 @@ export const gameWeeks: GameWeekRecord[] = [
       {
         id: "aggressive",
         riskLevel: "aggressive",
-        title: "Aggressive Accumulator",
+        title: "Aggressive",
         legs: 4,
         betLines: [
           {
@@ -160,7 +160,7 @@ export const gameWeeks: GameWeekRecord[] = [
       {
         id: "defensive",
         riskLevel: "safe",
-        title: "Defensive Accumulator",
+        title: "Defensive",
         legs: 3,
         betLines: [
           { label: "Brentford v Burnley: Brentford or Draw", odds: "1.40" },
@@ -172,7 +172,7 @@ export const gameWeeks: GameWeekRecord[] = [
       {
         id: "neutral",
         riskLevel: "balanced",
-        title: "Neutral Accumulator",
+        title: "Neutral",
         legs: 4,
         betLines: [
           { label: "Brentford v Burnley: Brentford to Win", odds: "1.50" },
@@ -186,7 +186,7 @@ export const gameWeeks: GameWeekRecord[] = [
       {
         id: "aggressive",
         riskLevel: "aggressive",
-        title: "Aggressive Accumulator",
+        title: "Aggressive",
         legs: 4,
         betLines: [
           { label: "Brentford v Burnley: Brentford -1 Handicap", odds: "2.00" },

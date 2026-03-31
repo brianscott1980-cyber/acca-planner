@@ -131,6 +131,12 @@ function AccumulatorCard({
       : card.riskLevel === "balanced"
         ? "Vote Neutral"
         : "Vote Aggressive";
+  const approachLabel =
+    card.riskLevel === "safe"
+      ? "Preserve"
+      : card.riskLevel === "balanced"
+        ? "Progress"
+        : "Profit";
   const displayTitle = compactTitle
     ? getCompactProposalTitle(card.riskLevel)
     : card.title;
@@ -201,6 +207,13 @@ function AccumulatorCard({
         </div>
 
         <div className="hub-proposal-metrics">
+          <div className="hub-approach-metric">
+            <span className="hub-metric-label">Approach</span>
+            <span className={`hub-tag hub-tag-${card.riskLevel}`}>
+              {approachLabel}
+            </span>
+          </div>
+          <div className="hub-metric-divider hub-approach-divider" />
           <div>
             <span className="hub-metric-label">Stake</span>
             <span className="hub-metric-value">

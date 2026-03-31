@@ -608,6 +608,12 @@ button {
   display: none;
 }
 
+.hub-risk-indicator,
+.hub-approach-metric,
+.hub-approach-divider {
+  display: none;
+}
+
 .hub-proposal-metrics {
   display: flex;
   align-items: center;
@@ -616,6 +622,22 @@ button {
   border-radius: 1rem;
   background: var(--hub-bg);
   padding: 0.8rem 1rem;
+}
+
+@media (min-width: 641px) {
+  .hub-risk-indicator {
+    display: none;
+  }
+
+  .hub-approach-metric {
+    display: block;
+    min-width: 0;
+    text-align: center;
+  }
+
+  .hub-approach-divider {
+    display: block;
+  }
 }
 
 .hub-metric-label,
@@ -1632,10 +1654,6 @@ button {
 
   .hub-header-group .hub-divider,
   .hub-header-group .hub-sparkline {
-    display: none;
-  }
-
-  .hub-risk-indicator {
     display: none;
   }
 
