@@ -887,6 +887,18 @@ button {
   margin: 0;
 }
 
+.hub-bet-line-detail-row {
+  display: grid;
+  grid-template-columns: 4.75rem minmax(0, 1fr);
+  align-items: start;
+  column-gap: 0.35rem;
+}
+
+.hub-bet-line-detail-row-form {
+  align-items: center;
+  margin-bottom: 0.45rem;
+}
+
 .hub-bet-line-detail p + p {
   margin-top: 0.45rem;
 }
@@ -896,8 +908,81 @@ button {
 }
 
 .hub-bet-line-detail-label {
-  display: inline-block;
-  min-width: 4.75rem;
+  display: block;
+}
+
+.hub-bet-line-detail-value {
+  min-width: 0;
+}
+
+.hub-form-visual {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+}
+
+.hub-form-team {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+}
+
+.hub-form-team-start {
+  align-items: flex-start;
+  text-align: left;
+}
+
+.hub-form-team-end {
+  align-items: flex-start;
+  text-align: left;
+}
+
+.hub-form-outcomes {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.28rem;
+  flex-wrap: wrap;
+}
+
+.hub-form-outcome {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.28rem;
+  height: 1.28rem;
+  border-radius: 999px;
+  font-family: ui-monospace, "SFMono-Regular", monospace;
+  font-size: 0.62rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.hub-form-outcome-win {
+  border: 1px solid rgba(16, 185, 129, 0.28);
+  background: rgba(16, 185, 129, 0.14);
+  color: var(--hub-success);
+}
+
+.hub-form-outcome-draw {
+  border: 1px solid rgba(139, 141, 152, 0.34);
+  background: rgba(139, 141, 152, 0.14);
+  color: #d4d4d8;
+}
+
+.hub-form-outcome-loss {
+  border: 1px solid rgba(239, 68, 68, 0.28);
+  background: rgba(239, 68, 68, 0.14);
+  color: var(--hub-danger);
+}
+
+.hub-form-versus {
+  color: var(--hub-muted);
+  font-size: 0.66rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
 }
 
 .hub-cashout-panel {
@@ -1946,6 +2031,25 @@ button {
     min-width: 2.6rem;
     padding: 0.28rem 0.48rem;
     font-size: 0.62rem;
+  }
+
+  .hub-bet-line-detail-row {
+    grid-template-columns: 3.65rem minmax(0, 1fr);
+  }
+
+  .hub-form-visual {
+    gap: 0.45rem;
+  }
+
+  .hub-form-outcome {
+    width: 1.14rem;
+    height: 1.14rem;
+    font-size: 0.56rem;
+  }
+
+  .hub-form-versus {
+    font-size: 0.58rem;
+    letter-spacing: 0.14em;
   }
 
   .hub-ledger-table thead {
