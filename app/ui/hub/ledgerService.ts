@@ -6,6 +6,7 @@ import { getMemberCount } from "../../../repositories/userService";
 import { getSimulatedNow } from "../../../repositories/leagueSimulationRepository";
 
 export type LedgerActivity = {
+  id: string;
   title: string;
   date: string;
   amount: number;
@@ -17,9 +18,12 @@ export type PotTimelinePoint = {
   date: string;
   label: string;
   potValue: number;
+  changeAmount: number;
+  eventTitle: string | null;
+  eventTransactionIds: string[];
 };
 
-export type LedgerRange = "1w" | "2w" | "1m";
+export type LedgerRange = "1w" | "2w" | "1m" | "all";
 
 export function getLedgerSummary() {
   const memberCount = getMemberCount();
@@ -69,11 +73,37 @@ export function getPotTimelineForRange(
   range: LedgerRange,
   today: Date = getSimulatedNow(),
 ) {
+  if (range === "all") {
+    return getPotTimelineSinceFirstStake(today);
+  }
+
   const rangeStart = getRangeStart(today, range);
+  return getPotTimelineFromDate(rangeStart, today);
+}
+
+export function getPotTimelineSinceFirstStake(today: Date = getSimulatedNow()) {
+  const firstStakeEntry = [...ledgerData]
+    .filter((entry) => entry.kind === "stake")
+    .sort(
+      (left, right) =>
+        new Date(left.dateIso).getTime() - new Date(right.dateIso).getTime(),
+    )[0];
+
+  if (!firstStakeEntry) {
+    return getPotTimelineFromDate(getEarliestLedgerDate(today), today);
+  }
+
+  return getPotTimelineFromDate(new Date(firstStakeEntry.dateIso), today);
+}
+
+function getPotTimelineFromDate(rangeStart: Date, today: Date) {
   const rangeStartKey = formatDateKey(rangeStart);
   const todayKey = formatDateKey(today);
 
-  const groupedByDate = new Map<string, number>();
+  const groupedByDate = new Map<
+    string,
+    { amount: number; titles: string[]; transactionIds: string[] }
+  >();
   const sortedEntries = [...ledgerData].sort(
     (left, right) =>
       new Date(left.dateIso).getTime() - new Date(right.dateIso).getTime(),
@@ -93,8 +123,20 @@ export function getPotTimelineForRange(
       continue;
     }
 
-    const currentValue = groupedByDate.get(dateKey) ?? 0;
-    groupedByDate.set(dateKey, roundCurrency(currentValue + entry.amount));
+    if (entry.kind === "deposit") {
+      continue;
+    }
+
+    const currentValue = groupedByDate.get(dateKey) ?? {
+      amount: 0,
+      titles: [],
+      transactionIds: [],
+    };
+    groupedByDate.set(dateKey, {
+      amount: roundCurrency(currentValue.amount + entry.amount),
+      titles: [...currentValue.titles, entry.title],
+      transactionIds: [...currentValue.transactionIds, entry.id],
+    });
   }
 
   const timeline: PotTimelinePoint[] = [];
@@ -103,13 +145,26 @@ export function getPotTimelineForRange(
 
   while (formatDateKey(cursor) <= todayKey) {
     const dateKey = formatDateKey(cursor);
-    const dayAmount = groupedByDate.get(dateKey) ?? 0;
+    const dayEntry = groupedByDate.get(dateKey) ?? {
+      amount: 0,
+      titles: [],
+      transactionIds: [],
+    };
+    const dayAmount = dayEntry.amount;
     runningPot = roundCurrency(runningPot + dayAmount);
 
     timeline.push({
       date: dateKey,
       label: formatChartDateLabel(dateKey),
       potValue: runningPot,
+      changeAmount: dayAmount,
+      eventTitle:
+        dayEntry.titles.length === 0
+          ? null
+          : dayEntry.titles.length === 1
+            ? dayEntry.titles[0]
+            : `${dayEntry.titles.length} events`,
+      eventTransactionIds: dayEntry.transactionIds,
     });
 
     cursor = addDays(cursor, 1);
@@ -155,6 +210,7 @@ function roundCurrency(value: number) {
 
 function normalizeLedgerActivity(entry: LedgerTransactionRecord): LedgerActivity {
   return {
+    id: entry.id,
     title: entry.title,
     date: formatLedgerActivityDate(entry.dateIso),
     amount: entry.amount,
@@ -199,6 +255,15 @@ function addDays(value: Date, days: number) {
   );
   next.setUTCDate(next.getUTCDate() + days);
   return next;
+}
+
+function getEarliestLedgerDate(fallbackDate: Date) {
+  const sortedEntries = [...ledgerData].sort(
+    (left, right) =>
+      new Date(left.dateIso).getTime() - new Date(right.dateIso).getTime(),
+  );
+
+  return sortedEntries[0] ? new Date(sortedEntries[0].dateIso) : fallbackDate;
 }
 
 function getRangeStart(today: Date, range: LedgerRange) {

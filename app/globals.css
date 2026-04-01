@@ -317,16 +317,39 @@ button {
   color: var(--hub-danger);
 }
 
+.hub-warning-text {
+  color: #fbbf24;
+}
+
+.hub-strategy-safe-text {
+  color: var(--hub-success);
+}
+
+.hub-strategy-balanced-text {
+  color: #93c5fd;
+}
+
+.hub-strategy-aggressive-text {
+  color: #fbbf24;
+}
+
 .hub-roi-value {
   font-family: ui-monospace, "SFMono-Regular", monospace;
   font-size: 0.95rem;
   font-weight: 700;
 }
 
+.hub-roi-row.is-positive {
+  color: var(--hub-success);
+}
+
+.hub-roi-row.is-negative {
+  color: var(--hub-danger);
+}
+
 .hub-sparkline {
   height: 1.5rem;
   width: 6rem;
-  color: var(--hub-success);
 }
 
 .hub-content {
@@ -389,6 +412,56 @@ button {
     var(--hub-panel);
 }
 
+.hub-decision-banner-locked-safe {
+  border-color: rgba(16, 185, 129, 0.24);
+  background:
+    linear-gradient(135deg, rgba(16, 185, 129, 0.14), rgba(16, 185, 129, 0.04)),
+    var(--hub-panel);
+}
+
+.hub-decision-banner-locked-balanced {
+  border-color: rgba(59, 130, 246, 0.24);
+  background:
+    linear-gradient(135deg, rgba(59, 130, 246, 0.14), rgba(59, 130, 246, 0.04)),
+    var(--hub-panel);
+}
+
+.hub-decision-banner-locked-aggressive {
+  border-color: rgba(245, 158, 11, 0.24);
+  background:
+    linear-gradient(135deg, rgba(245, 158, 11, 0.14), rgba(245, 158, 11, 0.04)),
+    var(--hub-panel);
+}
+
+.hub-decision-banner-placed {
+  border-color: rgba(59, 130, 246, 0.24);
+  background:
+    linear-gradient(135deg, rgba(59, 130, 246, 0.14), rgba(59, 130, 246, 0.04)),
+    var(--hub-panel);
+}
+
+.hub-decision-banner-review,
+.hub-decision-banner-review-cashout {
+  border-color: rgba(245, 158, 11, 0.24);
+  background:
+    linear-gradient(135deg, rgba(245, 158, 11, 0.14), rgba(245, 158, 11, 0.04)),
+    var(--hub-panel);
+}
+
+.hub-decision-banner-review-win {
+  border-color: rgba(16, 185, 129, 0.24);
+  background:
+    linear-gradient(135deg, rgba(16, 185, 129, 0.14), rgba(16, 185, 129, 0.04)),
+    var(--hub-panel);
+}
+
+.hub-decision-banner-review-loss {
+  border-color: rgba(239, 68, 68, 0.24);
+  background:
+    linear-gradient(135deg, rgba(239, 68, 68, 0.14), rgba(239, 68, 68, 0.04)),
+    var(--hub-panel);
+}
+
 .hub-decision-banner-main {
   display: flex;
   min-width: 0;
@@ -408,6 +481,42 @@ button {
   flex: none;
 }
 
+.hub-decision-banner-locked-safe .hub-decision-banner-icon {
+  background: rgba(16, 185, 129, 0.16);
+  color: var(--hub-success);
+}
+
+.hub-decision-banner-locked-balanced .hub-decision-banner-icon {
+  background: rgba(59, 130, 246, 0.16);
+  color: #93c5fd;
+}
+
+.hub-decision-banner-locked-aggressive .hub-decision-banner-icon {
+  background: rgba(245, 158, 11, 0.16);
+  color: #fbbf24;
+}
+
+.hub-decision-banner-placed .hub-decision-banner-icon {
+  background: rgba(59, 130, 246, 0.16);
+  color: #93c5fd;
+}
+
+.hub-decision-banner-review .hub-decision-banner-icon,
+.hub-decision-banner-review-cashout .hub-decision-banner-icon {
+  background: rgba(245, 158, 11, 0.16);
+  color: #fbbf24;
+}
+
+.hub-decision-banner-review-win .hub-decision-banner-icon {
+  background: rgba(16, 185, 129, 0.16);
+  color: var(--hub-success);
+}
+
+.hub-decision-banner-review-loss .hub-decision-banner-icon {
+  background: rgba(239, 68, 68, 0.16);
+  color: var(--hub-danger);
+}
+
 .hub-decision-banner-title {
   margin: 0;
   color: var(--hub-text);
@@ -422,11 +531,93 @@ button {
   line-height: 1.55;
 }
 
+.hub-vote-simulation-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.15rem;
+  padding: 1rem 1.05rem;
+  border: 1px solid rgba(59, 130, 246, 0.24);
+  border-radius: 1rem;
+  background:
+    linear-gradient(135deg, rgba(59, 130, 246, 0.14), rgba(59, 130, 246, 0.04)),
+    var(--hub-panel);
+}
+
+.hub-vote-simulation-banner.is-closed {
+  border-color: rgba(16, 185, 129, 0.24);
+  background:
+    linear-gradient(135deg, rgba(16, 185, 129, 0.14), rgba(16, 185, 129, 0.04)),
+    var(--hub-panel);
+}
+
+.hub-vote-simulation-banner-title {
+  margin: 0;
+  color: var(--hub-text);
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+.hub-vote-simulation-banner-copy {
+  margin: 0.2rem 0 0;
+  color: var(--hub-muted);
+  font-size: 0.82rem;
+  line-height: 1.55;
+}
+
 .hub-title {
   margin: 0;
   font-size: clamp(1.4rem, 2.2vw, 1.85rem);
   font-weight: 500;
   letter-spacing: -0.02em;
+}
+
+.hub-title-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.hub-matchday-nav {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.hub-matchday-nav-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 2rem;
+  width: 2rem;
+  border: 1px solid var(--hub-border);
+  border-radius: 999px;
+  background: var(--hub-panel);
+  color: var(--hub-text);
+  transition:
+    border-color 160ms ease,
+    background 160ms ease,
+    color 160ms ease,
+    transform 160ms ease;
+}
+
+.hub-matchday-nav-button:hover:not(:disabled) {
+  border-color: rgba(178, 102, 255, 0.28);
+  background: var(--hub-surface-hover);
+  color: var(--hub-primary-glow);
+  transform: translateY(-1px);
+}
+
+.hub-matchday-nav-button:disabled {
+  opacity: 0.42;
+  cursor: default;
+}
+
+.hub-matchday-nav-button:focus-visible {
+  outline: 2px solid rgba(178, 102, 255, 0.42);
+  outline-offset: 2px;
 }
 
 .hub-subtitle {
@@ -669,9 +860,11 @@ button {
 .hub-ai-tag,
 .hub-metric-pill,
 .hub-outcome {
+  position: relative;
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
+  overflow: hidden;
   padding: 0.35rem 0.55rem;
   font-size: 0.68rem;
   font-weight: 800;
@@ -1166,6 +1359,11 @@ button {
   margin-top: 0.35rem;
 }
 
+.hub-rule-box-live {
+  border-color: rgba(59, 130, 246, 0.24);
+  background: rgba(59, 130, 246, 0.08);
+}
+
 .hub-vote-note {
   display: inline-flex;
   align-items: center;
@@ -1195,6 +1393,16 @@ button {
 .hub-range-button:hover,
 .hub-link-button:hover {
   transform: translateY(-1px);
+}
+
+.hub-icon-button:disabled,
+.hub-primary-button:disabled,
+.hub-secondary-button:disabled,
+.hub-range-button:disabled,
+.hub-link-button:disabled {
+  opacity: 0.55;
+  cursor: default;
+  transform: none;
 }
 
 .hub-icon-button {
@@ -1462,6 +1670,24 @@ button {
   flex: none;
 }
 
+.hub-vote-breakdown-chart-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+  overflow: visible;
+}
+
+.hub-vote-breakdown-segment {
+  fill: none;
+  stroke-width: 12;
+  transition:
+    stroke-dasharray 520ms cubic-bezier(0.22, 1, 0.36, 1),
+    stroke-dashoffset 520ms cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 320ms ease;
+}
+
 .hub-vote-breakdown-chart::after {
   content: "";
   position: absolute;
@@ -1554,34 +1780,65 @@ button {
 }
 
 .hub-avatar-badge {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
   height: 2.5rem;
   width: 2.5rem;
   margin-right: -0.45rem;
   border: 2px solid var(--hub-surface);
-  background: linear-gradient(135deg, var(--hub-primary), #4c1d95);
+  background: var(--hub-surface-hover);
   color: #fff;
+  box-shadow: 0 0 0 rgba(0, 0, 0, 0);
+  transition:
+    color 260ms ease,
+    border-color 260ms ease,
+    box-shadow 420ms ease;
+}
+
+.hub-avatar-badge::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: var(
+    --hub-avatar-badge-fill,
+    linear-gradient(135deg, var(--hub-primary), #4c1d95)
+  );
+  opacity: var(--hub-avatar-badge-fill-opacity, 0);
+  transition: opacity 360ms ease;
+}
+
+.hub-avatar-badge-label {
+  position: relative;
+  z-index: 1;
 }
 
 .hub-avatar-badge.is-empty {
-  background: var(--hub-surface-hover);
   color: var(--hub-muted);
   border-style: dashed;
   border-color: var(--hub-border);
 }
 
 .hub-avatar-badge-defensive {
-  background: linear-gradient(135deg, #10b981, #047857);
+  --hub-avatar-badge-fill: linear-gradient(135deg, #10b981, #047857);
+  --hub-avatar-badge-fill-opacity: 1;
   color: #fff;
+  box-shadow: 0 0 18px rgba(16, 185, 129, 0.24);
 }
 
 .hub-avatar-badge-neutral {
-  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  --hub-avatar-badge-fill: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  --hub-avatar-badge-fill-opacity: 1;
   color: #fff;
+  box-shadow: 0 0 18px rgba(59, 130, 246, 0.24);
 }
 
 .hub-avatar-badge-aggressive {
-  background: linear-gradient(135deg, #f59e0b, #d97706);
+  --hub-avatar-badge-fill: linear-gradient(135deg, #f59e0b, #d97706);
+  --hub-avatar-badge-fill-opacity: 1;
   color: #fff;
+  box-shadow: 0 0 18px rgba(245, 158, 11, 0.24);
 }
 
 .hub-rule-box {
@@ -1663,7 +1920,14 @@ button {
 
 .hub-timeline-dot.is-loss,
 .hub-dot.is-loss {
-  background: var(--hub-border);
+  background: var(--hub-danger);
+  box-shadow: 0 0 14px rgba(239, 68, 68, 0.28);
+}
+
+.hub-timeline-dot.is-cashed-out,
+.hub-dot.is-cashed-out {
+  background: #f59e0b;
+  box-shadow: 0 0 14px rgba(245, 158, 11, 0.28);
 }
 
 .hub-timeline-dot.is-funded,
@@ -1674,8 +1938,8 @@ button {
 
 .hub-timeline-dot.is-placed,
 .hub-dot.is-placed {
-  background: var(--hub-primary);
-  box-shadow: 0 0 14px rgba(138, 44, 226, 0.28);
+  background: var(--hub-danger);
+  box-shadow: 0 0 14px rgba(239, 68, 68, 0.28);
 }
 
 .hub-timeline-dot.is-voted,
@@ -1740,6 +2004,47 @@ button {
   color: var(--hub-danger);
 }
 
+.hub-outcome.is-cashed-out {
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.24);
+  color: #fbbf24;
+}
+
+.hub-outcome.is-pending {
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.24);
+  color: #fbbf24;
+}
+
+.hub-outcome.is-in-play {
+  border: 1px solid rgba(79, 131, 255, 0.28);
+  background: rgba(79, 131, 255, 0.14);
+  color: #dbe7ff;
+}
+
+.hub-outcome.is-ended {
+  background: rgba(82, 82, 91, 0.16);
+  border: 1px solid rgba(82, 82, 91, 0.32);
+  color: #d4d4d8;
+}
+
+.hub-outcome.is-in-play::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(
+      115deg,
+      transparent 20%,
+      rgba(255, 255, 255, 0.08) 40%,
+      rgba(255, 255, 255, 0.32) 50%,
+      rgba(255, 255, 255, 0.08) 60%,
+      transparent 80%
+    );
+  transform: translateX(-140%);
+  animation: hub-outcome-shimmer 1.7s linear infinite;
+}
+
 .hub-outcome.is-funded {
   background: rgba(16, 185, 129, 0.12);
   border: 1px solid rgba(16, 185, 129, 0.24);
@@ -1747,9 +2052,9 @@ button {
 }
 
 .hub-outcome.is-placed {
-  background: rgba(138, 44, 226, 0.12);
-  border: 1px solid rgba(138, 44, 226, 0.24);
-  color: var(--hub-primary-glow);
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.24);
+  color: var(--hub-danger);
 }
 
 .hub-outcome.is-voted {
@@ -1758,11 +2063,44 @@ button {
   color: #86a8ff;
 }
 
+@keyframes hub-outcome-shimmer {
+  100% {
+    transform: translateX(140%);
+  }
+}
+
 .hub-stat-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 1rem;
   margin: 1.25rem 0;
+}
+
+.hub-stat-grid.has-info {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.hub-stat-grid.has-potential {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.hub-stat-grid.has-potential.has-info {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.hub-timeline-submitter-avatar {
+  display: inline-grid;
+  place-items: center;
+  height: 2.1rem;
+  width: 2.1rem;
+  margin-top: 0.28rem;
+  border: 1px solid rgba(178, 102, 255, 0.24);
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--hub-primary), #4c1d95);
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 700;
+  box-shadow: 0 0 14px rgba(138, 44, 226, 0.2);
 }
 
 .hub-leg-item {
@@ -1791,7 +2129,16 @@ button {
 }
 
 .hub-chart-panel {
+  --hub-chart-tone: var(--hub-primary);
   padding: 1.75rem;
+}
+
+.hub-chart-panel-positive {
+  --hub-chart-tone: var(--hub-success);
+}
+
+.hub-chart-panel-negative {
+  --hub-chart-tone: var(--hub-danger);
 }
 
 .hub-chart-head {
@@ -1833,6 +2180,7 @@ button {
 }
 
 .hub-chart-wrap {
+  position: relative;
   height: 10.125rem;
   margin-top: 1.75rem;
   filter: drop-shadow(0 0 10px rgba(138, 44, 226, 0.24));
@@ -1841,6 +2189,74 @@ button {
 .hub-chart-wrap svg {
   height: 100%;
   width: 100%;
+}
+
+.hub-chart-event-button {
+  position: absolute;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  transform: translate(-50%, -50%);
+}
+
+.hub-chart-event-guide {
+  position: absolute;
+  bottom: 0;
+  z-index: 0;
+  width: 2px;
+  background: linear-gradient(
+    to bottom,
+    color-mix(in srgb, var(--hub-chart-event-color) 50%, transparent) 0%,
+    color-mix(in srgb, var(--hub-chart-event-color) 0%, transparent) 100%
+  );
+  transform: translateX(-50%);
+}
+
+.hub-chart-event-dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border: 2px solid var(--hub-panel);
+  border-radius: 999px;
+  background: var(--hub-chart-event-color);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--hub-chart-event-color) 22%, transparent);
+}
+
+.hub-chart-event-button.is-active .hub-chart-event-dot {
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--hub-chart-event-color) 28%, transparent);
+}
+
+.hub-chart-event-tooltip {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 0.45rem);
+  display: flex;
+  min-width: max-content;
+  flex-direction: column;
+  gap: 0.12rem;
+  padding: 0.48rem 0.6rem;
+  border: 1px solid var(--hub-border);
+  border-radius: 0.7rem;
+  background: rgba(20, 20, 24, 0.96);
+  box-shadow: var(--hub-shadow);
+  color: var(--hub-text);
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.hub-chart-event-tooltip strong {
+  font-size: 0.7rem;
+  line-height: 1.35;
+}
+
+.hub-chart-event-tooltip span {
+  color: var(--hub-muted);
+  font-size: 0.66rem;
+  line-height: 1.3;
 }
 
 .hub-axis {
@@ -1950,6 +2366,20 @@ button {
   text-transform: uppercase;
 }
 
+.hub-ledger-table tbody tr.is-highlighted td {
+  background: var(--hub-bg);
+}
+
+.hub-ledger-table tbody tr.is-highlighted td:first-child {
+  border-top-left-radius: 0.9rem;
+  border-bottom-left-radius: 0.9rem;
+}
+
+.hub-ledger-table tbody tr.is-highlighted td:last-child {
+  border-top-right-radius: 0.9rem;
+  border-bottom-right-radius: 0.9rem;
+}
+
 .hub-ledger-table-main {
   display: flex;
   align-items: center;
@@ -1998,12 +2428,31 @@ button {
   padding: 1.5rem;
 }
 
+.hub-vote-closed-modal {
+  width: min(32rem, 100%);
+  max-height: none;
+  padding: 1.6rem;
+}
+
 .hub-modal-header {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   gap: 1rem;
   margin-bottom: 1rem;
+}
+
+.hub-vote-closed-modal-header {
+  margin-bottom: 1.35rem;
+}
+
+.hub-vote-closed-modal .hub-subtitle {
+  margin-top: 0.55rem;
+}
+
+.hub-vote-closed-modal-action {
+  width: 100%;
+  justify-content: center;
 }
 
 .hub-empty-state {

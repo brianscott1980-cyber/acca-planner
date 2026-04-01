@@ -19,7 +19,8 @@ type MatchBetSummaryRowProps = {
   insight?: BetLineInsight | null;
   isExpanded: boolean;
   onToggle: () => void;
-  settlementStatus?: SimulatedSlipLegStatus;
+  settlementStatus?: SimulatedSlipLegStatus | "pending" | "in_play" | "ended";
+  statusLabel?: string;
 };
 
 export function MatchBetSummaryRow({
@@ -29,6 +30,7 @@ export function MatchBetSummaryRow({
   isExpanded,
   onToggle,
   settlementStatus,
+  statusLabel,
 }: MatchBetSummaryRowProps) {
   const fixtureDisplayParts = getFixtureDisplayParts(betLine.label);
   const formContent = getBetLineFormContent(betLine, fixtureDisplayParts);
@@ -106,14 +108,27 @@ export function MatchBetSummaryRow({
                   ? "is-win"
                   : settlementStatus === "lost"
                     ? "is-loss"
-                    : "is-cashed-out"
+                  : settlementStatus === "in_play"
+                    ? "is-in-play"
+                  : settlementStatus === "ended"
+                    ? "is-ended"
+                    : settlementStatus === "cashed_out"
+                      ? "is-cashed-out"
+                      : "is-pending"
               }`}
             >
-              {settlementStatus === "won"
-                ? "Won"
-                : settlementStatus === "lost"
-                  ? "Lost"
-                  : "Cashout"}
+              {statusLabel ??
+                (settlementStatus === "won"
+                  ? "Won"
+                  : settlementStatus === "lost"
+                    ? "Lost"
+                  : settlementStatus === "in_play"
+                    ? "In Play"
+                  : settlementStatus === "ended"
+                    ? "Ended"
+                  : settlementStatus === "cashed_out"
+                    ? "Cashout"
+                    : "Pending")}
             </span>
           ) : null}
           <span className="hub-bet-line-pill">{displayOdds}</span>

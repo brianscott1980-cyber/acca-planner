@@ -10,7 +10,7 @@ export default function MatchdayPage() {
     <Suspense
       fallback={
         <GameWeekProvider>
-          <DashboardView decisionParam={null} />
+          <DashboardView />
         </GameWeekProvider>
       }
     >

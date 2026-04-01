@@ -6,6 +6,7 @@ import ts from "typescript";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const ROOT = path.resolve(__dirname, "..", "..");
+const LONDON_TIME_ZONE = "Europe/London";
 
 const CLUB_STRENGTHS = {
   arsenal: 87,
@@ -41,6 +42,21 @@ const CLUB_ALIASES = {
   brighton: "brighton",
 };
 
+const MONTH_INDEX_BY_LABEL = {
+  jan: 0,
+  feb: 1,
+  mar: 2,
+  apr: 3,
+  may: 4,
+  jun: 5,
+  jul: 6,
+  aug: 7,
+  sep: 8,
+  oct: 9,
+  nov: 10,
+  dec: 11,
+};
+
 async function main() {
   const [command, ...rest] = process.argv.slice(2);
 
@@ -64,6 +80,7 @@ async function main() {
     users,
     gameWeeks,
     ladbrokesOddsSnapshots,
+    simulatedAt,
   });
   const ledgerTransactions = buildLedgerTransactions({
     users,
@@ -106,13 +123,13 @@ function parseShortDateTime(input) {
   }
 
   const [, year, month, day, hours = "12", minutes = "00"] = match;
-  const parsedDate = new Date(
-    Number(year),
-    Number(month) - 1,
-    Number(day),
-    Number(hours),
-    Number(minutes),
-  );
+  const parsedDate = createDateInLondonTime({
+    year: Number(year),
+    month: Number(month),
+    day: Number(day),
+    hours: Number(hours),
+    minutes: Number(minutes),
+  });
 
   if (Number.isNaN(parsedDate.getTime())) {
     throw new Error(`Could not parse date "${input}".`);
@@ -137,8 +154,14 @@ async function loadTsModule(relativePath) {
   );
 }
 
-function buildMatchdaySimulations({ users, gameWeeks, ladbrokesOddsSnapshots }) {
-  const sortedGameWeeks = [...gameWeeks].sort(
+function buildMatchdaySimulations({
+  users,
+  gameWeeks,
+  ladbrokesOddsSnapshots,
+  simulatedAt,
+}) {
+  const includedGameWeeks = getIncludedGameWeeks(gameWeeks, simulatedAt);
+  const sortedGameWeeks = [...includedGameWeeks].sort(
     (left, right) =>
       new Date(left.windowStartIso).getTime() -
       new Date(right.windowStartIso).getTime(),
@@ -148,20 +171,34 @@ function buildMatchdaySimulations({ users, gameWeeks, ladbrokesOddsSnapshots }) 
   let completedGameWeeks = 0;
 
   return sortedGameWeeks.map((gameWeek) => {
-    const voteResolvedAt = addHours(new Date(gameWeek.windowStartIso), -72);
+    const windowStartDateParts = getLondonDateParts(new Date(gameWeek.windowStartIso));
+    const voteResolvedAt = createDateInLondonTime({
+      year: windowStartDateParts.year,
+      month: windowStartDateParts.month,
+      day: windowStartDateParts.day - 1,
+      hours: 0,
+      minutes: 0,
+      seconds: 0,
+    });
     const betPlacedAt = addHours(new Date(gameWeek.windowStartIso), -18);
     const betLineOddsByLabel = buildBetLineOddsByLabel(
       gameWeek,
       ladbrokesOddsSnapshots,
     );
-    const votesByUserId = buildVotesByUserId({
+    const initialVotesByUserId = buildVotesByUserId({
       users,
       gameWeek,
       betLineOddsByLabel,
     });
     const selectedProposalId = getWinningProposalId({
       gameWeek,
-      votesByUserId,
+      votesByUserId: initialVotesByUserId,
+    });
+    const votesByUserId = ensureWinningProposalMajority({
+      gameWeekId: gameWeek.id,
+      users,
+      votesByUserId: initialVotesByUserId,
+      winningProposalId: selectedProposalId,
     });
     const selectedProposal = findProposal(gameWeek, selectedProposalId);
     const selectedProposalOdds = getProposalDecimalOdds(
@@ -189,6 +226,7 @@ function buildMatchdaySimulations({ users, gameWeeks, ladbrokesOddsSnapshots }) 
       proposalOdds: selectedProposalOdds,
       stake,
       betPlacedAt,
+      betLineOddsByLabel,
     });
 
     runningPot = roundCurrency(
@@ -206,6 +244,124 @@ function buildMatchdaySimulations({ users, gameWeeks, ladbrokesOddsSnapshots }) 
       simulatedSlip,
     };
   });
+}
+
+function getIncludedGameWeeks(gameWeeks, simulatedAt) {
+  const sortedGameWeeks = [...gameWeeks].sort(
+    (left, right) =>
+      new Date(left.windowStartIso).getTime() -
+      new Date(right.windowStartIso).getTime(),
+  );
+  const simulatedTime = simulatedAt.getTime();
+  const startedOrClosedGameWeeks = sortedGameWeeks.filter(
+    (gameWeek) => new Date(gameWeek.windowStartIso).getTime() <= simulatedTime,
+  );
+
+  if (startedOrClosedGameWeeks.length > 0) {
+    const nextUpcomingIndex = sortedGameWeeks.findIndex(
+      (gameWeek) => new Date(gameWeek.windowStartIso).getTime() > simulatedTime,
+    );
+    const nextUpcomingGameWeek =
+      nextUpcomingIndex === -1 ? null : sortedGameWeeks[nextUpcomingIndex];
+    const previousGameWeek =
+      nextUpcomingIndex <= 0 ? null : sortedGameWeeks[nextUpcomingIndex - 1];
+
+    return nextUpcomingGameWeek &&
+      isNextGameWeekAvailable(previousGameWeek, simulatedAt)
+      ? [...startedOrClosedGameWeeks, nextUpcomingGameWeek]
+      : startedOrClosedGameWeeks;
+  }
+
+  return sortedGameWeeks.length > 0 ? [sortedGameWeeks[0]] : [];
+}
+
+function isNextGameWeekAvailable(previousGameWeek, simulatedAt) {
+  if (!previousGameWeek) {
+    return true;
+  }
+
+  const previousWindowEnd = getLondonDateParts(
+    new Date(previousGameWeek.windowEndIso),
+  );
+  const releaseDate = createDateInLondonTime({
+    year: previousWindowEnd.year,
+    month: previousWindowEnd.month,
+    day: previousWindowEnd.day + 1,
+    hours: 0,
+    minutes: 0,
+    seconds: 0,
+  });
+
+  return simulatedAt.getTime() >= releaseDate.getTime();
+}
+
+function createDateInLondonTime({
+  year,
+  month,
+  day,
+  hours = 0,
+  minutes = 0,
+  seconds = 0,
+}) {
+  const utcGuess = Date.UTC(year, month - 1, day, hours, minutes, seconds);
+  let resolvedTime = utcGuess;
+
+  for (let index = 0; index < 2; index += 1) {
+    const offsetMinutes = getLondonOffsetMinutes(new Date(resolvedTime));
+    resolvedTime =
+      Date.UTC(year, month - 1, day, hours, minutes, seconds) -
+      offsetMinutes * 60 * 1000;
+  }
+
+  return new Date(resolvedTime);
+}
+
+function getLondonOffsetMinutes(date) {
+  const timeZoneName = new Intl.DateTimeFormat("en-GB", {
+    timeZone: LONDON_TIME_ZONE,
+    timeZoneName: "shortOffset",
+  })
+    .formatToParts(date)
+    .find((part) => part.type === "timeZoneName")?.value;
+
+  if (!timeZoneName || timeZoneName === "GMT") {
+    return 0;
+  }
+
+  const match = timeZoneName.match(/^GMT([+-])(\d{1,2})(?::?(\d{2}))?$/);
+
+  if (!match) {
+    return 0;
+  }
+
+  const [, sign, hours = "0", minutes = "0"] = match;
+  const offsetMinutes = Number(hours) * 60 + Number(minutes);
+
+  return sign === "-" ? -offsetMinutes : offsetMinutes;
+}
+
+function getLondonDateParts(date) {
+  const parts = new Intl.DateTimeFormat("en-GB", {
+    timeZone: LONDON_TIME_ZONE,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hourCycle: "h23",
+  }).formatToParts(date);
+
+  const getPart = (type) => Number(parts.find((part) => part.type === type)?.value);
+
+  return {
+    year: getPart("year"),
+    month: getPart("month"),
+    day: getPart("day"),
+    hours: getPart("hour"),
+    minutes: getPart("minute"),
+    seconds: getPart("second"),
+  };
 }
 
 function buildVotesByUserId({ users, gameWeek, betLineOddsByLabel }) {
@@ -232,6 +388,39 @@ function buildVotesByUserId({ users, gameWeek, betLineOddsByLabel }) {
       return [user.id, vote];
     }),
   );
+}
+
+function ensureWinningProposalMajority({
+  gameWeekId,
+  users,
+  votesByUserId,
+  winningProposalId,
+}) {
+  const requiredVotes = Math.floor(users.length / 2) + 1;
+  const currentVotes = Object.values(votesByUserId).filter(
+    (proposalId) => proposalId === winningProposalId,
+  ).length;
+
+  if (currentVotes >= requiredVotes) {
+    return votesByUserId;
+  }
+
+  const updatedVotesByUserId = { ...votesByUserId };
+  const votersToFlip = users
+    .map((user) => user.id)
+    .filter((userId) => updatedVotesByUserId[userId] !== winningProposalId)
+    .sort((leftUserId, rightUserId) =>
+      hashString(`${gameWeekId}:${leftUserId}:consensus-adjustment`) -
+      hashString(`${gameWeekId}:${rightUserId}:consensus-adjustment`),
+    );
+
+  const votesNeeded = requiredVotes - currentVotes;
+
+  for (const userId of votersToFlip.slice(0, votesNeeded)) {
+    updatedVotesByUserId[userId] = winningProposalId;
+  }
+
+  return updatedVotesByUserId;
 }
 
 function buildBetLineOddsByLabel(gameWeek, ladbrokesOddsSnapshots) {
@@ -261,14 +450,23 @@ function buildBetLineOddsByLabel(gameWeek, ladbrokesOddsSnapshots) {
 }
 
 function simulateBetLineOdds(label) {
-  const [fixtureLabel, marketLabel] = label.split(":").map((part) => part.trim());
-  const [homeTeam, awayTeam] = fixtureLabel
-    .split(/\s+v(?:s)?\s+/i)
-    .map((team) => team.trim());
+  const probability = getBetLineProbability(label);
+  return clamp(roundCurrency((1 / clamp(probability, 0.08, 0.92)) * 1.06), 1.12, 8.5);
+}
+
+function getBetLineProbability(label) {
+  const { homeTeam, awayTeam, marketLabel } = parseBetLineLabel(label);
   const homeStrength = getClubStrength(homeTeam);
   const awayStrength = getClubStrength(awayTeam);
-  const { homeWinProb, drawProb, awayWinProb, over15Prob, over25Prob, bttsProb, awayScoreProb } =
-    getFixtureProbabilities(homeStrength, awayStrength);
+  const {
+    homeWinProb,
+    drawProb,
+    awayWinProb,
+    over15Prob,
+    over25Prob,
+    bttsProb,
+    awayScoreProb,
+  } = getFixtureProbabilities(homeStrength, awayStrength);
   let probability = 0.5;
 
   if (/draw no bet/i.test(marketLabel)) {
@@ -285,6 +483,8 @@ function simulateBetLineOdds(label) {
     probability = over15Prob;
   } else if (/over 2\.5 goals/i.test(marketLabel)) {
     probability = over25Prob;
+  } else if (/under 2\.5 goals/i.test(marketLabel)) {
+    probability = 1 - over25Prob;
   } else if (/win to nil/i.test(marketLabel)) {
     const team = marketLabel.replace(/win to nil/i, "").trim();
     const teamWinProb = isHomeTeamSelection(team, homeTeam)
@@ -312,6 +512,11 @@ function simulateBetLineOdds(label) {
       ? homeWinProb
       : awayWinProb;
     probability = teamWinProb * clamp(0.62 + Math.abs(homeStrength - awayStrength) / 60, 0.46, 0.84);
+  } else if (/or draw/i.test(marketLabel)) {
+    const team = marketLabel.replace(/or draw/i, "").trim();
+    probability = isHomeTeamSelection(team, homeTeam)
+      ? homeWinProb + drawProb
+      : awayWinProb + drawProb;
   } else if (/to win/i.test(marketLabel)) {
     const team = marketLabel.replace(/to win/i, "").trim();
     probability = isHomeTeamSelection(team, homeTeam)
@@ -319,7 +524,21 @@ function simulateBetLineOdds(label) {
       : awayWinProb;
   }
 
-  return clamp(roundCurrency((1 / clamp(probability, 0.08, 0.92)) * 1.06), 1.12, 8.5);
+  return probability;
+}
+
+function parseBetLineLabel(label) {
+  const [fixtureLabel, marketLabel = ""] = label.split(":").map((part) => part.trim());
+  const [homeTeam = "", awayTeam = ""] = fixtureLabel
+    .split(/\s+v(?:s)?\s+/i)
+    .map((team) => team.trim());
+
+  return {
+    fixtureLabel,
+    marketLabel,
+    homeTeam,
+    awayTeam,
+  };
 }
 
 function getFixtureProbabilities(homeStrength, awayStrength) {
@@ -359,37 +578,127 @@ function getFixtureProbabilities(homeStrength, awayStrength) {
   };
 }
 
-function buildSimulatedSlip({ gameWeek, proposal, proposalOdds, stake, betPlacedAt }) {
+function buildSimulatedSlip({
+  gameWeek,
+  proposal,
+  proposalOdds,
+  stake,
+  betPlacedAt,
+  betLineOddsByLabel,
+}) {
   const rng = createPrng(`${gameWeek.id}:${proposal.id}:settlement`);
-  const fairWinProbability = clamp(1 / (proposalOdds * 1.06), 0.12, 0.72);
-  const won = rng() < fairWinProbability;
-  const cashoutChance =
-    proposal.riskLevel === "safe"
-      ? 0.52
-      : proposal.riskLevel === "balanced"
-        ? 0.4
-        : 0.28;
-  const settlementKind =
-    rng() < (won ? cashoutChance : cashoutChance * 0.82) ? "cashout" : "settled";
+  const legResults = buildSimulatedLegResults({
+    gameWeek,
+    proposal,
+    betLineOddsByLabel,
+  });
+  const chronologicalLegResults = [...legResults].sort(
+    (left, right) =>
+      new Date(left.kickoffAt).getTime() - new Date(right.kickoffAt).getTime(),
+  );
   const fullReturn = roundCurrency(stake * proposalOdds);
+  const firstLosingIndex = chronologicalLegResults.findIndex(
+    (legResult) => legResult.actualStatus === "lost",
+  );
+  let settlementKind = "settled";
   let returnAmount = 0;
+  let settledAt = chronologicalLegResults.at(-1)
+    ? new Date(chronologicalLegResults.at(-1).settledAt)
+    : addMinutes(new Date(gameWeek.windowEndIso), -5);
+  const displayedStatusByLabel = new Map(
+    chronologicalLegResults.map((legResult) => [
+      legResult.betLineLabel,
+      legResult.actualStatus,
+    ]),
+  );
 
-  if (settlementKind === "cashout") {
-    if (won) {
-      returnAmount = roundCurrency(
-        Math.max(stake * 1.12, fullReturn * (0.4 + rng() * 0.24)),
+  if (firstLosingIndex === -1) {
+    const shouldTakeProfit =
+      chronologicalLegResults.length > 1 &&
+      rng() <
+        (proposal.riskLevel === "safe"
+          ? 0.34
+          : proposal.riskLevel === "balanced"
+            ? 0.24
+            : 0.14);
+
+    if (shouldTakeProfit) {
+      const remainingLegs =
+        chronologicalLegResults.length > 2 && rng() < 0.32 ? 2 : 1;
+      const cashoutStartIndex = Math.max(
+        1,
+        chronologicalLegResults.length - remainingLegs,
       );
+      settlementKind = "cashout";
+      settledAt = getCashoutTimestamp(chronologicalLegResults, cashoutStartIndex);
+      returnAmount = calculateCashoutReturn({
+        stake,
+        fullReturn,
+        chronologicalLegResults,
+        cashoutStartIndex,
+        proposal,
+        protectingAgainstKnownLoss: false,
+        rng,
+      });
+
+      for (let index = cashoutStartIndex; index < chronologicalLegResults.length; index += 1) {
+        displayedStatusByLabel.set(
+          chronologicalLegResults[index].betLineLabel,
+          "cashed_out",
+        );
+      }
     } else {
-      returnAmount = roundCurrency(stake * (0.34 + rng() * 0.42));
+      returnAmount = fullReturn;
     }
-  } else if (won) {
-    returnAmount = fullReturn;
+  } else {
+    const canCashoutBeforeLosingLeg = firstLosingIndex > 0;
+    const shouldCashoutBeforeLosingLeg =
+      canCashoutBeforeLosingLeg &&
+      rng() <
+        clamp(
+          (proposal.riskLevel === "safe"
+            ? 0.76
+            : proposal.riskLevel === "balanced"
+              ? 0.58
+              : 0.34) +
+            Math.min(firstLosingIndex, 3) * 0.04,
+          0.18,
+          0.88,
+        );
+
+    if (shouldCashoutBeforeLosingLeg) {
+      settlementKind = "cashout";
+      settledAt = getCashoutTimestamp(chronologicalLegResults, firstLosingIndex);
+      returnAmount = calculateCashoutReturn({
+        stake,
+        fullReturn,
+        chronologicalLegResults,
+        cashoutStartIndex: firstLosingIndex,
+        proposal,
+        protectingAgainstKnownLoss: true,
+        rng,
+      });
+
+      for (let index = firstLosingIndex; index < chronologicalLegResults.length; index += 1) {
+        displayedStatusByLabel.set(
+          chronologicalLegResults[index].betLineLabel,
+          "cashed_out",
+        );
+      }
+    } else {
+      settledAt = new Date(chronologicalLegResults[firstLosingIndex].settledAt);
+    }
   }
 
-  const settledAt =
-    settlementKind === "cashout"
-      ? addHours(new Date(gameWeek.windowEndIso), -(4 + Math.floor(rng() * 8)))
-      : addMinutes(new Date(gameWeek.windowEndIso), -5);
+  const finalLegResults = legResults.map((legResult) => ({
+    betLineLabel: legResult.betLineLabel,
+    kickoffAt: legResult.kickoffAt,
+    settledAt: legResult.settledAt,
+    finalScore: legResult.finalScore,
+    status: displayedStatusByLabel.get(legResult.betLineLabel) ?? legResult.actualStatus,
+    actualStatus: legResult.actualStatus,
+  }));
+  const status = returnAmount >= stake ? "win" : "loss";
 
   return {
     proposalId: proposal.id,
@@ -399,8 +708,316 @@ function buildSimulatedSlip({ gameWeek, proposal, proposalOdds, stake, betPlaced
     settledAt: settledAt.toISOString(),
     settlementKind,
     returnAmount,
-    status: won ? "win" : "loss",
+    status,
+    legResults: finalLegResults,
   };
+}
+
+function buildSimulatedLegResults({ gameWeek, proposal, betLineOddsByLabel }) {
+  const fixtureSimulationsByLabel = new Map();
+
+  return proposal.betLines.map((betLine, index) => {
+    const parsedBetLine = parseBetLineLabel(betLine.label);
+    const fixtureSimulation =
+      fixtureSimulationsByLabel.get(parsedBetLine.fixtureLabel) ??
+      buildFixtureSimulation({
+        gameWeek,
+        fixtureLabel: parsedBetLine.fixtureLabel,
+        homeTeam: parsedBetLine.homeTeam,
+        awayTeam: parsedBetLine.awayTeam,
+        scheduleNote: betLine.scheduleNote,
+        fallbackIndex: index,
+        fallbackTotal: proposal.betLines.length,
+      });
+
+    fixtureSimulationsByLabel.set(parsedBetLine.fixtureLabel, fixtureSimulation);
+
+    const actualStatus = evaluateBetLineOutcome({
+      parsedBetLine,
+      fixtureSimulation,
+      fallbackProbability: getFairProbabilityFromOdds(
+        Number.parseFloat(
+          betLineOddsByLabel[betLine.label] ?? betLine.odds ?? "1",
+        ),
+      ),
+      fallbackSeed: `${gameWeek.id}:${betLine.label}:fallback`,
+    });
+
+    const decimalOdds = Number.parseFloat(
+      betLineOddsByLabel[betLine.label] ?? betLine.odds ?? "1",
+    );
+
+    return {
+      betLineLabel: betLine.label,
+      kickoffAt: fixtureSimulation.kickoffAt.toISOString(),
+      settledAt: fixtureSimulation.settledAt.toISOString(),
+      finalScore: formatFixtureScore(
+        parsedBetLine.homeTeam,
+        parsedBetLine.awayTeam,
+        fixtureSimulation.homeGoals,
+        fixtureSimulation.awayGoals,
+      ),
+      decimalOdds,
+      status: actualStatus,
+      actualStatus,
+    };
+  });
+}
+
+function buildFixtureSimulation({
+  gameWeek,
+  fixtureLabel,
+  homeTeam,
+  awayTeam,
+  scheduleNote,
+  fallbackIndex,
+  fallbackTotal,
+}) {
+  const kickoffAt =
+    parseScheduleNoteDate(scheduleNote, gameWeek) ??
+    getFallbackKickoffAt(gameWeek, fallbackIndex, fallbackTotal);
+  const rng = createPrng(`${gameWeek.id}:${fixtureLabel}:score`);
+  const homeStrength = getClubStrength(homeTeam);
+  const awayStrength = getClubStrength(awayTeam);
+  const { homeExpectedGoals, awayExpectedGoals } = getExpectedGoals(
+    homeStrength,
+    awayStrength,
+  );
+
+  return {
+    kickoffAt,
+    settledAt: addMinutes(kickoffAt, 108 + Math.floor(rng() * 17)),
+    homeGoals: samplePoisson(homeExpectedGoals, rng),
+    awayGoals: samplePoisson(awayExpectedGoals, rng),
+  };
+}
+
+function evaluateBetLineOutcome({
+  parsedBetLine,
+  fixtureSimulation,
+  fallbackProbability,
+  fallbackSeed,
+}) {
+  const { marketLabel, homeTeam, awayTeam } = parsedBetLine;
+  const { homeGoals, awayGoals } = fixtureSimulation;
+  const totalGoals = homeGoals + awayGoals;
+  const draw = homeGoals === awayGoals;
+  const homeWon = homeGoals > awayGoals;
+  const awayWon = awayGoals > homeGoals;
+  const bothTeamsScored = homeGoals > 0 && awayGoals > 0;
+
+  if (/draw no bet/i.test(marketLabel)) {
+    const team = marketLabel.replace(/draw no bet/i, "").trim();
+    return isHomeTeamSelection(team, homeTeam)
+      ? homeWon
+        ? "won"
+        : "lost"
+      : awayWon
+        ? "won"
+        : "lost";
+  }
+
+  if (/both teams to score\s*&\s*over 2\.5 goals/i.test(marketLabel)) {
+    return bothTeamsScored && totalGoals > 2.5 ? "won" : "lost";
+  }
+
+  if (/to win\s*&\s*both teams to score/i.test(marketLabel)) {
+    const team = marketLabel.replace(/to win\s*&\s*both teams to score/i, "").trim();
+    const teamWon = isHomeTeamSelection(team, homeTeam) ? homeWon : awayWon;
+    return teamWon && bothTeamsScored ? "won" : "lost";
+  }
+
+  if (/to win\s*&\s*over 2\.5 goals/i.test(marketLabel)) {
+    const team = marketLabel.replace(/to win\s*&\s*over 2\.5 goals/i, "").trim();
+    const teamWon = isHomeTeamSelection(team, homeTeam) ? homeWon : awayWon;
+    return teamWon && totalGoals > 2.5 ? "won" : "lost";
+  }
+
+  if (/both teams to score/i.test(marketLabel)) {
+    return bothTeamsScored ? "won" : "lost";
+  }
+
+  const overMatch = marketLabel.match(/over\s+(\d+(?:\.\d+)?)\s+goals?/i);
+  if (overMatch) {
+    return totalGoals > Number.parseFloat(overMatch[1]) ? "won" : "lost";
+  }
+
+  const underMatch = marketLabel.match(/under\s+(\d+(?:\.\d+)?)\s+goals?/i);
+  if (underMatch) {
+    return totalGoals < Number.parseFloat(underMatch[1]) ? "won" : "lost";
+  }
+
+  if (/win to nil/i.test(marketLabel)) {
+    const team = marketLabel.replace(/win to nil/i, "").trim();
+    const selectedHome = isHomeTeamSelection(team, homeTeam);
+    const teamWon = selectedHome ? homeWon : awayWon;
+    const conceded = selectedHome ? awayGoals : homeGoals;
+    return teamWon && conceded === 0 ? "won" : "lost";
+  }
+
+  if (/-1 handicap/i.test(marketLabel)) {
+    const team = marketLabel.replace(/-1 handicap/i, "").trim();
+    const selectedHome = isHomeTeamSelection(team, homeTeam);
+    const goalDifference = selectedHome
+      ? homeGoals - awayGoals
+      : awayGoals - homeGoals;
+    return goalDifference >= 2 ? "won" : "lost";
+  }
+
+  if (/or draw/i.test(marketLabel)) {
+    const team = marketLabel.replace(/or draw/i, "").trim();
+    const selectedWon = isHomeTeamSelection(team, homeTeam) ? homeWon : awayWon;
+    return selectedWon || draw ? "won" : "lost";
+  }
+
+  if (/to win/i.test(marketLabel)) {
+    const team = marketLabel.replace(/to win/i, "").trim();
+    const selectedWon = isHomeTeamSelection(team, homeTeam) ? homeWon : awayWon;
+    return selectedWon ? "won" : "lost";
+  }
+
+  const fallbackRng = createPrng(fallbackSeed);
+  return fallbackRng() < fallbackProbability ? "won" : "lost";
+}
+
+function calculateCashoutReturn({
+  stake,
+  fullReturn,
+  chronologicalLegResults,
+  cashoutStartIndex,
+  proposal,
+  protectingAgainstKnownLoss,
+  rng,
+}) {
+  const unresolvedLegs = chronologicalLegResults.slice(cashoutStartIndex);
+  const unresolvedProbability = unresolvedLegs.reduce(
+    (total, legResult) =>
+      total * getFairProbabilityFromOdds(legResult.decimalOdds),
+    1,
+  );
+  const riskDiscount =
+    proposal.riskLevel === "safe"
+      ? protectingAgainstKnownLoss
+        ? 0.9
+        : 0.86
+      : proposal.riskLevel === "balanced"
+        ? protectingAgainstKnownLoss
+          ? 0.84
+          : 0.8
+        : protectingAgainstKnownLoss
+          ? 0.76
+          : 0.72;
+  const marketValue =
+    fullReturn *
+    unresolvedProbability *
+    riskDiscount *
+    (0.96 + rng() * 0.08);
+  const floorValue =
+    stake *
+    clamp(
+      0.28 + (cashoutStartIndex / chronologicalLegResults.length) * 0.62,
+      0.22,
+      0.94,
+    );
+  const ceilingValue =
+    fullReturn *
+    clamp(0.88 - unresolvedLegs.length * 0.06, 0.42, 0.9);
+  const lowerBound = Math.min(floorValue, ceilingValue);
+  const upperBound = Math.max(floorValue, ceilingValue);
+
+  return roundCurrency(clamp(marketValue, lowerBound, upperBound));
+}
+
+function getCashoutTimestamp(chronologicalLegResults, cashoutStartIndex) {
+  const nextKickoff = new Date(chronologicalLegResults[cashoutStartIndex].kickoffAt);
+  const previousSettledAt =
+    cashoutStartIndex > 0
+      ? new Date(chronologicalLegResults[cashoutStartIndex - 1].settledAt)
+      : null;
+  let cashoutAt = addMinutes(nextKickoff, -(40 + cashoutStartIndex * 5));
+
+  if (previousSettledAt && cashoutAt.getTime() <= previousSettledAt.getTime()) {
+    cashoutAt = addMinutes(previousSettledAt, 30);
+  }
+
+  return cashoutAt;
+}
+
+function getFallbackKickoffAt(gameWeek, index, total) {
+  const windowStart = new Date(gameWeek.windowStartIso).getTime();
+  const windowEnd = new Date(gameWeek.windowEndIso).getTime();
+  const segmentSize = (windowEnd - windowStart) / Math.max(total + 1, 2);
+
+  return new Date(windowStart + segmentSize * (index + 1));
+}
+
+function parseScheduleNoteDate(scheduleNote, gameWeek) {
+  if (!scheduleNote) {
+    return null;
+  }
+
+  const match = scheduleNote.match(
+    /^[A-Za-z]{3}\s+(\d{1,2})\s+([A-Za-z]{3}),\s+(\d{1,2}):(\d{2})/,
+  );
+
+  if (!match) {
+    return null;
+  }
+
+  const [, dayLabel, monthLabel, hourLabel, minuteLabel] = match;
+  const monthIndex = MONTH_INDEX_BY_LABEL[monthLabel.toLowerCase()];
+
+  if (monthIndex === undefined) {
+    return null;
+  }
+
+  const referenceDate = new Date(gameWeek.windowStartIso);
+
+  return new Date(
+    referenceDate.getFullYear(),
+    monthIndex,
+    Number(dayLabel),
+    Number(hourLabel),
+    Number(minuteLabel),
+  );
+}
+
+function getExpectedGoals(homeStrength, awayStrength) {
+  const strengthDiff = homeStrength - awayStrength;
+
+  return {
+    homeExpectedGoals: clamp(
+      1.32 + strengthDiff * 0.018 + (homeStrength - 74) / 80 + 0.18,
+      0.45,
+      3.3,
+    ),
+    awayExpectedGoals: clamp(
+      0.98 - strengthDiff * 0.013 + (awayStrength - 74) / 85,
+      0.25,
+      2.7,
+    ),
+  };
+}
+
+function samplePoisson(lambda, rng) {
+  const limit = Math.exp(-lambda);
+  let goals = 0;
+  let probabilityProduct = 1;
+
+  while (probabilityProduct > limit && goals < 7) {
+    goals += 1;
+    probabilityProduct *= rng();
+  }
+
+  return goals - 1;
+}
+
+function formatFixtureScore(homeTeam, awayTeam, homeGoals, awayGoals) {
+  return `${homeTeam} ${homeGoals}-${awayGoals} ${awayTeam}`;
+}
+
+function getFairProbabilityFromOdds(decimalOdds) {
+  return clamp(1 / Math.max(decimalOdds * 1.06, 1.06), 0.08, 0.92);
 }
 
 function buildLedgerTransactions({ users, matchdaySimulations, simulatedAt }) {
@@ -619,6 +1236,17 @@ function formatProposalTitle(proposalId) {
 
 function renderLeagueData(record) {
   return `${[
+    'export type LeagueSimulationLegStatus = "won" | "lost" | "cashed_out";',
+    "",
+    "export type LeagueSimulationLegRecord = {",
+    "  betLineLabel: string;",
+    "  kickoffAt: string;",
+    "  settledAt: string;",
+    "  finalScore: string;",
+    "  status: LeagueSimulationLegStatus;",
+    '  actualStatus: "won" | "lost";',
+    "};",
+    "",
     "export type LeagueSimulationSlipRecord = {",
     '  proposalId: string;',
     '  timelineLabel: string;',
@@ -628,6 +1256,7 @@ function renderLeagueData(record) {
     '  settlementKind: "settled" | "cashout";',
     '  returnAmount: number;',
     '  status: "win" | "loss";',
+    "  legResults: LeagueSimulationLegRecord[];",
     "};",
     "",
     "export type LeagueMatchdaySimulationRecord = {",

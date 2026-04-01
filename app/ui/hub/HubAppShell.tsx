@@ -1,6 +1,6 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
@@ -44,12 +44,40 @@ export function HubAppShell({ children }: HubAppShellProps) {
     ledgerSummary.memberCount === 0
       ? 0
       : ledgerSummary.currentPot / ledgerSummary.memberCount;
-  const simulatedNow = getSimulatedNow();
+  const [simulatedNow, setSimulatedNow] = useState(() => getSimulatedNow());
+  const initialSimulatedNowRef = useRef<Date | null>(null);
+  const mountedAtRef = useRef<number | null>(null);
   const currentMatchdayNumber = getCurrentMatchdayNumber();
+  const roiToneClass =
+    ledgerSummary.roiPercentage < 0 ? "is-negative" : "is-positive";
   const navigateToLedgerFromHeader = (source: string) => {
     trackEvent("navigate_ledger_from_header", { source });
     router.push("/ledger");
   };
+
+  useEffect(() => {
+    initialSimulatedNowRef.current = getSimulatedNow();
+    mountedAtRef.current = Date.now();
+
+    const intervalId = window.setInterval(() => {
+      const mountedAt = mountedAtRef.current;
+
+      if (mountedAt === null) {
+        return;
+      }
+
+      setSimulatedNow(
+        new Date(
+          (initialSimulatedNowRef.current ?? getSimulatedNow()).getTime() +
+            (Date.now() - mountedAt),
+        ),
+      );
+    }, 1000);
+
+    return () => {
+      window.clearInterval(intervalId);
+    };
+  }, []);
 
   return (
     <div className="hub-shell">
@@ -136,8 +164,14 @@ export function HubAppShell({ children }: HubAppShellProps) {
               onClick={() => navigateToLedgerFromHeader("season_roi")}
             >
               <p className="hub-label">Season ROI</p>
-              <div className="hub-roi-row">
-                <span className="hub-roi-value">
+              <div className={`hub-roi-row ${roiToneClass}`}>
+                <span
+                  className={`hub-roi-value ${
+                    ledgerSummary.roiPercentage < 0
+                      ? "hub-danger-text"
+                      : "hub-success-text"
+                  }`}
+                >
                   {formatPercent(ledgerSummary.roiPercentage)}
                 </span>
                 <MiniSparkline />

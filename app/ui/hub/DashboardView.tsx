@@ -2,32 +2,47 @@
 
 import { useSyncExternalStore } from "react";
 import { useSearchParams } from "next/navigation";
-import type { GameWeekProposalRecord } from "../../../data/gameWeeks";
-import { getUserVoteForGameWeek } from "../../../repositories/gameWeekRepository";
+import {
+  getGameWeekSelectedProposal,
+  type GameWeekViewState,
+  getGameWeekViewState,
+  getUserVoteForGameWeek,
+} from "../../../repositories/gameWeekRepository";
+import { getSimulationUpdatedAtIso } from "../../../repositories/leagueSimulationRepository";
 import { ConsensusPanel } from "./ConsensusPanel";
 import { GameWeekProvider } from "./GameWeekProvider";
 import { useCurrentGameWeek } from "./GameWeekProvider";
 import { GameweekBoard } from "./GameweekBoard";
 
 type DashboardViewProps = {
-  decisionParam?: string | null;
+  forcedProposalId?: string | null;
+  forcedViewState?: GameWeekViewState | null;
 };
 
-export function DashboardView({ decisionParam = null }: DashboardViewProps) {
+export function DashboardView({
+  forcedProposalId = null,
+  forcedViewState = null,
+}: DashboardViewProps) {
   const { currentGameWeek, loggedInUserId } = useCurrentGameWeek();
   const hasHydrated = useSyncExternalStore(
     subscribeToClientSnapshot,
     getClientSnapshot,
     getServerSnapshot,
   );
-  const decidedProposal = getDecisionProposal(
-    currentGameWeek.proposals,
-    decisionParam,
-  );
+  const gameWeekViewState = getGameWeekViewState(currentGameWeek);
+  const effectiveViewState = forcedViewState ?? gameWeekViewState;
+  const forcedProposal =
+    forcedProposalId
+      ? currentGameWeek.proposals.find((proposal) => proposal.id === forcedProposalId) ??
+        null
+      : null;
+  const decidedProposal =
+    forcedProposal ??
+    getGameWeekSelectedProposal(currentGameWeek);
   const hasUserVote = hasHydrated && loggedInUserId
     ? Boolean(getUserVoteForGameWeek(currentGameWeek, loggedInUserId))
     : false;
-  const isDecisionView = Boolean(decidedProposal);
+  const isDecisionView = effectiveViewState !== "voting" && Boolean(decidedProposal);
 
   return (
     <div
@@ -40,7 +55,10 @@ export function DashboardView({ decisionParam = null }: DashboardViewProps) {
       }`}
     >
       <section className="hub-column-main">
-        <GameweekBoard decidedProposal={decidedProposal} />
+        <GameweekBoard
+          decidedProposal={decidedProposal}
+          viewState={effectiveViewState}
+        />
       </section>
 
       {!isDecisionView ? (
@@ -53,16 +71,34 @@ export function DashboardView({ decisionParam = null }: DashboardViewProps) {
 }
 
 export function DashboardViewWithSearchParams() {
+  return <DashboardViewWithRouteGameWeekId />;
+}
+
+export function DashboardViewWithRouteGameWeekId({
+  routeGameWeekId = null,
+  routeForcedProposalId = null,
+  routeViewState = null,
+}: {
+  routeGameWeekId?: string | null;
+  routeForcedProposalId?: string | null;
+  routeViewState?: GameWeekViewState | null;
+}) {
   const searchParams = useSearchParams();
+  const simulationUpdatedAtIso = getSimulationUpdatedAtIso();
   const matchdayParam =
-    searchParams.get("matchday") ?? searchParams.get("gameWeek");
+    routeGameWeekId ??
+    searchParams.get("matchday") ??
+    searchParams.get("gameWeek");
 
   return (
     <GameWeekProvider
-      key={matchdayParam ?? "current-matchday"}
+      key={`${matchdayParam ?? "current-matchday"}:${simulationUpdatedAtIso}`}
       gameWeekId={matchdayParam}
     >
-      <DashboardView decisionParam={searchParams.get("decision")} />
+      <DashboardView
+        forcedProposalId={routeForcedProposalId}
+        forcedViewState={routeViewState}
+      />
     </GameWeekProvider>
   );
 }
@@ -77,29 +113,4 @@ function getClientSnapshot() {
 
 function getServerSnapshot() {
   return false;
-}
-
-function getDecisionProposal(
-  proposals: GameWeekProposalRecord[],
-  decisionParam: string | null,
-) {
-  if (!decisionParam) {
-    return null;
-  }
-
-  const normalizedDecision = decisionParam.trim().toLowerCase();
-  const proposalId =
-    normalizedDecision === "defensive" || normalizedDecision === "safe"
-      ? "defensive"
-      : normalizedDecision === "neutral" || normalizedDecision === "balanced"
-        ? "neutral"
-        : normalizedDecision === "aggressive" ||
-            normalizedDecision === "aggresive" ||
-            normalizedDecision === "profit"
-          ? "aggressive"
-          : null;
-
-  return proposalId
-    ? proposals.find((proposal) => proposal.id === proposalId) ?? null
-    : null;
 }

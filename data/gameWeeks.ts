@@ -357,37 +357,299 @@ export const gameWeeks: GameWeekRecord[] = [
     slug: "matchday-33",
     name: "Matchday 33 Voting Stage",
     description: "Premier League Matchday 33 analysis is complete.",
-    windowStartIso: "2026-04-17T18:30:00.000Z",
+    windowStartIso: "2026-04-18T11:30:00.000Z",
     windowEndIso: "2026-04-20T21:00:00.000Z",
-    startsIn: "Fri 17 Apr - Mon 20 Apr",
+    startsIn: "Sat 18 Apr - Mon 20 Apr",
     proposals: [
       {
         id: "defensive",
         riskLevel: "safe",
         title: "Defensive",
         summary:
-          "This build stays conservative with draw protection on stronger home sides and a low total-goals floor in the late game.",
+          "This build stays conservative with draw protection around the stronger home sides and low-risk goal lines in the clearer fixtures across the round.",
         legs: 3,
         betLines: [
           {
-            label: "Tottenham v Crystal Palace: Tottenham Draw No Bet",
-            scheduleNote: "Fri 17 Apr, 19:30 BST",
+            label: "Brentford v Fulham: Over 1.5 Goals",
+            scheduleNote: "Sat 18 Apr, 12:30 BST",
             aiReasoning:
-              "Spurs carry the stronger home profile, but the draw cover keeps the first leg aligned with a lower-risk approach.",
-            odds: "1.32",
+              "A west London derby with two front-foot sides makes the safer two-goal line a steadier opener than picking a result.",
+            odds: "1.28",
           },
           {
-            label: "Newcastle Utd v Burnley: Newcastle to Win",
+            label: "Aston Villa v Sunderland: Aston Villa Draw No Bet",
+            scheduleNote: "Sun 19 Apr, 14:00 BST",
+            aiReasoning:
+              "Villa's home edge makes them the stronger side, while draw cover keeps the slip in the lower-volatility lane.",
+            odds: "1.26",
+          },
+          {
+            label: "Crystal Palace v West Ham United: Over 1.5 Goals",
+            scheduleNote: "Mon 20 Apr, 20:00 BST",
+            aiReasoning:
+              "Both sides are usually open enough in transition for a low total-goals line to be the safer late anchor.",
+            odds: "1.31",
+          },
+        ],
+        statusLabel: "Safe",
+      },
+      {
+        id: "neutral",
+        riskLevel: "balanced",
+        title: "Neutral",
+        summary:
+          "The balanced route upgrades the result asks on the stronger favourites and leans into the more attack-minded fixtures without going all the way into builder territory.",
+        legs: 4,
+        betLines: [
+          {
+            label: "Newcastle United v Bournemouth: Newcastle United to Win",
             scheduleNote: "Sat 18 Apr, 15:00 BST",
             aiReasoning:
-              "Newcastle's recent home level gives the straight result enough support without stepping up to a bigger line.",
-            odds: "1.48",
+              "Newcastle's home advantage is enough to support the straight result once we step up from pure protection.",
+            odds: "1.62",
           },
           {
-            label: "Aston Villa v Everton: Over 1.5 Goals",
+            label: "Chelsea v Man Utd: Both Teams To Score",
+            scheduleNote: "Sat 18 Apr, 20:00 BST",
+            aiReasoning:
+              "Both clubs carry enough attacking quality to make a goals-at-both-ends angle cleaner than choosing the winner.",
+            odds: "1.68",
+          },
+          {
+            label: "Everton v Liverpool: Over 2.5 Goals",
+            scheduleNote: "Sun 19 Apr, 14:00 BST",
+            aiReasoning:
+              "Derbies can be volatile, and the goals line gives the slip upside without relying on one side to control the occasion.",
+            odds: "1.74",
+          },
+          {
+            label: "Man City v Arsenal: Both Teams To Score",
             scheduleNote: "Sun 19 Apr, 16:30 BST",
             aiReasoning:
-              "Both sides have been involved in enough two-goal games recently for the safer totals angle to make sense.",
+              "This is the highest-quality matchup of the round, and a mutual scoring angle is the cleaner balanced play.",
+            odds: "1.67",
+          },
+        ],
+        statusLabel: "Balanced",
+        aiRecommended: true,
+      },
+      {
+        id: "aggressive",
+        riskLevel: "aggressive",
+        title: "Aggressive",
+        summary:
+          "This is the return-led build, turning the marquee ties into higher-event builders and asking the stronger home side to win with more authority.",
+        legs: 4,
+        betLines: [
+          {
+            label: "Newcastle United v Bournemouth: Newcastle United to Win & Over 2.5 Goals",
+            scheduleNote: "Sat 18 Apr, 15:00 BST",
+            aiReasoning:
+              "Newcastle's home edge and Bournemouth's ability to keep games open make the builder attractive at the aggressive tier.",
+            odds: "2.14",
+          },
+          {
+            label: "Chelsea v Man Utd: Both Teams To Score & Over 2.5 Goals",
+            scheduleNote: "Sat 18 Apr, 20:00 BST",
+            aiReasoning:
+              "The attacking talent on both sides makes the higher-event builder more appealing than a straight result call.",
+            odds: "1.98",
+          },
+          {
+            label: "Everton v Liverpool: Both Teams To Score & Over 2.5 Goals",
+            scheduleNote: "Sun 19 Apr, 14:00 BST",
+            aiReasoning:
+              "A derby script with chances at both ends gives this leg a stronger ceiling in the high-return build.",
+            odds: "2.06",
+          },
+          {
+            label: "Man City v Arsenal: Both Teams To Score & Over 2.5 Goals",
+            scheduleNote: "Sun 19 Apr, 16:30 BST",
+            aiReasoning:
+              "If the headline fixture opens up, this builder gives the slip its biggest upside jump.",
+            odds: "2.01",
+          },
+        ],
+        statusLabel: "Aggressive",
+      },
+    ],
+    votesByUserId: {
+      "brian-scott": "neutral",
+      "tony-mclean": "defensive",
+      "john-colreavey": "neutral",
+      "paul-melville": "aggressive",
+      "alasdair-head": "neutral",
+      "paul-devine": "defensive",
+      "derek-mcmillan": "neutral",
+    },
+  },
+  {
+    id: "md-34",
+    slug: "matchday-34",
+    name: "Matchday 34 Voting Stage",
+    description: "Premier League Matchday 34 analysis is complete.",
+    windowStartIso: "2026-04-24T19:00:00.000Z",
+    windowEndIso: "2026-04-27T21:00:00.000Z",
+    startsIn: "Fri 24 Apr - Mon 27 Apr",
+    proposals: [
+      {
+        id: "defensive",
+        riskLevel: "safe",
+        title: "Defensive",
+        summary:
+          "A lower-volatility build that leans on safer result protection and low goal lines in the clearer fixtures across the amended round.",
+        legs: 3,
+        betLines: [
+          {
+            label: "Fulham v Aston Villa: Over 1.5 Goals",
+            scheduleNote: "Sat 25 Apr, 12:30 BST",
+            aiReasoning:
+              "Both sides are usually positive enough to make the two-goal line a steadier way into the weekend.",
+            odds: "1.29",
+          },
+          {
+            label: "Arsenal v Newcastle United: Arsenal Draw No Bet",
+            scheduleNote: "Sat 25 Apr, 17:30 BST",
+            aiReasoning:
+              "Arsenal's home edge is meaningful, but draw cover respects the difficulty of the matchup.",
+            odds: "1.34",
+          },
+          {
+            label: "Brighton v Chelsea: Over 1.5 Goals",
+            scheduleNote: "Sun 26 Apr, 16:30 BST",
+            aiReasoning:
+              "Two sides comfortable in possession make a low goals line the safer closer than picking a winner.",
+            odds: "1.30",
+          },
+        ],
+        statusLabel: "Safe",
+      },
+      {
+        id: "neutral",
+        riskLevel: "balanced",
+        title: "Neutral",
+        summary:
+          "The balanced slip pushes the stronger home teams into cleaner result asks and keeps one goals-based angle in the more open televised closer.",
+        legs: 4,
+        betLines: [
+          {
+            label: "Sunderland v Nottingham Forest: Over 1.5 Goals",
+            scheduleNote: "Fri 24 Apr, 20:00 BST",
+            aiReasoning:
+              "The Friday opener profiles better as a totals play than a result selection, but the balanced slip can still lean into goals.",
+            odds: "1.56",
+          },
+          {
+            label: "Liverpool v Crystal Palace: Liverpool to Win",
+            scheduleNote: "Sat 25 Apr, 15:00 BST",
+            aiReasoning:
+              "Liverpool remain the stronger home side, making the straight result acceptable in the balanced build.",
+            odds: "1.47",
+          },
+          {
+            label: "Arsenal v Newcastle United: Arsenal to Win",
+            scheduleNote: "Sat 25 Apr, 17:30 BST",
+            aiReasoning:
+              "Once the slip becomes more assertive, Arsenal's home advantage is enough to support the straight win.",
+            odds: "1.78",
+          },
+          {
+            label: "Man Utd v Brentford: Over 2.5 Goals",
+            scheduleNote: "Mon 27 Apr, 20:00 BST",
+            aiReasoning:
+              "The Monday night game carries enough attacking variance to support the stronger goals line.",
+            odds: "1.72",
+          },
+        ],
+        statusLabel: "Balanced",
+        aiRecommended: true,
+      },
+      {
+        id: "aggressive",
+        riskLevel: "aggressive",
+        title: "Aggressive",
+        summary:
+          "This build combines the clearer favourites with higher-event builders to chase a bigger week-on-week jump.",
+        legs: 4,
+        betLines: [
+          {
+            label: "Liverpool v Crystal Palace: Liverpool to Win & Over 2.5 Goals",
+            scheduleNote: "Sat 25 Apr, 15:00 BST",
+            aiReasoning:
+              "Liverpool's home attack gives enough upside to combine the result with a stronger goals line.",
+            odds: "1.96",
+          },
+          {
+            label: "Arsenal v Newcastle United: Both Teams To Score & Over 2.5 Goals",
+            scheduleNote: "Sat 25 Apr, 17:30 BST",
+            aiReasoning:
+              "If the headline Saturday game opens up, this builder gives the aggressive slip the bigger payoff it wants.",
+            odds: "2.24",
+          },
+          {
+            label: "Brighton v Chelsea: Both Teams To Score & Over 2.5 Goals",
+            scheduleNote: "Sun 26 Apr, 16:30 BST",
+            aiReasoning:
+              "Two technical sides with enough attack-minded players make the higher-event builder live here.",
+            odds: "2.02",
+          },
+          {
+            label: "Man Utd v Brentford: Man Utd to Win & Over 2.5 Goals",
+            scheduleNote: "Mon 27 Apr, 20:00 BST",
+            aiReasoning:
+              "United's home edge paired with a livelier game state makes this the stronger Monday closer for the aggressive build.",
+            odds: "2.10",
+          },
+        ],
+        statusLabel: "Aggressive",
+      },
+    ],
+    votesByUserId: {
+      "brian-scott": "defensive",
+      "tony-mclean": "neutral",
+      "john-colreavey": "neutral",
+      "paul-melville": "neutral",
+      "alasdair-head": "defensive",
+      "paul-devine": "neutral",
+      "derek-mcmillan": "defensive",
+    },
+  },
+  {
+    id: "md-35",
+    slug: "matchday-35",
+    name: "Matchday 35 Voting Stage",
+    description: "Premier League Matchday 35 analysis is complete.",
+    windowStartIso: "2026-05-02T14:00:00.000Z",
+    windowEndIso: "2026-05-02T17:00:00.000Z",
+    startsIn: "Sat 2 May",
+    proposals: [
+      {
+        id: "defensive",
+        riskLevel: "safe",
+        title: "Defensive",
+        summary:
+          "A lower-volatility build centered on the stronger home sides and a pair of safer total-goals lines in the clearest fixtures of the round.",
+        legs: 3,
+        betLines: [
+          {
+            label: "Aston Villa v Tottenham Hotspur: Over 1.5 Goals",
+            scheduleNote: "Sat 2 May, 15:00 BST",
+            aiReasoning:
+              "This matchup has enough attacking quality to make the safer two-goal line the right conservative opener.",
+            odds: "1.30",
+          },
+          {
+            label: "Arsenal v Fulham: Arsenal Draw No Bet",
+            scheduleNote: "Sat 2 May, 15:00 BST",
+            aiReasoning:
+              "Arsenal's home edge makes them the stronger side, but draw cover keeps this version of the slip under control.",
+            odds: "1.20",
+          },
+          {
+            label: "Everton v Man City: Over 1.5 Goals",
+            scheduleNote: "Sat 2 May, 15:00 BST",
+            aiReasoning:
+              "The final game of the round profiles better as a low-goals floor than a pure result call at the safest tier.",
             odds: "1.29",
           },
         ],
@@ -398,37 +660,37 @@ export const gameWeeks: GameWeekRecord[] = [
         riskLevel: "balanced",
         title: "Neutral",
         summary:
-          "This mix adds a little more upside with a Spurs win, a Newcastle goals angle, and a Villa-Everton builder that still stays in a manageable range.",
+          "The balanced route upgrades the stronger home teams into straight result calls and keeps one goals-based angle in the round's headline fixtures.",
         legs: 4,
         betLines: [
           {
-            label: "Tottenham v Crystal Palace: Tottenham to Win",
-            scheduleNote: "Fri 17 Apr, 19:30 BST",
+            label: "Leeds United v Burnley: Over 2.5 Goals",
+            scheduleNote: "Sat 2 May, 15:00 BST",
             aiReasoning:
-              "Spurs look good enough at home to support the straight win once we move away from draw protection.",
-            odds: "1.64",
+              "This fixture projects well for chance volume, so the stronger goals line fits the balanced build.",
+            odds: "1.79",
           },
           {
-            label: "Newcastle Utd v Burnley: Over 2.5 Goals",
-            scheduleNote: "Sat 18 Apr, 15:00 BST",
+            label: "Arsenal v Fulham: Arsenal to Win",
+            scheduleNote: "Sat 2 May, 15:00 BST",
             aiReasoning:
-              "Newcastle's attacking floor and Burnley's open game scripts push this fixture toward the stronger totals line.",
+              "Arsenal's home control is enough to support the straight result once we step up from protection.",
+            odds: "1.44",
+          },
+          {
+            label: "Chelsea v Nottingham Forest: Chelsea to Win",
+            scheduleNote: "Sat 2 May, 15:00 BST",
+            aiReasoning:
+              "Chelsea's home edge makes the straight result acceptable in the balanced version of the slip.",
+            odds: "1.61",
+          },
+          {
+            label: "Everton v Man City: Both Teams To Score",
+            scheduleNote: "Sat 2 May, 15:00 BST",
+            aiReasoning:
+              "This is the cleaner route into the late game, avoiding a tighter result call while still leaning into the attacking quality.",
             odds: "1.76",
           },
-          {
-            label: "Aston Villa v Everton: Both Teams To Score",
-            scheduleNote: "Sun 19 Apr, 16:30 BST",
-            aiReasoning:
-              "Villa still create high-value chances at home, while Everton have shown enough away threat to contribute to the script.",
-            odds: "1.72",
-          },
-          {
-            label: "Chelsea v Brighton: Over 2.5 Goals",
-            scheduleNote: "Mon 20 Apr, 20:00 BST",
-            aiReasoning:
-              "This matchup still profiles as one of the more open totals spots of the round.",
-            odds: "1.81",
-          },
         ],
         statusLabel: "Balanced",
         aiRecommended: true,
@@ -438,318 +700,36 @@ export const gameWeeks: GameWeekRecord[] = [
         riskLevel: "aggressive",
         title: "Aggressive",
         summary:
-          "This is the higher-return version, turning the better home sides into result-and-goals plays and chasing a stronger close on Monday night.",
+          "This version turns the strongest favourites into builders and leans hardest into the higher-event fixtures to chase the biggest upside.",
         legs: 4,
         betLines: [
           {
-            label: "Tottenham v Crystal Palace: Tottenham to Win & Over 2.5 Goals",
-            scheduleNote: "Fri 17 Apr, 19:30 BST",
-            aiReasoning:
-              "Tottenham's home edge and the chance of a stretched game make the builder live at the aggressive tier.",
-            odds: "2.18",
-          },
-          {
-            label: "Newcastle Utd v Burnley: Newcastle -1 Handicap",
-            scheduleNote: "Sat 18 Apr, 15:00 BST",
-            aiReasoning:
-              "The home side's stronger recent results support the margin angle if we push for more upside.",
-            odds: "2.02",
-          },
-          {
-            label: "Aston Villa v Everton: Aston Villa to Win & Both Teams To Score",
-            scheduleNote: "Sun 19 Apr, 16:30 BST",
-            aiReasoning:
-              "Villa retain the stronger result profile, but Everton are lively enough to keep the BTTS side of the builder live.",
-            odds: "2.35",
-          },
-          {
-            label: "Chelsea v Brighton: Both Teams To Score & Over 2.5 Goals",
-            scheduleNote: "Mon 20 Apr, 20:00 BST",
-            aiReasoning:
-              "Both sides can drag this into a higher-event finish, which suits the final aggressive leg.",
-            odds: "1.94",
-          },
-        ],
-        statusLabel: "Aggressive",
-      },
-    ],
-    votesByUserId: {
-      "brian-scott": "defensive",
-      "tony-mclean": "neutral",
-      "john-colreavey": "defensive",
-      "paul-melville": "aggressive",
-      "alasdair-head": "defensive",
-      "paul-devine": "neutral",
-      "derek-mcmillan": "defensive",
-    },
-    simulatedSlip: {
-      proposalId: "defensive",
-      timelineLabel: "Defensive Strategy Cashout",
-      stake: 44,
-      stakePlacedAt: "2026-04-17T17:45:00.000Z",
-      settledAt: "2026-04-20T20:20:00.000Z",
-      settlementKind: "cashout",
-      returnAmount: 26,
-      status: "loss",
-    },
-  },
-  {
-    id: "md-34",
-    slug: "matchday-34",
-    name: "Matchday 34 Voting Stage",
-    description: "Premier League Matchday 34 analysis is complete.",
-    windowStartIso: "2026-04-24T18:30:00.000Z",
-    windowEndIso: "2026-04-27T21:00:00.000Z",
-    startsIn: "Fri 24 Apr - Mon 27 Apr",
-    proposals: [
-      {
-        id: "defensive",
-        riskLevel: "safe",
-        title: "Defensive",
-        summary:
-          "A lower-volatility build that leans on established home edges and keeps the total-goals asks conservative.",
-        legs: 3,
-        betLines: [
-          {
-            label: "Liverpool v Brentford: Liverpool Draw No Bet",
-            scheduleNote: "Fri 24 Apr, 19:30 BST",
-            aiReasoning:
-              "Liverpool still carry the stronger baseline, and draw cover keeps the opening leg stable.",
-            odds: "1.24",
-          },
-          {
-            label: "West Ham v Fulham: Over 1.5 Goals",
-            scheduleNote: "Sat 25 Apr, 15:00 BST",
-            aiReasoning:
-              "Both teams still land in enough two-goal matches to support the safer line.",
-            odds: "1.30",
-          },
-          {
-            label: "Arsenal v Wolves: Arsenal to Win",
-            scheduleNote: "Sun 26 Apr, 16:30 BST",
-            aiReasoning:
-              "Arsenal's home edge is strong enough to support the straight result in the conservative build.",
-            odds: "1.46",
-          },
-        ],
-        statusLabel: "Safe",
-      },
-      {
-        id: "neutral",
-        riskLevel: "balanced",
-        title: "Neutral",
-        summary:
-          "The balanced slip gives Liverpool and Arsenal clearer win conditions while using a goals angle in West Ham-Fulham to keep momentum.",
-        legs: 4,
-        betLines: [
-          {
-            label: "Liverpool v Brentford: Liverpool to Win",
-            scheduleNote: "Fri 24 Apr, 19:30 BST",
-            aiReasoning:
-              "Liverpool's stronger attacking profile makes the straight home win acceptable at the balanced tier.",
-            odds: "1.55",
-          },
-          {
-            label: "West Ham v Fulham: Both Teams To Score",
-            scheduleNote: "Sat 25 Apr, 15:00 BST",
-            aiReasoning:
-              "This fixture still carries enough chance creation at both ends to support BTTS.",
-            odds: "1.74",
-          },
-          {
-            label: "Arsenal v Wolves: Arsenal -1 Handicap",
-            scheduleNote: "Sun 26 Apr, 16:30 BST",
-            aiReasoning:
-              "The stronger home profile supports stepping into a margin play once the build becomes more assertive.",
-            odds: "1.98",
-          },
-          {
-            label: "Man City v Leeds United: Over 2.5 Goals",
-            scheduleNote: "Mon 27 Apr, 20:00 BST",
-            aiReasoning:
-              "City's scoring floor and Leeds' willingness to play in transition still support the higher total.",
-            odds: "1.69",
-          },
-        ],
-        statusLabel: "Balanced",
-        aiRecommended: true,
-      },
-      {
-        id: "aggressive",
-        riskLevel: "aggressive",
-        title: "Aggressive",
-        summary:
-          "This build combines the strongest favourites with goals-heavy builders to chase a bigger week-on-week jump.",
-        legs: 4,
-        betLines: [
-          {
-            label: "Liverpool v Brentford: Liverpool to Win & Over 2.5 Goals",
-            scheduleNote: "Fri 24 Apr, 19:30 BST",
-            aiReasoning:
-              "Liverpool's home attack gives enough upside to merge result and goals here.",
-            odds: "2.05",
-          },
-          {
-            label: "West Ham v Fulham: Both Teams To Score & Over 2.5 Goals",
-            scheduleNote: "Sat 25 Apr, 15:00 BST",
-            aiReasoning:
-              "Both sides can trade chances in a way that keeps the higher-event builder live.",
-            odds: "2.10",
-          },
-          {
-            label: "Arsenal v Wolves: Arsenal Win to Nil",
-            scheduleNote: "Sun 26 Apr, 16:30 BST",
-            aiReasoning:
-              "Arsenal's control at home supports the cleaner aggressive route if Wolves don't offer enough threat.",
-            odds: "2.16",
-          },
-          {
-            label: "Man City v Leeds United: Man City -1 Handicap",
-            scheduleNote: "Mon 27 Apr, 20:00 BST",
-            aiReasoning:
-              "City's superiority makes the margin play the stronger closer in the high-return build.",
-            odds: "1.94",
-          },
-        ],
-        statusLabel: "Aggressive",
-      },
-    ],
-    votesByUserId: {
-      "brian-scott": "neutral",
-      "tony-mclean": "neutral",
-      "john-colreavey": "defensive",
-      "paul-melville": "neutral",
-      "alasdair-head": "aggressive",
-      "paul-devine": "neutral",
-      "derek-mcmillan": "neutral",
-    },
-    simulatedSlip: {
-      proposalId: "neutral",
-      timelineLabel: "Neutral Strategy Settled",
-      stake: 39,
-      stakePlacedAt: "2026-04-24T17:50:00.000Z",
-      settledAt: "2026-04-27T20:55:00.000Z",
-      settlementKind: "settled",
-      returnAmount: 0,
-      status: "loss",
-    },
-  },
-  {
-    id: "md-35",
-    slug: "matchday-35",
-    name: "Matchday 35 Voting Stage",
-    description: "Premier League Matchday 35 analysis is complete.",
-    windowStartIso: "2026-05-01T18:30:00.000Z",
-    windowEndIso: "2026-05-04T21:00:00.000Z",
-    startsIn: "Fri 1 May - Mon 4 May",
-    proposals: [
-      {
-        id: "defensive",
-        riskLevel: "safe",
-        title: "Defensive",
-        summary:
-          "A lower-volatility build centered on stronger home teams and a pair of safer total-goals lines.",
-        legs: 3,
-        betLines: [
-          {
-            label: "Chelsea v Wolves: Chelsea Draw No Bet",
-            scheduleNote: "Fri 1 May, 19:30 BST",
-            aiReasoning:
-              "Chelsea keep the stronger baseline in this spot, and draw cover keeps the build in the defensive lane.",
-            odds: "1.31",
-          },
-          {
-            label: "Tottenham v West Ham: Over 1.5 Goals",
+            label: "Leeds United v Burnley: Both Teams To Score & Over 2.5 Goals",
             scheduleNote: "Sat 2 May, 15:00 BST",
             aiReasoning:
-              "Both sides still land in enough open games for the safer totals angle to carry value.",
-            odds: "1.34",
-          },
-          {
-            label: "Newcastle Utd v Fulham: Newcastle to Win",
-            scheduleNote: "Sun 3 May, 16:30 BST",
-            aiReasoning:
-              "Newcastle's home edge makes the straight result the conservative anchor leg.",
-            odds: "1.52",
-          },
-        ],
-        statusLabel: "Safe",
-      },
-      {
-        id: "neutral",
-        riskLevel: "balanced",
-        title: "Neutral",
-        summary:
-          "The balanced route upgrades the result asks on Chelsea and Newcastle while keeping a goals angle in Tottenham-West Ham.",
-        legs: 4,
-        betLines: [
-          {
-            label: "Chelsea v Wolves: Chelsea to Win",
-            scheduleNote: "Fri 1 May, 19:30 BST",
-            aiReasoning:
-              "Chelsea's stronger chance-creation profile supports the home win once the build moves up a tier.",
-            odds: "1.62",
-          },
-          {
-            label: "Tottenham v West Ham: Both Teams To Score",
-            scheduleNote: "Sat 2 May, 15:00 BST",
-            aiReasoning:
-              "This fixture still trends toward goals at both ends when the game opens up early.",
-            odds: "1.73",
-          },
-          {
-            label: "Newcastle Utd v Fulham: Newcastle -1 Handicap",
-            scheduleNote: "Sun 3 May, 16:30 BST",
-            aiReasoning:
-              "The stronger home profile is enough to support the margin line in the balanced build.",
-            odds: "1.94",
-          },
-          {
-            label: "Brighton v Brentford: Over 2.5 Goals",
-            scheduleNote: "Mon 4 May, 20:00 BST",
-            aiReasoning:
-              "Both sides still project enough transition play and chance volume for the higher total.",
-            odds: "1.77",
-          },
-        ],
-        statusLabel: "Balanced",
-        aiRecommended: true,
-      },
-      {
-        id: "aggressive",
-        riskLevel: "aggressive",
-        title: "Aggressive",
-        summary:
-          "This version turns the stronger favourites into builders and leans into the highest-event fixture to chase a bigger weekly jump.",
-        legs: 4,
-        betLines: [
-          {
-            label: "Chelsea v Wolves: Chelsea to Win & Over 2.5 Goals",
-            scheduleNote: "Fri 1 May, 19:30 BST",
-            aiReasoning:
-              "Chelsea's home attacking edge gives enough upside to combine result and goals.",
+              "This fixture has enough volatility to justify going after the higher-event builder.",
             odds: "2.08",
           },
           {
-            label: "Tottenham v West Ham: Both Teams To Score & Over 2.5 Goals",
+            label: "Aston Villa v Tottenham Hotspur: Both Teams To Score & Over 2.5 Goals",
             scheduleNote: "Sat 2 May, 15:00 BST",
             aiReasoning:
-              "Both clubs can drag this into the kind of end-to-end game that suits the aggressive builder.",
-            odds: "2.06",
+              "Both teams have enough attack to stretch the game, making the builder the stronger aggressive angle.",
+            odds: "2.04",
           },
           {
-            label: "Newcastle Utd v Fulham: Newcastle Win to Nil",
-            scheduleNote: "Sun 3 May, 16:30 BST",
+            label: "Arsenal v Fulham: Arsenal to Win & Over 2.5 Goals",
+            scheduleNote: "Sat 2 May, 15:00 BST",
             aiReasoning:
-              "Newcastle's home control supports the cleaner result route if Fulham's away threat stays limited.",
-            odds: "2.12",
+              "Arsenal's home edge gives enough confidence to merge the result with the stronger goals line.",
+            odds: "1.97",
           },
           {
-            label: "Brighton v Brentford: Brighton to Win & Over 2.5 Goals",
-            scheduleNote: "Mon 4 May, 20:00 BST",
+            label: "Everton v Man City: Both Teams To Score & Over 2.5 Goals",
+            scheduleNote: "Sat 2 May, 15:00 BST",
             aiReasoning:
-              "Brighton's attacking edge gives the closer more upside if the game state opens early.",
-            odds: "2.22",
+              "If the marquee closer opens up, this builder gives the slip its biggest return spike.",
+            odds: "2.02",
           },
         ],
         statusLabel: "Aggressive",
@@ -763,6 +743,399 @@ export const gameWeeks: GameWeekRecord[] = [
       "alasdair-head": "neutral",
       "paul-devine": "neutral",
       "derek-mcmillan": "defensive",
+    },
+  },
+  {
+    id: "md-36",
+    slug: "matchday-36",
+    name: "Matchday 36 Voting Stage",
+    description: "Premier League Matchday 36 analysis is complete.",
+    windowStartIso: "2026-05-09T14:00:00.000Z",
+    windowEndIso: "2026-05-09T17:00:00.000Z",
+    startsIn: "Sat 9 May",
+    proposals: [
+      {
+        id: "defensive",
+        riskLevel: "safe",
+        title: "Defensive",
+        summary:
+          "This build keeps things measured with draw protection on the strongest home side and safer goals lines in the more open fixtures.",
+        legs: 3,
+        betLines: [
+          {
+            label: "Liverpool v Chelsea: Over 1.5 Goals",
+            scheduleNote: "Sat 9 May, 15:00 BST",
+            aiReasoning:
+              "The early headline fixture has enough attacking quality on both sides to make the low goals line the safest route in.",
+            odds: "1.27",
+          },
+          {
+            label: "Man City v Brentford: Man City Draw No Bet",
+            scheduleNote: "Sat 9 May, 15:00 BST",
+            aiReasoning:
+              "City are the stronger side at home, but draw cover keeps the defensive slip disciplined.",
+            odds: "1.18",
+          },
+          {
+            label: "Tottenham Hotspur v Leeds United: Over 1.5 Goals",
+            scheduleNote: "Sat 9 May, 15:00 BST",
+            aiReasoning:
+              "This fixture profiles better as a two-goal floor than a result call at the lowest-risk tier.",
+            odds: "1.26",
+          },
+        ],
+        statusLabel: "Safe",
+      },
+      {
+        id: "neutral",
+        riskLevel: "balanced",
+        title: "Neutral",
+        summary:
+          "The balanced route upgrades the stronger home favourites into straight result picks and keeps one goals angle in the round's standout matchup.",
+        legs: 4,
+        betLines: [
+          {
+            label: "Liverpool v Chelsea: Both Teams To Score",
+            scheduleNote: "Sat 9 May, 15:00 BST",
+            aiReasoning:
+              "Both clubs have enough attacking quality to make a mutual scoring angle cleaner than choosing the winner.",
+            odds: "1.71",
+          },
+          {
+            label: "Man City v Brentford: Man City to Win",
+            scheduleNote: "Sat 9 May, 15:00 BST",
+            aiReasoning:
+              "City's home edge is strong enough to support the straight result once the slip steps up from pure protection.",
+            odds: "1.37",
+          },
+          {
+            label: "West Ham United v Arsenal: Arsenal to Win",
+            scheduleNote: "Sat 9 May, 15:00 BST",
+            aiReasoning:
+              "Arsenal's overall quality gives the away win enough support to sit inside the balanced build.",
+            odds: "1.71",
+          },
+          {
+            label: "Tottenham Hotspur v Leeds United: Over 2.5 Goals",
+            scheduleNote: "Sat 9 May, 15:00 BST",
+            aiReasoning:
+              "This matchup has enough transition potential to support the stronger goals line.",
+            odds: "1.74",
+          },
+        ],
+        statusLabel: "Balanced",
+        aiRecommended: true,
+      },
+      {
+        id: "aggressive",
+        riskLevel: "aggressive",
+        title: "Aggressive",
+        summary:
+          "This is the high-upside version, combining the clearest favourites with builders in the round's most attack-friendly fixtures.",
+        legs: 4,
+        betLines: [
+          {
+            label: "Liverpool v Chelsea: Both Teams To Score & Over 2.5 Goals",
+            scheduleNote: "Sat 9 May, 15:00 BST",
+            aiReasoning:
+              "If the marquee matchup opens up, this builder creates immediate upside for the aggressive slip.",
+            odds: "2.01",
+          },
+          {
+            label: "Man City v Brentford: Man City to Win & Over 2.5 Goals",
+            scheduleNote: "Sat 9 May, 15:00 BST",
+            aiReasoning:
+              "City's home attack makes the win-plus-goals builder the sharper high-return angle here.",
+            odds: "1.86",
+          },
+          {
+            label: "West Ham United v Arsenal: Arsenal to Win & Over 2.5 Goals",
+            scheduleNote: "Sat 9 May, 15:00 BST",
+            aiReasoning:
+              "Arsenal's edge combined with a livelier game state gives this leg a stronger ceiling.",
+            odds: "2.21",
+          },
+          {
+            label: "Tottenham Hotspur v Leeds United: Both Teams To Score & Over 2.5 Goals",
+            scheduleNote: "Sat 9 May, 15:00 BST",
+            aiReasoning:
+              "The final fixture has the right shape for a higher-event closer in the aggressive build.",
+            odds: "2.08",
+          },
+        ],
+        statusLabel: "Aggressive",
+      },
+    ],
+    votesByUserId: {
+      "brian-scott": "neutral",
+      "tony-mclean": "neutral",
+      "john-colreavey": "defensive",
+      "paul-melville": "aggressive",
+      "alasdair-head": "neutral",
+      "paul-devine": "defensive",
+      "derek-mcmillan": "neutral",
+    },
+  },
+  {
+    id: "md-37",
+    slug: "matchday-37",
+    name: "Matchday 37 Voting Stage",
+    description: "Premier League Matchday 37 analysis is complete.",
+    windowStartIso: "2026-05-17T14:00:00.000Z",
+    windowEndIso: "2026-05-17T17:00:00.000Z",
+    startsIn: "Sun 17 May",
+    proposals: [
+      {
+        id: "defensive",
+        riskLevel: "safe",
+        title: "Defensive",
+        summary:
+          "This build keeps the asks conservative with low goal lines and draw protection around the strongest teams on a packed Sunday slate.",
+        legs: 3,
+        betLines: [
+          {
+            label: "Arsenal v Burnley: Arsenal Draw No Bet",
+            scheduleNote: "Sun 17 May, 15:00 BST",
+            aiReasoning:
+              "Arsenal are still the stronger side, and draw cover keeps the final-week pressure from pushing the slip too far.",
+            odds: "1.15",
+          },
+          {
+            label: "Chelsea v Tottenham Hotspur: Over 1.5 Goals",
+            scheduleNote: "Sun 17 May, 15:00 BST",
+            aiReasoning:
+              "The derby carries enough attacking quality for the two-goal line to be the steadier conservative route.",
+            odds: "1.29",
+          },
+          {
+            label: "Man Utd v Nottingham Forest: Over 1.5 Goals",
+            scheduleNote: "Sun 17 May, 15:00 BST",
+            aiReasoning:
+              "The home side's game states tend to create enough goal volume for a low floor to make sense.",
+            odds: "1.28",
+          },
+        ],
+        statusLabel: "Safe",
+      },
+      {
+        id: "neutral",
+        riskLevel: "balanced",
+        title: "Neutral",
+        summary:
+          "The balanced route moves the stronger favourites into straight wins and leans into one bigger attacking spot for added upside.",
+        legs: 4,
+        betLines: [
+          {
+            label: "Bournemouth v Man City: Man City to Win",
+            scheduleNote: "Sun 17 May, 15:00 BST",
+            aiReasoning:
+              "City's overall quality still gives the away win enough support to sit inside the balanced build.",
+            odds: "1.56",
+          },
+          {
+            label: "Arsenal v Burnley: Arsenal to Win",
+            scheduleNote: "Sun 17 May, 15:00 BST",
+            aiReasoning:
+              "Arsenal's home control is strong enough to support the straight result once we leave draw protection behind.",
+            odds: "1.32",
+          },
+          {
+            label: "Chelsea v Tottenham Hotspur: Both Teams To Score",
+            scheduleNote: "Sun 17 May, 15:00 BST",
+            aiReasoning:
+              "The derby profiles better as a mutual scoring spot than a winner pick in the balanced slip.",
+            odds: "1.72",
+          },
+          {
+            label: "Man Utd v Nottingham Forest: Man Utd to Win",
+            scheduleNote: "Sun 17 May, 15:00 BST",
+            aiReasoning:
+              "United's home edge gives the straight result enough support to complete the balanced build.",
+            odds: "1.64",
+          },
+        ],
+        statusLabel: "Balanced",
+        aiRecommended: true,
+      },
+      {
+        id: "aggressive",
+        riskLevel: "aggressive",
+        title: "Aggressive",
+        summary:
+          "This is the higher-return version, turning the strongest sides into builders and using derby volatility to chase the bigger payout.",
+        legs: 4,
+        betLines: [
+          {
+            label: "Bournemouth v Man City: Man City to Win & Over 2.5 Goals",
+            scheduleNote: "Sun 17 May, 15:00 BST",
+            aiReasoning:
+              "City's attacking quality makes the win-plus-goals route the sharper aggressive angle.",
+            odds: "1.91",
+          },
+          {
+            label: "Arsenal v Burnley: Arsenal -1 Handicap",
+            scheduleNote: "Sun 17 May, 15:00 BST",
+            aiReasoning:
+              "Arsenal's superiority at home supports the margin line when the build shifts fully toward return.",
+            odds: "1.86",
+          },
+          {
+            label: "Chelsea v Tottenham Hotspur: Both Teams To Score & Over 2.5 Goals",
+            scheduleNote: "Sun 17 May, 15:00 BST",
+            aiReasoning:
+              "If the London derby opens up, this builder becomes the highest-ceiling leg on the slip.",
+            odds: "2.03",
+          },
+          {
+            label: "Man Utd v Nottingham Forest: Man Utd to Win & Over 2.5 Goals",
+            scheduleNote: "Sun 17 May, 15:00 BST",
+            aiReasoning:
+              "United's home edge plus a livelier game script gives the aggressive build a stronger final kick.",
+            odds: "2.15",
+          },
+        ],
+        statusLabel: "Aggressive",
+      },
+    ],
+    votesByUserId: {
+      "brian-scott": "neutral",
+      "tony-mclean": "defensive",
+      "john-colreavey": "neutral",
+      "paul-melville": "aggressive",
+      "alasdair-head": "neutral",
+      "paul-devine": "neutral",
+      "derek-mcmillan": "defensive",
+    },
+  },
+  {
+    id: "md-38",
+    slug: "matchday-38",
+    name: "Matchday 38 Voting Stage",
+    description: "Premier League Matchday 38 analysis is complete.",
+    windowStartIso: "2026-05-24T14:00:00.000Z",
+    windowEndIso: "2026-05-24T17:00:00.000Z",
+    startsIn: "Sun 24 May",
+    proposals: [
+      {
+        id: "defensive",
+        riskLevel: "safe",
+        title: "Defensive",
+        summary:
+          "The final-day defensive build avoids the most chaotic result calls and leans on safer totals plus draw protection on the clearest favourite.",
+        legs: 3,
+        betLines: [
+          {
+            label: "Liverpool v Brentford: Over 1.5 Goals",
+            scheduleNote: "Sun 24 May, 15:00 BST",
+            aiReasoning:
+              "Final-day volatility often helps low goals lines land, making this a steadier opener than a straight result call.",
+            odds: "1.24",
+          },
+          {
+            label: "Man City v Aston Villa: Man City Draw No Bet",
+            scheduleNote: "Sun 24 May, 15:00 BST",
+            aiReasoning:
+              "City still carry the stronger profile, but draw cover respects the variance that can come with the last day.",
+            odds: "1.22",
+          },
+          {
+            label: "Tottenham Hotspur v Everton: Over 1.5 Goals",
+            scheduleNote: "Sun 24 May, 15:00 BST",
+            aiReasoning:
+              "Both sides are capable of contributing to a two-goal script, which keeps the close conservative.",
+            odds: "1.30",
+          },
+        ],
+        statusLabel: "Safe",
+      },
+      {
+        id: "neutral",
+        riskLevel: "balanced",
+        title: "Neutral",
+        summary:
+          "The balanced final-day slip backs the stronger favourites and keeps one BTTS angle in the fixture most likely to stretch.",
+        legs: 4,
+        betLines: [
+          {
+            label: "Liverpool v Brentford: Liverpool to Win",
+            scheduleNote: "Sun 24 May, 15:00 BST",
+            aiReasoning:
+              "Liverpool's home edge remains strong enough for the straight result in the balanced build.",
+            odds: "1.40",
+          },
+          {
+            label: "Man City v Aston Villa: Man City to Win",
+            scheduleNote: "Sun 24 May, 15:00 BST",
+            aiReasoning:
+              "City are still the stronger side at home, making the win the cleaner balanced play.",
+            odds: "1.52",
+          },
+          {
+            label: "Sunderland v Chelsea: Both Teams To Score",
+            scheduleNote: "Sun 24 May, 15:00 BST",
+            aiReasoning:
+              "This fixture has enough room for both attacks to contribute, which suits a BTTS angle more than a result call.",
+            odds: "1.78",
+          },
+          {
+            label: "Tottenham Hotspur v Everton: Tottenham Hotspur to Win",
+            scheduleNote: "Sun 24 May, 15:00 BST",
+            aiReasoning:
+              "Spurs' home advantage gives the final leg enough support to round out the balanced slip.",
+            odds: "1.73",
+          },
+        ],
+        statusLabel: "Balanced",
+        aiRecommended: true,
+      },
+      {
+        id: "aggressive",
+        riskLevel: "aggressive",
+        title: "Aggressive",
+        summary:
+          "This is the higher-return final-day version, combining the strongest favourites with builders in the fixtures most likely to turn chaotic.",
+        legs: 4,
+        betLines: [
+          {
+            label: "Liverpool v Brentford: Liverpool to Win & Over 2.5 Goals",
+            scheduleNote: "Sun 24 May, 15:00 BST",
+            aiReasoning:
+              "Liverpool's attacking ceiling makes the win-plus-goals route the stronger high-return option.",
+            odds: "1.92",
+          },
+          {
+            label: "Man City v Aston Villa: Both Teams To Score & Over 2.5 Goals",
+            scheduleNote: "Sun 24 May, 15:00 BST",
+            aiReasoning:
+              "The headline fixture has enough quality to support the higher-event builder rather than a simple winner.",
+            odds: "2.09",
+          },
+          {
+            label: "Sunderland v Chelsea: Both Teams To Score & Over 2.5 Goals",
+            scheduleNote: "Sun 24 May, 15:00 BST",
+            aiReasoning:
+              "If this final-day game opens up, the aggressive slip gets a much better ceiling from the builder.",
+            odds: "2.18",
+          },
+          {
+            label: "Tottenham Hotspur v Everton: Tottenham Hotspur to Win & Over 2.5 Goals",
+            scheduleNote: "Sun 24 May, 15:00 BST",
+            aiReasoning:
+              "Spurs' home edge paired with a more open game state makes this the stronger aggressive closer.",
+            odds: "2.16",
+          },
+        ],
+        statusLabel: "Aggressive",
+      },
+    ],
+    votesByUserId: {
+      "brian-scott": "neutral",
+      "tony-mclean": "neutral",
+      "john-colreavey": "defensive",
+      "paul-melville": "aggressive",
+      "alasdair-head": "neutral",
+      "paul-devine": "defensive",
+      "derek-mcmillan": "neutral",
     },
   },
 ];

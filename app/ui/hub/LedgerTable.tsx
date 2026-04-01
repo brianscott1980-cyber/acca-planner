@@ -3,9 +3,15 @@ import { formatSignedCurrency, type LedgerActivity } from "./ledgerService";
 
 type LedgerTableProps = {
   items: LedgerActivity[];
+  highlightedTransactionIds?: string[];
+  onHighlightTransactions?: (transactionIds: string[]) => void;
 };
 
-export function LedgerTable({ items }: LedgerTableProps) {
+export function LedgerTable({
+  items,
+  highlightedTransactionIds = [],
+  onHighlightTransactions,
+}: LedgerTableProps) {
   return (
     <div className="hub-ledger-table-wrap">
       <table className="hub-ledger-table">
@@ -19,7 +25,12 @@ export function LedgerTable({ items }: LedgerTableProps) {
         </thead>
         <tbody>
           {items.map((item) => (
-            <LedgerTableRow key={`${item.title}-${item.date}`} item={item} />
+            <LedgerTableRow
+              key={item.id}
+              item={item}
+              isHighlighted={highlightedTransactionIds.includes(item.id)}
+              onHighlightTransactions={onHighlightTransactions}
+            />
           ))}
         </tbody>
       </table>
@@ -27,12 +38,24 @@ export function LedgerTable({ items }: LedgerTableProps) {
   );
 }
 
-function LedgerTableRow({ item }: { item: LedgerActivity }) {
+function LedgerTableRow({
+  item,
+  isHighlighted,
+  onHighlightTransactions,
+}: {
+  item: LedgerActivity;
+  isHighlighted: boolean;
+  onHighlightTransactions?: (transactionIds: string[]) => void;
+}) {
   const isPositive = item.amount >= 0;
   const Icon = isPositive ? ArrowUpRight : ArrowDownRight;
 
   return (
-    <tr>
+    <tr
+      className={isHighlighted ? "is-highlighted" : undefined}
+      onMouseEnter={() => onHighlightTransactions?.([item.id])}
+      onMouseLeave={() => onHighlightTransactions?.([])}
+    >
       <td>
         <div className="hub-ledger-table-main">
           <div

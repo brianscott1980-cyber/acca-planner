@@ -1,51 +1,45 @@
 "use client";
 
-import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { ChevronRight } from "lucide-react";
 import { ledgerData } from "../../../data/ledgerData";
 import {
   formatCurrency,
 } from "./ledgerService";
 import { getSimulatedNow } from "../../../repositories/leagueSimulationRepository";
 import {
-  getBetLineDisplayOdds,
-  getBetLineInsight,
+  getMatchdayHref,
   getProposalDisplayOdds,
   getVisibleGameWeekTimelineRecords,
-  type BetLineInsight,
-  type ProposalBetLine,
 } from "../../../repositories/gameWeekRepository";
 import { formatGameWeekDateRange } from "../../../repositories/leagueSimulationRepository";
-import { MatchBetSummaryRow } from "./MatchBetSummaryRow";
+import { getMembers, getUserInitials } from "../../../repositories/userService";
 
 type TimelineEntry = {
   id: string;
   title: string;
   dateRange: string;
-  status: "win" | "loss" | "funded" | "placed" | "voted";
-  label: string;
+  status: "win" | "loss" | "cashout" | "funded" | "placed" | "voted";
+  label?: string;
   stake: string;
   stakeLabel?: string;
   odds?: string;
   oddsLabel?: string;
+  potentialValue?: string;
+  potentialLabel?: string;
   returnValue: string;
   returnLabel?: string;
+  returnTone?: "positive" | "neutral" | "negative";
+  infoLabel?: string;
+  infoAvatarLabel?: string;
+  infoAvatarTitle?: string;
   outcomeLabel?: string;
   timestampIso: string;
   matchdayId?: string;
-  decisionParam?: string;
-  legs?: number;
-  betLines?: Array<{
-    betLine: ProposalBetLine;
-    displayOdds: string;
-    insight?: BetLineInsight | null;
-    settlementStatus?: "won" | "lost";
-  }>;
 };
 
 export function TimelineFeed() {
   const simulatedNow = getSimulatedNow().getTime();
+  const members = getMembers();
   const timelineEntries: TimelineEntry[] = [
     ...getVisibleGameWeekTimelineRecords().flatMap(
       ({ gameWeek, proposal, simulation }) => {
@@ -66,12 +60,13 @@ export function TimelineFeed() {
           outcomeLabel: "Voted",
           timestampIso: simulation.voteResolvedAtIso,
           matchdayId: gameWeek.id,
-          decisionParam: simulation.selectedProposalId,
         };
         const entries = [votedEntry];
 
-        if (new Date(simulation.simulatedSlip.stakePlacedAt).getTime() <= simulatedNow) {
-          entries.push({
+	        if (new Date(simulation.simulatedSlip.stakePlacedAt).getTime() <= simulatedNow) {
+          const submitter = getTimelineSubmitter(members, `${gameWeek.id}:placed`);
+
+	          entries.push({
             id: `${gameWeek.id}-placed`,
             title: `${gameWeek.name.replace(/\s+Voting Stage$/i, "")} Bet Placed`,
             dateRange: formatTimelineDateTime(simulation.simulatedSlip.stakePlacedAt),
@@ -84,46 +79,61 @@ export function TimelineFeed() {
             }),
             odds: getProposalDisplayOdds(proposal),
             oddsLabel: "Odds",
-            returnLabel: "Potential",
-            returnValue: formatCurrency(simulation.simulatedSlip.stake * proposalOdds, {
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2,
-            }),
-            outcomeLabel: "Placed",
-            timestampIso: simulation.simulatedSlip.stakePlacedAt,
-            matchdayId: gameWeek.id,
-            decisionParam: simulation.selectedProposalId,
-            legs: proposal.legs,
+	            returnLabel: "Potential",
+	            returnValue: formatCurrency(simulation.simulatedSlip.stake * proposalOdds, {
+	              minimumFractionDigits: 2,
+	              maximumFractionDigits: 2,
+	            }),
+              infoLabel: "Submitter",
+              infoAvatarLabel: getUserInitials(submitter.displayName),
+              infoAvatarTitle: submitter.displayName,
+	            outcomeLabel: "Placed",
+	            timestampIso: simulation.simulatedSlip.stakePlacedAt,
+	            matchdayId: gameWeek.id,
           });
         }
 
         if (new Date(simulation.simulatedSlip.settledAt).getTime() <= simulatedNow) {
+          const returnTone =
+            simulation.simulatedSlip.settlementKind === "cashout"
+              ? getCashoutReturnTone(
+                  simulation.simulatedSlip.returnAmount,
+                  simulation.simulatedSlip.stake,
+                )
+              : undefined;
+
           entries.push({
             id: `${gameWeek.id}-settled`,
             title: gameWeek.name.replace(/\s+Voting Stage$/i, ""),
             dateRange: formatGameWeekDateRange(gameWeek),
-            status: simulation.simulatedSlip.status,
-            label: simulation.simulatedSlip.timelineLabel,
+            status:
+              simulation.simulatedSlip.settlementKind === "cashout"
+                ? "cashout"
+                : simulation.simulatedSlip.status,
             stake: formatCurrency(simulation.simulatedSlip.stake, {
               minimumFractionDigits: 2,
               maximumFractionDigits: 2,
             }),
             odds: getProposalDisplayOdds(proposal),
+            potentialLabel: "Potential",
+            potentialValue: formatCurrency(
+              simulation.simulatedSlip.stake * proposalOdds,
+              {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              },
+            ),
             returnValue: formatCurrency(simulation.simulatedSlip.returnAmount, {
               minimumFractionDigits: 2,
               maximumFractionDigits: 2,
             }),
+            returnTone,
+            outcomeLabel:
+              simulation.simulatedSlip.settlementKind === "cashout"
+                ? "Cashout"
+                : undefined,
             timestampIso: simulation.simulatedSlip.settledAt,
             matchdayId: gameWeek.id,
-            decisionParam: simulation.selectedProposalId,
-            legs: proposal.legs,
-            betLines: proposal.betLines.map((betLine) => ({
-              betLine,
-              displayOdds: getBetLineDisplayOdds(betLine),
-              insight: getBetLineInsight(proposal, betLine),
-              settlementStatus:
-                simulation.simulatedSlip.status === "win" ? "won" : "lost",
-            })),
           });
         }
 
@@ -157,9 +167,6 @@ export function TimelineFeed() {
 
 function TimelineMatchday({ entry }: { entry: TimelineEntry }) {
   const router = useRouter();
-  const [expandedBetLineLabel, setExpandedBetLineLabel] = useState<
-    string | null
-  >(null);
   const isNavigable = Boolean(entry.matchdayId);
   const isWin = entry.status === "win";
   const outcomeLabel =
@@ -168,6 +175,8 @@ function TimelineMatchday({ entry }: { entry: TimelineEntry }) {
       ? "Won"
       : entry.status === "loss"
         ? "Lost"
+        : entry.status === "cashout"
+          ? "Cashout"
         : entry.status === "placed"
           ? "Placed"
           : entry.status === "voted"
@@ -179,13 +188,12 @@ function TimelineMatchday({ entry }: { entry: TimelineEntry }) {
       return;
     }
 
-    const searchParams = new URLSearchParams({ matchday: entry.matchdayId });
-
-    if (entry.decisionParam) {
-      searchParams.set("decision", entry.decisionParam);
-    }
-
-    router.push(`/matchday?${searchParams.toString()}`);
+    router.push(
+      getMatchdayHref({
+        gameWeekId: entry.matchdayId,
+        stage: entry.status === "voted" ? "pending" : null,
+      }),
+    );
   };
 
   return (
@@ -227,27 +235,53 @@ function TimelineMatchday({ entry }: { entry: TimelineEntry }) {
           </span>
         </div>
 
-        <div className="hub-badge-row">
-          <span className={`hub-tag ${getTimelineTagClassName(entry)}`}>
-            {entry.label}
-          </span>
-          {entry.legs ? (
-            <span className="hub-inline-meta">
-              <ChevronRight size={14} />
-              {entry.legs} legs
-            </span>
-          ) : null}
-        </div>
+        {shouldShowTimelineStrategyLabel(entry) ? (
+          <div className="hub-badge-row">
+            {shouldShowTimelineStrategyLabel(entry) ? (
+              <span className={`hub-tag ${getTimelineTagClassName(entry)}`}>
+                {entry.label}
+              </span>
+            ) : null}
+          </div>
+        ) : null}
 
-        <div className={`hub-stat-grid${entry.odds ? "" : " is-compact"}`}>
+        <div
+          className={`hub-stat-grid${entry.odds ? "" : " is-compact"}${
+            entry.potentialValue ? " has-potential" : ""
+          }${
+            entry.infoAvatarLabel ? " has-info" : ""
+          }`}
+        >
           <div>
             <span className="hub-metric-label">{entry.stakeLabel ?? "Stake"}</span>
-            <span className="hub-metric-value">{entry.stake}</span>
+            <span
+              className={`hub-metric-value${
+                entry.status === "funded"
+                  ? " hub-success-text"
+                  : entry.status === "placed"
+                    ? " hub-danger-text"
+                    : entry.status === "voted"
+                      ? ` ${getTimelineStrategyTextClassName(entry)}`
+                    : ""
+              }`}
+            >
+              {entry.stake}
+            </span>
           </div>
           {entry.odds ? (
             <div>
               <span className="hub-metric-label">{entry.oddsLabel ?? "Odds"}</span>
               <span className="hub-metric-value hub-accent-text">{entry.odds}</span>
+            </div>
+          ) : null}
+          {entry.potentialValue ? (
+            <div>
+              <span className="hub-metric-label">
+                {entry.potentialLabel ?? "Potential"}
+              </span>
+              <span className="hub-metric-value hub-accent-text">
+                {entry.potentialValue}
+              </span>
             </div>
           ) : null}
           <div>
@@ -256,6 +290,12 @@ function TimelineMatchday({ entry }: { entry: TimelineEntry }) {
               className={`hub-metric-value ${
                 entry.status === "win" || entry.status === "funded"
                   ? "hub-success-text"
+                  : entry.returnTone === "positive"
+                    ? "hub-success-text"
+                  : entry.returnTone === "neutral"
+                    ? "hub-warning-text"
+                  : entry.returnTone === "negative"
+                    ? "hub-danger-text"
                   : entry.status === "placed"
                     ? "hub-accent-text"
                   : entry.status === "voted"
@@ -266,27 +306,19 @@ function TimelineMatchday({ entry }: { entry: TimelineEntry }) {
               {entry.returnValue}
             </span>
           </div>
+          {entry.infoAvatarLabel ? (
+            <div>
+              <span className="hub-metric-label">{entry.infoLabel ?? "Info"}</span>
+              <span
+                className="hub-timeline-submitter-avatar"
+                title={entry.infoAvatarTitle}
+                aria-label={entry.infoAvatarTitle}
+              >
+                {entry.infoAvatarLabel}
+              </span>
+            </div>
+          ) : null}
         </div>
-
-        {entry.betLines?.length ? (
-          <div className="hub-bet-lines">
-            {entry.betLines.map((item) => (
-              <MatchBetSummaryRow
-                key={item.betLine.label}
-                betLine={item.betLine}
-                displayOdds={item.displayOdds}
-                insight={item.insight}
-                settlementStatus={item.settlementStatus}
-                isExpanded={expandedBetLineLabel === item.betLine.label}
-                onToggle={() =>
-                  setExpandedBetLineLabel((previous) =>
-                    previous === item.betLine.label ? null : item.betLine.label,
-                  )
-                }
-              />
-            ))}
-          </div>
-        ) : null}
       </div>
     </article>
   );
@@ -327,10 +359,6 @@ function getInitialDepositTimelineEntries(): TimelineEntry[] {
       title: "Collective Deposit",
       dateRange,
       status: "funded",
-      label: `${openingDeposits.length} players x ${formatCurrency(perPlayerAmount, {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-      })} each`,
       stakeLabel: "Deposits",
       stake: `${openingDeposits.length} x ${formatCurrency(perPlayerAmount, {
         minimumFractionDigits: 2,
@@ -356,6 +384,10 @@ function getTimelineStatusClassName(status: TimelineEntry["status"]) {
     return "is-loss";
   }
 
+  if (status === "cashout") {
+    return "is-cashed-out";
+  }
+
   if (status === "placed") {
     return "is-placed";
   }
@@ -368,7 +400,7 @@ function getTimelineStatusClassName(status: TimelineEntry["status"]) {
 }
 
 function getTimelineTagClassName(entry: TimelineEntry) {
-  const normalizedLabel = entry.label.toLowerCase();
+  const normalizedLabel = entry.label?.toLowerCase() ?? "";
 
   if (normalizedLabel.includes("defensive")) {
     return "hub-tag-safe";
@@ -393,6 +425,53 @@ function getTimelineTagClassName(entry: TimelineEntry) {
   return "hub-tag-safe";
 }
 
+function shouldShowTimelineStrategyLabel(entry: TimelineEntry) {
+  return (
+    Boolean(entry.label) &&
+    entry.status !== "voted" &&
+    entry.status !== "placed" &&
+    entry.status !== "win" &&
+    entry.status !== "loss"
+  );
+}
+
+function getTimelineStrategyTextClassName(entry: TimelineEntry) {
+  const normalizedLabel = entry.label?.toLowerCase() ?? entry.stake.toLowerCase();
+
+  if (normalizedLabel.includes("defensive")) {
+    return "hub-strategy-safe-text";
+  }
+
+  if (normalizedLabel.includes("neutral")) {
+    return "hub-strategy-balanced-text";
+  }
+
+  if (normalizedLabel.includes("aggressive")) {
+    return "hub-strategy-aggressive-text";
+  }
+
+  return "hub-text";
+}
+
+function getTimelineSubmitter(
+  members: ReturnType<typeof getMembers>,
+  seedInput: string,
+) {
+  const memberIndex = getTimelineSeedHash(seedInput) % Math.max(members.length, 1);
+  return members[memberIndex] ?? members[0];
+}
+
+function getTimelineSeedHash(value: string) {
+  let hash = 2166136261;
+
+  for (let index = 0; index < value.length; index += 1) {
+    hash ^= value.charCodeAt(index);
+    hash = Math.imul(hash, 16777619);
+  }
+
+  return hash >>> 0;
+}
+
 function formatTimelineDateTime(value: string) {
   return new Intl.DateTimeFormat("en-GB", {
     day: "numeric",
@@ -400,5 +479,14 @@ function formatTimelineDateTime(value: string) {
     year: "numeric",
     hour: "2-digit",
     minute: "2-digit",
+    timeZone: "Europe/London",
   }).format(new Date(value));
+}
+
+function getCashoutReturnTone(returnAmount: number, stakeAmount: number) {
+  if (Math.abs(returnAmount - stakeAmount) < 0.005) {
+    return "neutral";
+  }
+
+  return returnAmount > stakeAmount ? "positive" : "negative";
 }

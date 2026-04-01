@@ -13,6 +13,10 @@ export function getSimulatedNow() {
   return new Date(leagueData.simulatedAtIso);
 }
 
+export function getSimulationUpdatedAtIso() {
+  return leagueData.updatedAtIso;
+}
+
 export function getGameWeekSimulation(gameWeekId: string) {
   return (
     leagueData.matchdaySimulations.find(
@@ -22,7 +26,15 @@ export function getGameWeekSimulation(gameWeekId: string) {
 }
 
 export function getSortedGameWeeks() {
-  return [...gameWeeks]
+  const availableGameWeekIds = new Set(
+    leagueData.matchdaySimulations.map((simulation) => simulation.gameWeekId),
+  );
+  const visibleGameWeeks =
+    availableGameWeekIds.size > 0
+      ? gameWeeks.filter((gameWeek) => availableGameWeekIds.has(gameWeek.id))
+      : gameWeeks;
+
+  return [...visibleGameWeeks]
     .sort(
       (left, right) =>
         new Date(left.windowStartIso).getTime() -
@@ -36,9 +48,11 @@ export function getCurrentSimulatedGameWeek() {
   const sortedGameWeeks = getSortedGameWeeks();
 
   return (
+    sortedGameWeeks.find((gameWeek) => !gameWeek.simulatedSlip) ??
     sortedGameWeeks.find(
       (gameWeek) => new Date(gameWeek.windowEndIso).getTime() >= now,
-    ) ?? sortedGameWeeks[sortedGameWeeks.length - 1]
+    ) ??
+    sortedGameWeeks[sortedGameWeeks.length - 1]
   );
 }
 
@@ -108,7 +122,7 @@ export function getGameWeekTimingLabel(gameWeek: GameWeekRecord) {
   const windowEnd = new Date(gameWeek.windowEndIso).getTime();
 
   if (windowEnd < now) {
-    return "Closed";
+    return `Closed · ${gameWeek.startsIn}`;
   }
 
   if (windowStart <= now) {
@@ -143,14 +157,17 @@ export function isGameWeekClosed(
 export function formatGameWeekDateRange(gameWeek: GameWeekRecord) {
   const start = new Date(gameWeek.windowStartIso);
   const end = new Date(gameWeek.windowEndIso);
-  const startLabel = new Intl.DateTimeFormat("en-GB", {
+  const formatter = new Intl.DateTimeFormat("en-GB", {
     day: "numeric",
     month: "short",
-  }).format(start);
-  const endLabel = new Intl.DateTimeFormat("en-GB", {
-    day: "numeric",
-    month: "short",
-  }).format(end);
+    timeZone: "Europe/London",
+  });
+  const startLabel = formatter.format(start);
+  const endLabel = formatter.format(end);
+
+  if (startLabel === endLabel) {
+    return startLabel;
+  }
 
   return `${startLabel} - ${endLabel}`;
 }
@@ -197,6 +214,7 @@ function applySimulationToGameWeek(gameWeek: GameWeekRecord) {
           settlementKind: simulation.simulatedSlip.settlementKind,
           returnAmount: simulation.simulatedSlip.returnAmount,
           status: simulation.simulatedSlip.status,
+          legResults: simulation.simulatedSlip.legResults,
         }
       : undefined,
   };

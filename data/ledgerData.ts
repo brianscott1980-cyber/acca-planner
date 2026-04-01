@@ -71,9 +71,9 @@ export const ledgerData: LedgerTransactionRecord[] = [
   },
   {
     "id": "settlement-md-32",
-    "title": "Matchday 32 Settled return",
-    "dateIso": "2026-04-13T20:55:00.000Z",
-    "amount": 10.38,
+    "title": "Matchday 32 Cashout return",
+    "dateIso": "2026-04-11T15:45:00.000Z",
+    "amount": 5.14,
     "kind": "settlement",
     "gameWeekId": "md-32",
     "proposalId": "defensive"
@@ -81,8 +81,8 @@ export const ledgerData: LedgerTransactionRecord[] = [
   {
     "id": "stake-md-33",
     "title": "Matchday 33 Aggressive Stake",
-    "dateIso": "2026-04-17T00:30:00.000Z",
-    "amount": -34,
+    "dateIso": "2026-04-17T17:30:00.000Z",
+    "amount": -31,
     "kind": "stake",
     "gameWeekId": "md-33",
     "proposalId": "aggressive"
@@ -90,8 +90,8 @@ export const ledgerData: LedgerTransactionRecord[] = [
   {
     "id": "stake-md-34",
     "title": "Matchday 34 Neutral Stake",
-    "dateIso": "2026-04-24T00:30:00.000Z",
-    "amount": -8,
+    "dateIso": "2026-04-24T01:00:00.000Z",
+    "amount": -10,
     "kind": "stake",
     "gameWeekId": "md-34",
     "proposalId": "neutral"
@@ -99,8 +99,8 @@ export const ledgerData: LedgerTransactionRecord[] = [
   {
     "id": "settlement-md-34",
     "title": "Matchday 34 Cashout return",
-    "dateIso": "2026-04-27T10:00:00.000Z",
-    "amount": 54.97,
+    "dateIso": "2026-04-25T13:15:00.000Z",
+    "amount": 11.18,
     "kind": "settlement",
     "gameWeekId": "md-34",
     "proposalId": "neutral"
@@ -108,19 +108,55 @@ export const ledgerData: LedgerTransactionRecord[] = [
   {
     "id": "stake-md-35",
     "title": "Matchday 35 Neutral Stake",
-    "dateIso": "2026-05-01T00:30:00.000Z",
-    "amount": -16,
+    "dateIso": "2026-05-01T20:00:00.000Z",
+    "amount": -9,
     "kind": "stake",
     "gameWeekId": "md-35",
     "proposalId": "neutral"
   },
   {
-    "id": "settlement-md-35",
-    "title": "Matchday 35 Cashout return",
-    "dateIso": "2026-05-04T15:00:00.000Z",
-    "amount": 5.84,
-    "kind": "settlement",
-    "gameWeekId": "md-35",
+    "id": "stake-md-36",
+    "title": "Matchday 36 Neutral Stake",
+    "dateIso": "2026-05-08T20:00:00.000Z",
+    "amount": -10,
+    "kind": "stake",
+    "gameWeekId": "md-36",
     "proposalId": "neutral"
+  },
+  {
+    "id": "stake-md-37",
+    "title": "Matchday 37 Defensive Stake",
+    "dateIso": "2026-05-16T20:00:00.000Z",
+    "amount": -2,
+    "kind": "stake",
+    "gameWeekId": "md-37",
+    "proposalId": "defensive"
+  },
+  {
+    "id": "settlement-md-37",
+    "title": "Matchday 37 Cashout return",
+    "dateIso": "2026-05-17T16:20:00.000Z",
+    "amount": 2.04,
+    "kind": "settlement",
+    "gameWeekId": "md-37",
+    "proposalId": "defensive"
+  },
+  {
+    "id": "stake-md-38",
+    "title": "Matchday 38 Defensive Stake",
+    "dateIso": "2026-05-23T20:00:00.000Z",
+    "amount": -1,
+    "kind": "stake",
+    "gameWeekId": "md-38",
+    "proposalId": "defensive"
+  },
+  {
+    "id": "settlement-md-38",
+    "title": "Matchday 38 Cashout return",
+    "dateIso": "2026-05-24T16:19:00.000Z",
+    "amount": 1.25,
+    "kind": "settlement",
+    "gameWeekId": "md-38",
+    "proposalId": "defensive"
   }
 ];

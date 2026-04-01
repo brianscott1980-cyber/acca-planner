@@ -6,7 +6,13 @@ import { trackEvent } from "../../../lib/analytics";
 import { getRecentLedgerActivity } from "./ledgerService";
 import { LedgerTable } from "./LedgerTable";
 
-export function LedgerActivityPanel() {
+export function LedgerActivityPanel({
+  highlightedTransactionIds = [],
+  onHighlightTransactions,
+}: {
+  highlightedTransactionIds?: string[];
+  onHighlightTransactions?: (transactionIds: string[]) => void;
+}) {
   const [showAllTransactions, setShowAllTransactions] = useState(false);
   const allEntries = getRecentLedgerActivity();
   const latestEntries = getRecentLedgerActivity(3);
@@ -17,7 +23,11 @@ export function LedgerActivityPanel() {
         <h2 className="hub-panel-title">Recent Activity</h2>
 
         <div className="hub-activity-list">
-          <LedgerTable items={latestEntries} />
+          <LedgerTable
+            items={latestEntries}
+            highlightedTransactionIds={highlightedTransactionIds}
+            onHighlightTransactions={onHighlightTransactions}
+          />
         </div>
 
         <button
@@ -77,7 +87,11 @@ export function LedgerActivityPanel() {
               </button>
             </div>
 
-            <LedgerTable items={allEntries} />
+            <LedgerTable
+              items={allEntries}
+              highlightedTransactionIds={highlightedTransactionIds}
+              onHighlightTransactions={onHighlightTransactions}
+            />
           </div>
         </div>
       ) : null}

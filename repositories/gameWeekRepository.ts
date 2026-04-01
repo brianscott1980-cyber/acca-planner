@@ -3,6 +3,7 @@ import {
   type GameWeekRecord,
   type GameWeekProposalRecord,
 } from "../data/gameWeeks";
+import { users } from "../data/users";
 import { formatCurrency, getLedgerSummary } from "../app/ui/hub/ledgerService";
 import { getLadbrokesSelectionDisplayOdds, getLadbrokesSelectionOdds } from "./ladbrokesOddsRepository";
 import {
@@ -30,6 +31,12 @@ export type BetLineInsight = {
   sequenceReasoning: string | null;
 };
 
+export type GameWeekViewState =
+  | "voting"
+  | "locked"
+  | "placed"
+  | "review";
+
 export function getCurrentGameWeek() {
   return getCurrentSimulatedGameWeek();
 }
@@ -46,11 +53,117 @@ export function getGameWeeks() {
   return getSortedGameWeeks();
 }
 
+export function getLatestAccessibleGameWeek() {
+  const gameWeeks = getGameWeeks();
+  const currentGameWeek = getCurrentGameWeek();
+
+  if (getGameWeekViewState(currentGameWeek) === "voting") {
+    return currentGameWeek;
+  }
+
+  return gameWeeks.at(-1) ?? currentGameWeek;
+}
+
+export function getAccessibleGameWeekById(gameWeekId: string | null | undefined) {
+  const requestedGameWeek = getGameWeekById(gameWeekId);
+
+  if (!requestedGameWeek) {
+    return null;
+  }
+
+  const gameWeeks = getGameWeeks();
+  const latestAccessibleGameWeek = getLatestAccessibleGameWeek();
+  const requestedIndex = gameWeeks.findIndex(
+    (gameWeek) => gameWeek.id === requestedGameWeek.id,
+  );
+  const latestAccessibleIndex = gameWeeks.findIndex(
+    (gameWeek) => gameWeek.id === latestAccessibleGameWeek.id,
+  );
+
+  if (requestedIndex === -1 || latestAccessibleIndex === -1) {
+    return requestedGameWeek;
+  }
+
+  return requestedIndex <= latestAccessibleIndex
+    ? requestedGameWeek
+    : latestAccessibleGameWeek;
+}
+
+export function canNavigateToGameWeek(gameWeekId: string) {
+  return getAccessibleGameWeekById(gameWeekId)?.id === gameWeekId;
+}
+
 export function getCurrentMatchdayNumber() {
   const currentGameWeek = getCurrentGameWeek();
-  const match = currentGameWeek.id.match(/\d+/) ?? currentGameWeek.slug.match(/\d+/);
+  return getMatchdayNumberFromGameWeekId(currentGameWeek.id);
+}
+
+export function getMatchdayNumberFromGameWeekId(gameWeekId: string) {
+  const gameWeek =
+    gameWeeks.find((entry) => entry.id === gameWeekId) ??
+    gameWeeks.find((entry) => entry.slug === gameWeekId);
+  const match =
+    gameWeek?.id.match(/\d+/) ??
+    gameWeek?.slug.match(/\d+/) ??
+    gameWeekId.match(/\d+/);
 
   return match ? Number.parseInt(match[0], 10) : null;
+}
+
+export function getGameWeekIdFromMatchdayNumber(
+  matchdayNumber: string | number | null | undefined,
+) {
+  if (matchdayNumber === null || matchdayNumber === undefined) {
+    return null;
+  }
+
+  const normalizedNumber = String(matchdayNumber).trim().replace(/^md-?/i, "");
+
+  if (!/^\d+$/.test(normalizedNumber)) {
+    return null;
+  }
+
+  const gameWeek = gameWeeks.find(
+    (entry) => getMatchdayNumberFromGameWeekId(entry.id) === Number.parseInt(normalizedNumber, 10),
+  );
+
+  return gameWeek?.id ?? null;
+}
+
+export function getMatchdayHref({
+  gameWeekId,
+  stage,
+}: {
+  gameWeekId: string;
+  stage?: "pending" | null;
+}) {
+  const matchdayNumber = getMatchdayNumberFromGameWeekId(gameWeekId);
+  const basePathname = matchdayNumber ? `/matchday/${matchdayNumber}` : "/matchday";
+  return stage === "pending" ? `${basePathname}/pending/` : basePathname;
+}
+
+export function getStaticMatchdayNumberParams() {
+  return gameWeeks
+    .map((gameWeek) => getMatchdayNumberFromGameWeekId(gameWeek.id))
+    .filter((matchdayNumber): matchdayNumber is number => matchdayNumber !== null)
+    .map((matchdayNumber) => ({
+      matchdayNumber: String(matchdayNumber),
+    }));
+}
+
+export function getPendingProposalIdForGameWeek(gameWeekId: string) {
+  const gameWeek = getGameWeekById(gameWeekId);
+  const simulatedProposalId = getGameWeekSimulation(gameWeekId)?.selectedProposalId;
+
+  if (simulatedProposalId) {
+    return simulatedProposalId;
+  }
+
+  const fallbackProposal =
+    gameWeek?.proposals.find((proposal) => proposal.aiRecommended) ??
+    gameWeek?.proposals[0];
+
+  return fallbackProposal?.id ?? null;
 }
 
 export function getCompletedGameWeekCount() {
@@ -63,6 +176,53 @@ export function getCurrentGameWeekTimingLabel() {
 
 export function getGameWeekTimingStatusLabel(gameWeek: GameWeekRecord) {
   return getGameWeekTimingLabel(gameWeek);
+}
+
+export function getGameWeekConsensusProposalId(gameWeek: GameWeekRecord) {
+  const simulation = getGameWeekSimulation(gameWeek.id);
+
+  if (!simulation) {
+    return null;
+  }
+
+  const selectedProposalVoteCount = Object.values(simulation.votesByUserId).filter(
+    (proposalId) => proposalId === simulation.selectedProposalId,
+  ).length;
+
+  return selectedProposalVoteCount > users.length / 2
+    ? simulation.selectedProposalId
+    : null;
+}
+
+export function getGameWeekSelectedProposal(gameWeek: GameWeekRecord) {
+  const selectedProposalId = getGameWeekConsensusProposalId(gameWeek);
+
+  return selectedProposalId
+    ? gameWeek.proposals.find((proposal) => proposal.id === selectedProposalId) ?? null
+    : null;
+}
+
+export function getGameWeekViewState(gameWeek: GameWeekRecord): GameWeekViewState {
+  const simulation = getGameWeekSimulation(gameWeek.id);
+  const now = getSimulatedNow().getTime();
+
+  if (!simulation || !getGameWeekConsensusProposalId(gameWeek)) {
+    return "voting";
+  }
+
+  if (new Date(simulation.voteResolvedAtIso).getTime() > now) {
+    return "voting";
+  }
+
+  if (new Date(simulation.simulatedSlip.stakePlacedAt).getTime() > now) {
+    return "locked";
+  }
+
+  if (new Date(simulation.simulatedSlip.settledAt).getTime() > now) {
+    return "placed";
+  }
+
+  return "review";
 }
 
 export function getGameWeekTimelineRecords() {

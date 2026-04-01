@@ -7,7 +7,13 @@ import { getMembers, getUserInitials } from "../../../repositories/userService";
 import { useCurrentGameWeek } from "./GameWeekProvider";
 
 export function ConsensusPanel() {
-  const { currentGameWeek, loggedInUserId, clearVote } = useCurrentGameWeek();
+  const {
+    currentGameWeek,
+    loggedInUserId,
+    clearVote,
+    voteSimulationResult,
+    voteSimulationStatus,
+  } = useCurrentGameWeek();
   const members = getMembers();
   const leadingProposal = getLeadingProposal(currentGameWeek);
   const votesByUserId = currentGameWeek.votesByUserId;
@@ -47,7 +53,27 @@ export function ConsensusPanel() {
         </p>
       </div>
 
-      {hasCurrentUserVote ? (
+      {voteSimulationStatus === "running" ? (
+        <div className="hub-rule-box hub-rule-box-live">
+          <p>
+            <strong>Voting is open:</strong> the consensus graph will keep
+            updating as votes come in.
+          </p>
+        </div>
+      ) : null}
+
+      {voteSimulationStatus === "closed" && voteSimulationResult ? (
+        <div className="hub-rule-box hub-rule-box-live">
+          <p>
+            <strong>Voting closed:</strong>{" "}
+            {voteSimulationResult.hasConsensus
+              ? `${voteSimulationResult.leadingProposalTitle ?? "A strategy"} reached consensus.`
+              : "All votes were cast without consensus."}
+          </p>
+        </div>
+      ) : null}
+
+      {hasCurrentUserVote && voteSimulationStatus === "idle" ? (
         <button
           className="hub-secondary-button hub-mobile-change-vote"
           type="button"
@@ -78,7 +104,7 @@ export function AvatarBadge({
         vote ? ` hub-avatar-badge-${vote}` : " is-empty"
       }`}
     >
-      {label}
+      <span className="hub-avatar-badge-label">{label}</span>
     </div>
   );
 }
@@ -118,18 +144,32 @@ export function ConsensusVoteBreakdown({
   votesByUserId: Record<string, string>;
 }) {
   const segments = getVoteBreakdownSegments(members, votesByUserId);
-  const gradient = buildVoteBreakdownGradient(segments);
   const votedCount = segments
     .filter((segment) => segment.id !== "no-vote")
     .reduce((total, segment) => total + segment.count, 0);
 
   return (
     <div className="hub-vote-breakdown">
-      <div
-        className="hub-vote-breakdown-chart"
-        style={{ backgroundImage: gradient }}
-        aria-hidden="true"
-      >
+      <div className="hub-vote-breakdown-chart" aria-hidden="true">
+        <svg
+          className="hub-vote-breakdown-chart-svg"
+          viewBox="0 0 100 100"
+          aria-hidden="true"
+        >
+          {segments.map((segment) => (
+            <circle
+              key={segment.id}
+              className="hub-vote-breakdown-segment"
+              cx="50"
+              cy="50"
+              r="44"
+              pathLength={100}
+              stroke={segment.color}
+              strokeDasharray={`${segment.length} ${100 - segment.length}`}
+              strokeDashoffset={-segment.start}
+            />
+          ))}
+        </svg>
         <div className="hub-vote-breakdown-center">
           <span className="hub-vote-breakdown-value">
             {votedCount}/{members.length}
@@ -186,30 +226,22 @@ function getVoteBreakdownSegments(
     counts.noVote += 1;
   }
 
+  let start = 0;
+
   return [
     { id: "defensive", label: "Defensive", count: counts.defensive, color: "#10b981" },
     { id: "neutral", label: "Neutral", count: counts.neutral, color: "#3b82f6" },
     { id: "aggressive", label: "Aggressive", count: counts.aggressive, color: "#f59e0b" },
     { id: "no-vote", label: "No vote", count: counts.noVote, color: "#52525b" },
-  ];
-}
+  ].map((segment) => {
+    const length = members.length > 0 ? (segment.count / members.length) * 100 : 0;
+    const nextSegment = {
+      ...segment,
+      start,
+      length,
+    };
 
-function buildVoteBreakdownGradient(
-  segments: Array<{ count: number; color: string }>,
-) {
-  const total = segments.reduce((sum, segment) => sum + segment.count, 0);
-
-  if (total <= 0) {
-    return "conic-gradient(#27272a 0deg 360deg)";
-  }
-
-  let currentAngle = 0;
-  const stops = segments.map((segment) => {
-    const nextAngle = currentAngle + (segment.count / total) * 360;
-    const stop = `${segment.color} ${currentAngle}deg ${nextAngle}deg`;
-    currentAngle = nextAngle;
-    return stop;
+    start += length;
+    return nextSegment;
   });
-
-  return `conic-gradient(${stops.join(", ")})`;
 }
