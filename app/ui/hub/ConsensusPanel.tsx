@@ -1,10 +1,7 @@
 "use client";
 
 import { Vote } from "lucide-react";
-import {
-  getLeadingProposal,
-  getProposalVotes,
-} from "../../../repositories/gameWeekRepository";
+import { getLeadingProposal } from "../../../repositories/gameWeekRepository";
 import { trackEvent } from "../../../lib/analytics";
 import { getMembers, getUserInitials } from "../../../repositories/userService";
 import { useCurrentGameWeek } from "./GameWeekProvider";
@@ -17,18 +14,8 @@ export function ConsensusPanel() {
   const hasCurrentUserVote = loggedInUserId
     ? Boolean(votesByUserId[loggedInUserId])
     : false;
-  const votedMemberIds = new Set(
-    leadingProposal ? getProposalVotes(currentGameWeek, leadingProposal.id) : [],
-  );
-  const votedMembers = members.filter((member) => votedMemberIds.has(member.id));
-  const approvalPercentage =
-    members.length === 0 ? 0 : (votedMembers.length / members.length) * 100;
-  const ringCircumference = 339.292;
-  const ringOffset =
-    ringCircumference - (approvalPercentage / 100) * ringCircumference;
-  const ringColor = getConsensusRingColor(
-    leadingProposal?.riskLevel,
-    approvalPercentage,
+  const votedMembers = members.filter(
+    (member) => typeof votesByUserId[member.id] === "string",
   );
 
   return (
@@ -38,52 +25,13 @@ export function ConsensusPanel() {
         <h2 className="hub-panel-title">Consensus State</h2>
       </div>
 
-      <div className="hub-ring-wrap">
-        <svg className="hub-ring" viewBox="0 0 120 120" aria-hidden="true">
-          <circle
-            cx="60"
-            cy="60"
-            r="54"
-            fill="none"
-            stroke="var(--hub-border)"
-            strokeWidth="8"
-          />
-          <circle
-            className="hub-ring-progress"
-            cx="60"
-            cy="60"
-            r="54"
-            fill="none"
-            stroke={ringColor}
-            strokeDasharray={ringCircumference}
-            strokeDashoffset={ringOffset}
-            strokeLinecap="round"
-            strokeWidth="8"
-          />
-        </svg>
-        <div className="hub-ring-center">
-          <span className="hub-ring-value">
-            {Math.round(approvalPercentage)}%
-          </span>
-          <span className="hub-ring-label">Approval</span>
-          <span className="hub-ring-threshold">Threshold: 50%</span>
-        </div>
-      </div>
+      <ConsensusVoteBreakdown members={members} votesByUserId={votesByUserId} />
 
-      <div className="hub-voter-block">
-        <p className="hub-voter-copy">
-          Current Votting ({votedMembers.length}/{members.length})
-        </p>
-        <div className="hub-voters">
-          {members.map((member) => (
-            <AvatarBadge
-              key={member.id}
-              label={getUserInitials(member.displayName)}
-              vote={votesByUserId[member.id]}
-            />
-          ))}
-        </div>
-      </div>
+      <VotesAvatarRow
+        label={`Current Votting (${votedMembers.length}/${members.length})`}
+        members={members}
+        votesByUserId={votesByUserId}
+      />
 
       <div className="hub-rule-box">
         <p>
@@ -117,26 +65,7 @@ export function ConsensusPanel() {
   );
 }
 
-function getConsensusRingColor(
-  riskLevel: "safe" | "balanced" | "aggressive" | undefined,
-  approvalPercentage: number,
-) {
-  if (!riskLevel || approvalPercentage <= 50) {
-    return "var(--hub-primary)";
-  }
-
-  if (riskLevel === "safe") {
-    return "#10b981";
-  }
-
-  if (riskLevel === "balanced") {
-    return "#3b82f6";
-  }
-
-  return "#f59e0b";
-}
-
-function AvatarBadge({
+export function AvatarBadge({
   label,
   vote,
 }: {
@@ -152,4 +81,135 @@ function AvatarBadge({
       {label}
     </div>
   );
+}
+
+export function VotesAvatarRow({
+  label,
+  members,
+  votesByUserId,
+  className = "",
+}: {
+  label?: string;
+  members: ReturnType<typeof getMembers>;
+  votesByUserId: Record<string, string>;
+  className?: string;
+}) {
+  return (
+    <div className={`hub-voter-block${className ? ` ${className}` : ""}`}>
+      {label ? <p className="hub-voter-copy">{label}</p> : null}
+      <div className="hub-voters">
+        {members.map((member) => (
+          <AvatarBadge
+            key={member.id}
+            label={getUserInitials(member.displayName)}
+            vote={votesByUserId[member.id]}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+export function ConsensusVoteBreakdown({
+  members,
+  votesByUserId,
+}: {
+  members: ReturnType<typeof getMembers>;
+  votesByUserId: Record<string, string>;
+}) {
+  const segments = getVoteBreakdownSegments(members, votesByUserId);
+  const gradient = buildVoteBreakdownGradient(segments);
+  const votedCount = segments
+    .filter((segment) => segment.id !== "no-vote")
+    .reduce((total, segment) => total + segment.count, 0);
+
+  return (
+    <div className="hub-vote-breakdown">
+      <div
+        className="hub-vote-breakdown-chart"
+        style={{ backgroundImage: gradient }}
+        aria-hidden="true"
+      >
+        <div className="hub-vote-breakdown-center">
+          <span className="hub-vote-breakdown-value">
+            {votedCount}/{members.length}
+          </span>
+          <span className="hub-vote-breakdown-label">Voted</span>
+        </div>
+      </div>
+
+      <div className="hub-vote-breakdown-legend">
+        {segments.map((segment) => (
+          <span key={segment.id} className="hub-vote-breakdown-legend-item">
+            <span
+              className="hub-vote-breakdown-legend-dot"
+              style={{ background: segment.color }}
+              aria-hidden="true"
+            />
+            <span>{segment.label}</span>
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function getVoteBreakdownSegments(
+  members: ReturnType<typeof getMembers>,
+  votesByUserId: Record<string, string>,
+) {
+  const counts = {
+    defensive: 0,
+    neutral: 0,
+    aggressive: 0,
+    noVote: 0,
+  };
+
+  for (const member of members) {
+    const vote = votesByUserId[member.id];
+
+    if (vote === "defensive") {
+      counts.defensive += 1;
+      continue;
+    }
+
+    if (vote === "neutral") {
+      counts.neutral += 1;
+      continue;
+    }
+
+    if (vote === "aggressive") {
+      counts.aggressive += 1;
+      continue;
+    }
+
+    counts.noVote += 1;
+  }
+
+  return [
+    { id: "defensive", label: "Defensive", count: counts.defensive, color: "#10b981" },
+    { id: "neutral", label: "Neutral", count: counts.neutral, color: "#3b82f6" },
+    { id: "aggressive", label: "Aggressive", count: counts.aggressive, color: "#f59e0b" },
+    { id: "no-vote", label: "No vote", count: counts.noVote, color: "#52525b" },
+  ];
+}
+
+function buildVoteBreakdownGradient(
+  segments: Array<{ count: number; color: string }>,
+) {
+  const total = segments.reduce((sum, segment) => sum + segment.count, 0);
+
+  if (total <= 0) {
+    return "conic-gradient(#27272a 0deg 360deg)";
+  }
+
+  let currentAngle = 0;
+  const stops = segments.map((segment) => {
+    const nextAngle = currentAngle + (segment.count / total) * 360;
+    const stop = `${segment.color} ${currentAngle}deg ${nextAngle}deg`;
+    currentAngle = nextAngle;
+    return stop;
+  });
+
+  return `conic-gradient(${stops.join(", ")})`;
 }

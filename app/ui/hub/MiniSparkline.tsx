@@ -1,7 +1,7 @@
 import { getPotTimelineForRange } from "./ledgerService";
 
 export function MiniSparkline() {
-  const timeline = getPotTimelineForRange("1m", new Date());
+  const timeline = getPotTimelineForRange("1m");
   const { areaPath, linePath } = buildMiniSparklineGeometry(timeline);
 
   return (

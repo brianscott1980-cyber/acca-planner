@@ -15,6 +15,7 @@ import {
   getLedgerSummary,
 } from "./ledgerService";
 import { MiniSparkline } from "./MiniSparkline";
+import { getSimulatedNow } from "../../../repositories/leagueSimulationRepository";
 import {
   getMemberCount,
   getUserInitials,
@@ -28,7 +29,7 @@ type HubAppShellProps = {
 };
 
 const navItems = [
-  { href: "/dashboard", label: "Matchday", icon: LayoutDashboard },
+  { href: "/matchday", label: "Matchday", icon: LayoutDashboard },
   { href: "/timeline", label: "Timeline", icon: History },
   { href: "/ledger", label: "Ledger", icon: Wallet },
 ];
@@ -43,6 +44,7 @@ export function HubAppShell({ children }: HubAppShellProps) {
     ledgerSummary.memberCount === 0
       ? 0
       : ledgerSummary.currentPot / ledgerSummary.memberCount;
+  const simulatedNow = getSimulatedNow();
   const currentMatchdayNumber = getCurrentMatchdayNumber();
   const navigateToLedgerFromHeader = (source: string) => {
     trackEvent("navigate_ledger_from_header", { source });
@@ -93,7 +95,7 @@ export function HubAppShell({ children }: HubAppShellProps) {
                   <Icon size={18} />
                 </span>
                 <span>{item.label}</span>
-                {item.href === "/dashboard" && currentMatchdayNumber ? (
+                {item.href === "/matchday" && currentMatchdayNumber ? (
                   <span className="hub-nav-pill">{currentMatchdayNumber}</span>
                 ) : null}
               </Link>
@@ -160,6 +162,13 @@ export function HubAppShell({ children }: HubAppShellProps) {
               </>
             ) : null}
           </div>
+
+          <div className="hub-header-datetime" aria-label="Current simulated date and time">
+            <p className="hub-label">Current Time</p>
+            <p className="hub-header-datetime-value">
+              {formatHeaderDateTime(simulatedNow)}
+            </p>
+          </div>
         </header>
 
         <main className="hub-content">{children}</main>
@@ -172,7 +181,11 @@ function isActiveNavItem(pathname: string, href: string) {
   const normalizedPathname = normalizePath(pathname);
   const normalizedHref = normalizePath(href);
 
-  if (normalizedHref === "/dashboard" && normalizedPathname === "/") {
+  if (normalizedHref === "/matchday" && normalizedPathname === "/") {
+    return true;
+  }
+
+  if (normalizedHref === "/matchday" && normalizedPathname === "/dashboard") {
     return true;
   }
 
@@ -188,4 +201,16 @@ function normalizePath(value: string) {
   }
 
   return value.replace(/\/+$/, "");
+}
+
+function formatHeaderDateTime(value: Date) {
+  return new Intl.DateTimeFormat("en-GB", {
+    weekday: "short",
+    day: "numeric",
+    month: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+    timeZone: "Europe/London",
+    timeZoneName: "short",
+  }).format(value);
 }

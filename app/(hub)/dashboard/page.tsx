@@ -1,10 +1,5 @@
-import { DashboardView } from "../../ui/hub/DashboardView";
-import { GameWeekProvider } from "../../ui/hub/GameWeekProvider";
+import { redirect } from "next/navigation";
 
 export default function DashboardPage() {
-  return (
-    <GameWeekProvider>
-      <DashboardView />
-    </GameWeekProvider>
-  );
+  redirect("/matchday");
 }

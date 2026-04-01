@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { TrendingUp } from "lucide-react";
+import { Minus, TrendingDown, TrendingUp } from "lucide-react";
 import { trackEvent } from "../../../lib/analytics";
 import {
   formatCurrency,
@@ -46,9 +46,16 @@ function PerformanceChart({
   roiPercentage: number;
 }) {
   const [selectedRange, setSelectedRange] = useState<LedgerRange>("1m");
-  const potTimeline = getPotTimelineForRange(selectedRange, new Date());
+  const potTimeline = getPotTimelineForRange(selectedRange);
   const chartGeometry = buildChartGeometry(potTimeline);
   const axisPoints = buildAxisPoints(potTimeline);
+  const rangeChange = getRangeChangeSummary(potTimeline, selectedRange);
+  const RangeChangeIcon =
+    rangeChange.direction === "positive"
+      ? TrendingUp
+      : rangeChange.direction === "negative"
+        ? TrendingDown
+        : Minus;
 
   return (
     <div className="hub-chart-panel">
@@ -57,9 +64,17 @@ function PerformanceChart({
           <p className="hub-label">Syndicate Performance Over Time</p>
           <div className="hub-chart-value-row">
             <h1>{formatPercent(roiPercentage)}</h1>
-            <span className="hub-success-text">
-              <TrendingUp size={16} />
-              2.4% this week
+            <span
+              className={
+                rangeChange.direction === "positive"
+                  ? "hub-success-text"
+                  : rangeChange.direction === "negative"
+                    ? "hub-danger-text"
+                    : ""
+              }
+            >
+              <RangeChangeIcon size={16} />
+              {rangeChange.label}
             </span>
           </div>
         </div>
@@ -232,6 +247,40 @@ function buildAxisPoints(timeline: ReturnType<typeof getPotTimelineForRange>) {
       index === targetCount - 1 ? lastIndex : Math.round(index * step);
     return timeline[pointIndex];
   });
+}
+
+function getRangeChangeSummary(
+  timeline: ReturnType<typeof getPotTimelineForRange>,
+  range: LedgerRange,
+) {
+  const firstPoint = timeline[0];
+  const lastPoint = timeline[timeline.length - 1];
+  const rangeLabel =
+    range === "1w"
+      ? "this week"
+      : range === "2w"
+        ? "past 2 weeks"
+        : "past month";
+
+  if (!firstPoint || !lastPoint || firstPoint.potValue === 0) {
+    return {
+      direction: "neutral" as const,
+      label: `0.0% ${rangeLabel}`,
+    };
+  }
+
+  const changePercent =
+    ((lastPoint.potValue - firstPoint.potValue) / firstPoint.potValue) * 100;
+
+  return {
+    direction:
+      changePercent > 0
+        ? ("positive" as const)
+        : changePercent < 0
+          ? ("negative" as const)
+          : ("neutral" as const),
+    label: `${formatPercent(changePercent)} ${rangeLabel}`,
+  };
 }
 
 function SummaryCard({ label, value }: { label: string; value: string }) {

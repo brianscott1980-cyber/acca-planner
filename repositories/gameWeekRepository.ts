@@ -5,6 +5,16 @@ import {
 } from "../data/gameWeeks";
 import { formatCurrency, getLedgerSummary } from "../app/ui/hub/ledgerService";
 import { getLadbrokesSelectionDisplayOdds, getLadbrokesSelectionOdds } from "./ladbrokesOddsRepository";
+import {
+  getCurrentSimulatedGameWeek,
+  getCompletedSimulatedGameWeeks,
+  getGameWeekSimulation,
+  getGameWeekTimingLabel,
+  getSimulatedNow,
+  getSettledSimulatedTimelineRecords,
+  getSortedGameWeeks,
+  getVisibleSimulatedTimelineRecords,
+} from "./leagueSimulationRepository";
 
 export type ProposalBetLine = GameWeekProposalRecord["betLines"][number];
 
@@ -21,11 +31,19 @@ export type BetLineInsight = {
 };
 
 export function getCurrentGameWeek() {
-  return gameWeeks[0];
+  return getCurrentSimulatedGameWeek();
+}
+
+export function getGameWeekById(gameWeekId: string | null | undefined) {
+  if (!gameWeekId) {
+    return null;
+  }
+
+  return getSortedGameWeeks().find((gameWeek) => gameWeek.id === gameWeekId) ?? null;
 }
 
 export function getGameWeeks() {
-  return gameWeeks;
+  return getSortedGameWeeks();
 }
 
 export function getCurrentMatchdayNumber() {
@@ -36,7 +54,67 @@ export function getCurrentMatchdayNumber() {
 }
 
 export function getCompletedGameWeekCount() {
-  return gameWeeks.filter((gameWeek) => gameWeek.startsIn === "Closed").length;
+  return getCompletedSimulatedGameWeeks().length;
+}
+
+export function getCurrentGameWeekTimingLabel() {
+  return getGameWeekTimingLabel(getCurrentGameWeek());
+}
+
+export function getGameWeekTimingStatusLabel(gameWeek: GameWeekRecord) {
+  return getGameWeekTimingLabel(gameWeek);
+}
+
+export function getGameWeekTimelineRecords() {
+  return getSettledSimulatedTimelineRecords()
+    .map(({ gameWeek, simulation }) => {
+      const proposal = gameWeek.proposals.find(
+        (entry) => entry.id === simulation.simulatedSlip.proposalId,
+      );
+
+      if (!proposal) {
+        return null;
+      }
+
+      return {
+        gameWeek,
+        proposal,
+        simulation,
+      };
+    })
+    .filter((entry) => entry !== null);
+}
+
+export function getVisibleGameWeekTimelineRecords() {
+  return getVisibleSimulatedTimelineRecords()
+    .map(({ gameWeek, simulation }) => {
+      const proposal = gameWeek.proposals.find(
+        (entry) => entry.id === simulation.simulatedSlip.proposalId,
+      );
+
+      if (!proposal) {
+        return null;
+      }
+
+      return {
+        gameWeek,
+        proposal,
+        simulation,
+      };
+    })
+    .filter((entry) => entry !== null);
+}
+
+export function isGameWeekVoteLocked(gameWeek: GameWeekRecord) {
+  const simulation = getGameWeekSimulation(gameWeek.id);
+
+  if (!simulation) {
+    return false;
+  }
+
+  return (
+    new Date(simulation.voteResolvedAtIso).getTime() <= getSimulatedNow().getTime()
+  );
 }
 
 export function getProposalVotes(

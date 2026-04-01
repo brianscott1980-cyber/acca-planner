@@ -282,6 +282,21 @@ button {
   text-shadow: 0 0 16px rgba(16, 185, 129, 0.22);
 }
 
+.hub-header-datetime {
+  min-width: 0;
+  text-align: right;
+}
+
+.hub-header-datetime-value {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--hub-success);
+  letter-spacing: -0.01em;
+  text-shadow: 0 0 16px rgba(16, 185, 129, 0.22);
+  white-space: nowrap;
+}
+
 .hub-divider {
   height: 2.25rem;
   width: 1px;
@@ -326,6 +341,10 @@ button {
   gap: 2rem;
 }
 
+.hub-grid-decision {
+  grid-template-columns: 1fr;
+}
+
 .hub-column-main,
 .hub-column-side,
 .hub-summary-stack,
@@ -354,6 +373,53 @@ button {
   margin-bottom: 1.5rem;
   padding-bottom: 1.25rem;
   border-bottom: 1px solid var(--hub-border);
+}
+
+.hub-decision-banner {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.9rem;
+  margin-bottom: 1.15rem;
+  padding: 1rem 1.05rem;
+  border: 1px solid rgba(178, 102, 255, 0.24);
+  border-radius: 1rem;
+  background:
+    linear-gradient(135deg, rgba(138, 44, 226, 0.16), rgba(138, 44, 226, 0.04)),
+    var(--hub-panel);
+}
+
+.hub-decision-banner-main {
+  display: flex;
+  min-width: 0;
+  align-items: flex-start;
+  gap: 0.9rem;
+}
+
+.hub-decision-banner-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 2rem;
+  width: 2rem;
+  border-radius: 999px;
+  background: rgba(178, 102, 255, 0.16);
+  color: var(--hub-primary-glow);
+  flex: none;
+}
+
+.hub-decision-banner-title {
+  margin: 0;
+  color: var(--hub-text);
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+.hub-decision-banner-copy {
+  margin: 0.18rem 0 0;
+  color: var(--hub-muted);
+  font-size: 0.8rem;
+  line-height: 1.55;
 }
 
 .hub-title {
@@ -676,6 +742,24 @@ button {
   gap: 0.85rem;
 }
 
+.hub-proposal-detail-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.hub-proposal-detail-main,
+.hub-proposal-detail-side {
+  min-width: 0;
+}
+
+.hub-proposal-detail-side {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
 @media (min-width: 641px) {
   .hub-proposal-top {
     display: grid;
@@ -704,6 +788,17 @@ button {
 
   .hub-approach-divider {
     display: block;
+  }
+
+  .hub-proposal-top-locked {
+    grid-template-columns: 1fr;
+  }
+
+  .hub-proposal-detail-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.35fr) minmax(17rem, 0.75fr);
+    align-items: start;
+    gap: 1.25rem;
   }
 }
 
@@ -749,6 +844,23 @@ button {
   width: 100%;
 }
 
+.hub-decision-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  width: 100%;
+  justify-content: center;
+  padding: 0.85rem 1rem;
+  border: 1px solid rgba(178, 102, 255, 0.22);
+  border-radius: 0.85rem;
+  background: rgba(138, 44, 226, 0.12);
+  color: var(--hub-primary-glow);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
 .hub-proposal-actions .hub-primary-button,
 .hub-proposal-actions .hub-secondary-button {
   width: 100%;
@@ -760,6 +872,10 @@ button {
   flex-direction: column;
   gap: 0.6rem;
   margin-top: 1rem;
+}
+
+.hub-bet-lines-locked {
+  margin-top: 0;
 }
 
 .hub-bet-line {
@@ -993,6 +1109,10 @@ button {
   overflow: hidden;
 }
 
+.hub-cashout-panel-inline {
+  margin-top: 0;
+}
+
 .hub-cashout-toggle {
   width: 100%;
   border: 0;
@@ -1121,6 +1241,33 @@ button {
   background: var(--hub-primary-glow);
 }
 
+.hub-primary-button-safe {
+  background: #10b981;
+  box-shadow: 0 0 18px rgba(16, 185, 129, 0.28);
+}
+
+.hub-primary-button-safe:hover {
+  background: #34d399;
+}
+
+.hub-primary-button-balanced {
+  background: #3b82f6;
+  box-shadow: 0 0 18px rgba(59, 130, 246, 0.28);
+}
+
+.hub-primary-button-balanced:hover {
+  background: #60a5fa;
+}
+
+.hub-primary-button-aggressive {
+  background: #f59e0b;
+  box-shadow: 0 0 18px rgba(245, 158, 11, 0.28);
+}
+
+.hub-primary-button-aggressive:hover {
+  background: #fbbf24;
+}
+
 .hub-secondary-button {
   border-color: var(--hub-border);
   background: var(--hub-surface);
@@ -1151,6 +1298,45 @@ button {
   background-size: 200% 100%;
   animation: hub-border-flow 3s linear infinite;
   z-index: -2;
+}
+
+.hub-proposal-actions .hub-secondary-button-safe::before {
+  background:
+    linear-gradient(
+      90deg,
+      transparent,
+      transparent,
+      rgba(16, 185, 129, 0.72),
+      transparent,
+      transparent
+    );
+  background-size: 200% 100%;
+}
+
+.hub-proposal-actions .hub-secondary-button-balanced::before {
+  background:
+    linear-gradient(
+      90deg,
+      transparent,
+      transparent,
+      rgba(59, 130, 246, 0.72),
+      transparent,
+      transparent
+    );
+  background-size: 200% 100%;
+}
+
+.hub-proposal-actions .hub-secondary-button-aggressive::before {
+  background:
+    linear-gradient(
+      90deg,
+      transparent,
+      transparent,
+      rgba(245, 158, 11, 0.72),
+      transparent,
+      transparent
+    );
+  background-size: 200% 100%;
 }
 
 .hub-proposal-actions .hub-secondary-button::after {
@@ -1188,9 +1374,18 @@ button {
   margin: 1.5rem 0 2rem;
 }
 
+.hub-ring-wrap.is-compact {
+  margin: 0;
+}
+
 .hub-ring {
   height: 12rem;
   width: 12rem;
+}
+
+.hub-ring-wrap.is-compact .hub-ring {
+  height: 8.5rem;
+  width: 8.5rem;
 }
 
 .hub-ring-progress {
@@ -1213,6 +1408,10 @@ button {
   font-family: ui-monospace, "SFMono-Regular", monospace;
 }
 
+.hub-ring-wrap.is-compact .hub-ring-value {
+  font-size: 1.55rem;
+}
+
 .hub-ring-label,
 .hub-ring-threshold {
   font-size: 0.72rem;
@@ -1225,8 +1424,128 @@ button {
   color: var(--hub-primary-glow);
 }
 
+.hub-ring-wrap.is-compact .hub-ring-label,
+.hub-ring-wrap.is-compact .hub-ring-threshold {
+  font-size: 0.62rem;
+}
+
+.hub-consensus-inline-panel {
+  display: flex;
+  justify-content: center;
+  padding: 0.95rem 1rem;
+  border: 1px solid var(--hub-border);
+  border-radius: 1rem;
+  background: var(--hub-bg);
+}
+
+.hub-vote-breakdown {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.9rem;
+}
+
+.hub-sticky-panel .hub-vote-breakdown {
+  margin-top: calc(1.5rem + 20px);
+  margin-bottom: 20px;
+}
+
+.hub-vote-breakdown-chart {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 8.75rem;
+  height: 8.75rem;
+  margin-bottom: 10px;
+  border-radius: 999px;
+  flex: none;
+}
+
+.hub-vote-breakdown-chart::after {
+  content: "";
+  position: absolute;
+  inset: 0.57rem;
+  border-radius: 999px;
+  background: var(--hub-bg);
+}
+
+.hub-vote-breakdown-center {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.hub-vote-breakdown-value {
+  font-family: ui-monospace, "SFMono-Regular", monospace;
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: var(--hub-text);
+}
+
+.hub-vote-breakdown-label {
+  color: var(--hub-muted);
+  font-size: 0.64rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.hub-vote-breakdown-legend {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.45rem 0.75rem;
+}
+
+.hub-vote-breakdown-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--hub-muted);
+  font-size: 0.68rem;
+  font-weight: 700;
+}
+
+.hub-vote-breakdown-legend-dot {
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 999px;
+  flex: none;
+}
+
+.hub-proposal-metrics-stacked {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.95rem;
+}
+
+.hub-proposal-metrics-stacked > div {
+  min-width: 0;
+}
+
+.hub-approach-metric-locked {
+  display: block;
+  text-align: left;
+}
+
 .hub-voter-block {
   margin-bottom: 1.5rem;
+}
+
+.hub-voter-block-banner {
+  margin: 0;
+  flex: none;
+  padding-top: 0;
+  text-align: right;
+}
+
+.hub-voter-block-banner .hub-voters {
+  justify-content: flex-end;
+  margin-top: 0.55rem;
 }
 
 .hub-voters {
@@ -1347,8 +1666,45 @@ button {
   background: var(--hub-border);
 }
 
+.hub-timeline-dot.is-funded,
+.hub-dot.is-funded {
+  background: var(--hub-success);
+  box-shadow: 0 0 14px rgba(16, 185, 129, 0.28);
+}
+
+.hub-timeline-dot.is-placed,
+.hub-dot.is-placed {
+  background: var(--hub-primary);
+  box-shadow: 0 0 14px rgba(138, 44, 226, 0.28);
+}
+
+.hub-timeline-dot.is-voted,
+.hub-dot.is-voted {
+  background: #4f83ff;
+  box-shadow: 0 0 14px rgba(79, 131, 255, 0.28);
+}
+
 .hub-timeline-card {
   padding: 1.4rem;
+}
+
+.hub-timeline-card.is-clickable {
+  cursor: pointer;
+  transition:
+    transform 160ms ease,
+    border-color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.hub-timeline-card.is-clickable:hover {
+  transform: translateY(-1px);
+  border-color: rgba(178, 102, 255, 0.2);
+  box-shadow: 0 18px 32px rgba(0, 0, 0, 0.2);
+}
+
+.hub-timeline-card.is-clickable:focus-visible {
+  outline: 2px solid rgba(178, 102, 255, 0.45);
+  outline-offset: 2px;
 }
 
 .hub-timeline-card.is-muted {
@@ -1382,6 +1738,24 @@ button {
   background: rgba(239, 68, 68, 0.12);
   border: 1px solid rgba(239, 68, 68, 0.24);
   color: var(--hub-danger);
+}
+
+.hub-outcome.is-funded {
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.24);
+  color: var(--hub-success);
+}
+
+.hub-outcome.is-placed {
+  background: rgba(138, 44, 226, 0.12);
+  border: 1px solid rgba(138, 44, 226, 0.24);
+  color: var(--hub-primary-glow);
+}
+
+.hub-outcome.is-voted {
+  background: rgba(79, 131, 255, 0.12);
+  border: 1px solid rgba(79, 131, 255, 0.24);
+  color: #86a8ff;
 }
 
 .hub-stat-grid {
@@ -1715,6 +2089,11 @@ button {
     flex-wrap: wrap;
   }
 
+  .hub-header-datetime {
+    width: 100%;
+    text-align: left;
+  }
+
   .hub-roi {
     width: 100%;
   }
@@ -1731,6 +2110,10 @@ button {
 
   .hub-grid-mobile-voted {
     grid-template-columns: 1fr;
+  }
+
+  .hub-grid-decision .hub-card-stack-desktop {
+    display: flex;
   }
 
   .hub-grid-mobile-voted .hub-column-main {
@@ -1841,6 +2224,11 @@ button {
     align-items: flex-start;
     justify-content: space-between;
     gap: 0.75rem;
+  }
+
+  .hub-header-datetime {
+    width: 100%;
+    text-align: left;
   }
 
   .hub-header-group > div:not(.hub-divider) {

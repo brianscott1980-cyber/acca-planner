@@ -1,4 +1,9 @@
-import { getMemberCount, getMembers } from "../../../repositories/userService";
+import {
+  ledgerData,
+  type LedgerTransactionRecord,
+} from "../../../data/ledgerData";
+import { getMemberCount } from "../../../repositories/userService";
+import { getSimulatedNow } from "../../../repositories/leagueSimulationRepository";
 
 export type LedgerActivity = {
   title: string;
@@ -16,55 +21,42 @@ export type PotTimelinePoint = {
 
 export type LedgerRange = "1w" | "2w" | "1m";
 
-type LedgerSnapshot = {
-  totalProfitOverall: number;
-  recentActivity: LedgerActivity[];
-};
-
-const memberDepositEntries: LedgerActivity[] = getMembers().map((member) => ({
-  title: member.displayName,
-  date: "Mar 23, 2026",
-  amount: 10,
-  tone: "positive",
-  kind: "deposit",
-}));
-
-const ledgerSnapshot: LedgerSnapshot = {
-  totalProfitOverall: 0,
-  recentActivity: memberDepositEntries,
-};
-
 export function getLedgerSummary() {
   const memberCount = getMemberCount();
-  const initialPotTotal = getInitialPotTotal();
   const totalDeposits = roundCurrency(
-    ledgerSnapshot.recentActivity
+    ledgerData
       .filter((entry) => entry.kind === "deposit")
       .reduce((sum, entry) => sum + entry.amount, 0),
   );
-  const currentPot = roundCurrency(
-    totalDeposits + ledgerSnapshot.totalProfitOverall,
+  const totalProfitOverall = roundCurrency(
+    ledgerData
+      .filter((entry) => entry.kind !== "deposit")
+      .reduce((sum, entry) => sum + entry.amount, 0),
   );
+  const currentPot = roundCurrency(totalDeposits + totalProfitOverall);
   const sharePerMember =
     memberCount === 0 ? 0 : roundCurrency(currentPot / memberCount);
   const roiPercentage =
-    totalDeposits === 0
-      ? 0
-      : (ledgerSnapshot.totalProfitOverall / totalDeposits) * 100;
+    totalDeposits === 0 ? 0 : (totalProfitOverall / totalDeposits) * 100;
 
   return {
     currentPot,
     sharePerMember,
     roiPercentage,
     memberCount,
-    initialPotTotal,
+    initialPotTotal: getInitialPotTotal(),
     totalDeposits,
-    totalProfitOverall: ledgerSnapshot.totalProfitOverall,
+    totalProfitOverall,
   };
 }
 
 export function getRecentLedgerActivity(limit?: number) {
-  const normalizedActivity = ledgerSnapshot.recentActivity.map(normalizeLedgerActivity);
+  const normalizedActivity = [...ledgerData]
+    .sort(
+      (left, right) =>
+        new Date(right.dateIso).getTime() - new Date(left.dateIso).getTime(),
+    )
+    .map(normalizeLedgerActivity);
 
   if (typeof limit === "number") {
     return normalizedActivity.slice(0, limit);
@@ -75,22 +67,22 @@ export function getRecentLedgerActivity(limit?: number) {
 
 export function getPotTimelineForRange(
   range: LedgerRange,
-  today: Date = new Date(),
+  today: Date = getSimulatedNow(),
 ) {
   const rangeStart = getRangeStart(today, range);
   const rangeStartKey = formatDateKey(rangeStart);
   const todayKey = formatDateKey(today);
 
   const groupedByDate = new Map<string, number>();
-  const sortedEntries = [...ledgerSnapshot.recentActivity].sort(
+  const sortedEntries = [...ledgerData].sort(
     (left, right) =>
-      new Date(left.date).getTime() - new Date(right.date).getTime(),
+      new Date(left.dateIso).getTime() - new Date(right.dateIso).getTime(),
   );
 
   let openingPot = 0;
 
   for (const entry of sortedEntries) {
-    const dateKey = toDateKey(entry.date);
+    const dateKey = toDateKey(entry.dateIso);
 
     if (dateKey < rangeStartKey) {
       openingPot = roundCurrency(openingPot + entry.amount);
@@ -161,29 +153,30 @@ function roundCurrency(value: number) {
   return Math.round(value * 100) / 100;
 }
 
-function normalizeLedgerActivity(entry: LedgerActivity) {
+function normalizeLedgerActivity(entry: LedgerTransactionRecord): LedgerActivity {
   return {
-    ...entry,
+    title: entry.title,
+    date: formatLedgerActivityDate(entry.dateIso),
+    amount: entry.amount,
     tone: entry.amount >= 0 ? "positive" : "negative",
-  } as LedgerActivity;
+    kind: entry.kind,
+  };
 }
 
 function getInitialPotTotal() {
-  const depositEntries = ledgerSnapshot.recentActivity.filter(
-    (entry) => entry.kind === "deposit",
-  );
+  const depositEntries = ledgerData.filter((entry) => entry.kind === "deposit");
 
   if (depositEntries.length === 0) {
     return 0;
   }
 
   const firstDepositDateKey = depositEntries
-    .map((entry) => toDateKey(entry.date))
+    .map((entry) => toDateKey(entry.dateIso))
     .sort()[0];
 
   return roundCurrency(
     depositEntries
-      .filter((entry) => toDateKey(entry.date) === firstDepositDateKey)
+      .filter((entry) => toDateKey(entry.dateIso) === firstDepositDateKey)
       .reduce((sum, entry) => sum + entry.amount, 0),
   );
 }
@@ -231,4 +224,12 @@ function formatChartDateLabel(dateKey: string) {
   })
     .format(new Date(dateKey))
     .toUpperCase();
+}
+
+function formatLedgerActivityDate(value: string) {
+  return new Intl.DateTimeFormat("en-GB", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  }).format(new Date(value));
 }

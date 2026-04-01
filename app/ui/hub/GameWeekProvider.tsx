@@ -3,14 +3,15 @@
 import {
   createContext,
   useContext,
-  useEffect,
   useMemo,
   useState,
   type ReactNode,
 } from "react";
 import type { GameWeekRecord } from "../../../data/gameWeeks";
 import {
+  getGameWeekById,
   getCurrentGameWeek,
+  isGameWeekVoteLocked,
   updateUserVoteForGameWeek,
 } from "../../../repositories/gameWeekRepository";
 import { getLoggedInUser } from "../../../repositories/authenticationService";
@@ -26,31 +27,17 @@ const GameWeekContext = createContext<GameWeekContextValue | null>(null);
 
 type GameWeekProviderProps = {
   children: ReactNode;
+  gameWeekId?: string | null;
 };
 
-export function GameWeekProvider({ children }: GameWeekProviderProps) {
+export function GameWeekProvider({
+  children,
+  gameWeekId = null,
+}: GameWeekProviderProps) {
   const loggedInUser = getLoggedInUser();
   const [currentGameWeek, setCurrentGameWeek] = useState(() =>
-    getInitialGameWeekState(loggedInUser?.id ?? null),
+    getInitialGameWeekState(loggedInUser?.id ?? null, gameWeekId),
   );
-
-  useEffect(() => {
-    if (!loggedInUser) {
-      return;
-    }
-
-    const baseGameWeek = getInitialGameWeekState(loggedInUser.id);
-    const persistedVote = readPersistedVote(baseGameWeek.id, loggedInUser.id);
-
-    if (!persistedVote || !hasProposal(baseGameWeek, persistedVote)) {
-      setCurrentGameWeek(baseGameWeek);
-      return;
-    }
-
-    setCurrentGameWeek(
-      updateUserVoteForGameWeek(baseGameWeek, loggedInUser.id, persistedVote),
-    );
-  }, [loggedInUser]);
 
   const value = useMemo<GameWeekContextValue>(
     () => ({
@@ -58,6 +45,10 @@ export function GameWeekProvider({ children }: GameWeekProviderProps) {
       loggedInUserId: loggedInUser?.id ?? null,
       castVote(proposalId: string) {
         if (!loggedInUser) {
+          return;
+        }
+
+        if (isGameWeekVoteLocked(currentGameWeek)) {
           return;
         }
 
@@ -75,6 +66,10 @@ export function GameWeekProvider({ children }: GameWeekProviderProps) {
       },
       clearVote() {
         if (!loggedInUser) {
+          return;
+        }
+
+        if (isGameWeekVoteLocked(currentGameWeek)) {
           return;
         }
 
@@ -108,10 +103,13 @@ export function useCurrentGameWeek() {
   return context;
 }
 
-function getInitialGameWeekState(loggedInUserId: string | null) {
-  const currentGameWeek = getCurrentGameWeek();
+function getInitialGameWeekState(
+  loggedInUserId: string | null,
+  gameWeekId: string | null,
+) {
+  const currentGameWeek = getGameWeekById(gameWeekId) ?? getCurrentGameWeek();
 
-  if (!loggedInUserId) {
+  if (!loggedInUserId || isGameWeekVoteLocked(currentGameWeek)) {
     return currentGameWeek;
   }
 

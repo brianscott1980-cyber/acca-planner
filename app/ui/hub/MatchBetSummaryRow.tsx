@@ -4,6 +4,7 @@ import { ChevronRight } from "lucide-react";
 import type {
   BetLineFormMatch,
   BetLineFormOutcome,
+  SimulatedSlipLegStatus,
 } from "../../../data/gameWeeks";
 import type {
   BetLineInsight,
@@ -18,7 +19,7 @@ type MatchBetSummaryRowProps = {
   insight?: BetLineInsight | null;
   isExpanded: boolean;
   onToggle: () => void;
-  settlementStatus?: "won" | "lost";
+  settlementStatus?: SimulatedSlipLegStatus;
 };
 
 export function MatchBetSummaryRow({
@@ -98,16 +99,24 @@ export function MatchBetSummaryRow({
           ) : null}
         </div>
         <span className="hub-bet-line-pill-wrap">
-          <span className="hub-bet-line-pill">{displayOdds}</span>
           {settlementStatus ? (
             <span
               className={`hub-outcome ${
-                settlementStatus === "won" ? "is-win" : "is-loss"
+                settlementStatus === "won"
+                  ? "is-win"
+                  : settlementStatus === "lost"
+                    ? "is-loss"
+                    : "is-cashed-out"
               }`}
             >
-              {settlementStatus === "won" ? "Won" : "Lost"}
+              {settlementStatus === "won"
+                ? "Won"
+                : settlementStatus === "lost"
+                  ? "Lost"
+                  : "Cashout"}
             </span>
           ) : null}
+          <span className="hub-bet-line-pill">{displayOdds}</span>
         </span>
       </button>
 
