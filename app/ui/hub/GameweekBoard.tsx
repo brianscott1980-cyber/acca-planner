@@ -583,26 +583,26 @@ function AccumulatorCard({
                   <h2 className="hub-proposal-title">{displayTitle}</h2>
                 )}
               </div>
-              <p className="hub-proposal-summary">{card.summary}</p>
-              <div className="hub-proposal-meta-row">
-                <span
-                  className={`hub-tag hub-tag-${card.riskLevel} hub-risk-indicator`}
-                >
-                  {card.statusLabel}
-                </span>
-                {card.aiRecommended ? (
-                  <span className="hub-ai-tag hub-ai-tag-full">
-                    <Sparkles size={12} />
-                    Ai Recommended Strategy
-                  </span>
-                ) : null}
-              </div>
             </div>
             {compactTitle ? (
               <div
                 className="hub-proposal-icon hub-proposal-icon-spacer"
                 aria-hidden="true"
               />
+            ) : null}
+          </div>
+          <p className="hub-proposal-summary">{card.summary}</p>
+          <div className="hub-proposal-meta-row">
+            <span
+              className={`hub-tag hub-tag-${card.riskLevel} hub-risk-indicator`}
+            >
+              {card.statusLabel}
+            </span>
+            {card.aiRecommended ? (
+              <span className="hub-ai-tag hub-ai-tag-full">
+                <Sparkles size={12} />
+                Ai Recommended Strategy
+              </span>
             ) : null}
           </div>
         </div>

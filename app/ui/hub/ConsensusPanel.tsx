@@ -1,6 +1,6 @@
 "use client";
 
-import { Vote } from "lucide-react";
+import { Flame, Scale, Shield, Vote } from "lucide-react";
 import { getLeadingProposal } from "../../../repositories/gameWeekRepository";
 import { trackEvent } from "../../../lib/analytics";
 import { getMembers, getUserInitials } from "../../../repositories/userService";
@@ -17,8 +17,9 @@ export function ConsensusPanel() {
   const members = getMembers();
   const leadingProposal = getLeadingProposal(currentGameWeek);
   const votesByUserId = currentGameWeek.votesByUserId;
+  const currentUserVote = loggedInUserId ? votesByUserId[loggedInUserId] ?? null : null;
   const hasCurrentUserVote = loggedInUserId
-    ? Boolean(votesByUserId[loggedInUserId])
+    ? Boolean(currentUserVote)
     : false;
   const votedMembers = members.filter(
     (member) => typeof votesByUserId[member.id] === "string",
@@ -74,21 +75,103 @@ export function ConsensusPanel() {
       ) : null}
 
       {hasCurrentUserVote && voteSimulationStatus === "idle" ? (
-        <button
-          className="hub-secondary-button hub-mobile-change-vote"
-          type="button"
-          onClick={() => {
-            trackEvent("clear_vote", {
-              surface: "consensus_panel_mobile",
-            });
-            clearVote();
-          }}
-        >
-          Change vote
-        </button>
+        <>
+          <p className="hub-mobile-vote-message">
+            <span className="hub-mobile-vote-message-content">
+              <span
+                className={`hub-proposal-icon hub-mobile-vote-message-icon ${getVoteMessageIconClassName(
+                  currentUserVote,
+                )}`}
+                aria-hidden="true"
+              >
+                <VoteMessageIcon vote={currentUserVote} />
+              </span>
+              <span className={getVoteMessageTextClassName(currentUserVote)}>
+                You voted {formatVoteLabel(currentUserVote)}
+              </span>
+            </span>
+          </p>
+          <button
+            className="hub-secondary-button hub-mobile-change-vote"
+            type="button"
+            onClick={() => {
+              trackEvent("clear_vote", {
+                surface: "consensus_panel_mobile",
+              });
+              clearVote();
+            }}
+          >
+            Change my Vote
+          </button>
+        </>
       ) : null}
+
     </section>
   );
+}
+
+function formatVoteLabel(vote: string | null) {
+  if (vote === "defensive") {
+    return "Defensive";
+  }
+
+  if (vote === "neutral") {
+    return "Neutral";
+  }
+
+  if (vote === "aggressive") {
+    return "Aggressive";
+  }
+
+  return "Unknown";
+}
+
+function VoteMessageIcon({ vote }: { vote: string | null }) {
+  if (vote === "defensive") {
+    return <Shield size={16} />;
+  }
+
+  if (vote === "neutral") {
+    return <Scale size={16} />;
+  }
+
+  if (vote === "aggressive") {
+    return <Flame size={16} />;
+  }
+
+  return <Vote size={16} />;
+}
+
+function getVoteMessageIconClassName(vote: string | null) {
+  if (vote === "defensive") {
+    return "hub-proposal-icon-safe";
+  }
+
+  if (vote === "neutral") {
+    return "hub-proposal-icon-balanced";
+  }
+
+  if (vote === "aggressive") {
+    return "hub-proposal-icon-aggressive";
+  }
+
+  return "";
+}
+
+function getVoteMessageTextClassName(vote: string | null) {
+  if (vote === "defensive") {
+    return "hub-success-text";
+  }
+
+  if (vote === "neutral") {
+    return "hub-accent-text";
+  }
+
+  if (vote === "aggressive") {
+    return "hub-warning-text";
+  }
+
+  return "";
 }
 
 export function AvatarBadge({

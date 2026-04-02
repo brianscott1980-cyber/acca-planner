@@ -230,8 +230,8 @@ button {
 .hub-mobile-user-avatar {
   display: none;
   place-items: center;
-  height: 2.5rem;
-  width: 2.5rem;
+  height: 2.25rem;
+  width: 2.25rem;
   border: 1px solid rgba(178, 102, 255, 0.24);
   border-radius: 999px;
   background: linear-gradient(135deg, var(--hub-primary), #4c1d95);
@@ -240,6 +240,7 @@ button {
   font-weight: 700;
   box-shadow: 0 0 18px rgba(138, 44, 226, 0.22);
   flex: none;
+  cursor: pointer;
 }
 
 .auth-shell {
@@ -837,6 +838,70 @@ button {
 
 .hub-secondary-button.hub-mobile-change-vote {
   display: none;
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border-color: transparent;
+  background: transparent;
+  color: var(--hub-danger);
+}
+
+.hub-secondary-button.hub-mobile-change-vote::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  background:
+    linear-gradient(
+      90deg,
+      transparent,
+      transparent,
+      rgba(239, 68, 68, 0.72),
+      transparent,
+      transparent
+    );
+  background-size: 200% 100%;
+  animation: hub-border-flow 3s linear infinite;
+  z-index: -2;
+}
+
+.hub-secondary-button.hub-mobile-change-vote::after {
+  content: "";
+  position: absolute;
+  inset: 1px;
+  border-radius: calc(0.85rem - 1px);
+  background: var(--hub-surface);
+  z-index: -1;
+  transition: background-color 160ms ease;
+}
+
+.hub-secondary-button.hub-mobile-change-vote:hover {
+  background: transparent;
+  color: #fca5a5;
+}
+
+.hub-secondary-button.hub-mobile-change-vote:hover::after {
+  background: rgba(239, 68, 68, 0.06);
+}
+
+.hub-mobile-vote-message {
+  display: none;
+  margin: 1rem 0;
+  font-size: 0.88rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+.hub-mobile-vote-message-content {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+}
+
+.hub-mobile-vote-message-icon {
+  height: 2rem;
+  width: 2rem;
+  border-radius: 0.75rem;
 }
 
 .hub-proposal-card {
@@ -899,6 +964,10 @@ button {
   min-width: 0;
 }
 
+.hub-proposal-overview {
+  width: 100%;
+}
+
 .hub-proposal-title-wrap,
 .hub-leg-title {
   display: flex;
@@ -946,6 +1015,7 @@ button {
 
 .hub-proposal-summary {
   margin: 0.35rem 0 0;
+  width: 100%;
   color: var(--hub-muted);
   font-size: 0.82rem;
   line-height: 1.45;
@@ -1347,7 +1417,7 @@ button {
   display: grid;
   grid-template-columns: 4.75rem minmax(0, 1fr);
   align-items: start;
-  column-gap: 0.35rem;
+  column-gap: 0.50rem;
 }
 
 .hub-bet-line-detail-row-form {
@@ -1365,6 +1435,7 @@ button {
 
 .hub-bet-line-detail-label {
   display: block;
+  align-self: start;
 }
 
 .hub-bet-line-detail-value {
@@ -2122,7 +2193,26 @@ button {
   opacity: 0.86;
 }
 
+.hub-timeline-head {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.hub-timeline-head-row,
+.hub-timeline-meta-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.hub-timeline-meta-spacer {
+  flex: 1 1 auto;
+}
+
 .hub-timeline-head h2 {
+  margin: 0;
   font-size: 1.35rem;
 }
 
@@ -2134,7 +2224,6 @@ button {
 
 .hub-timeline-head p,
 .hub-leg-title span {
-  margin-top: 0.25rem;
   color: var(--hub-muted);
   font-size: 0.9rem;
 }
@@ -2597,6 +2686,39 @@ button {
   margin-top: 0.55rem;
 }
 
+.hub-mobile-profile-modal {
+  position: relative;
+  width: min(24rem, 100%);
+  max-height: none;
+}
+
+.hub-mobile-profile-body {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.hub-mobile-profile-summary {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+}
+
+.hub-mobile-profile-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+}
+
+.hub-mobile-profile-avatar {
+  flex: none;
+}
+
+.hub-mobile-profile-signout {
+  width: 100%;
+  justify-content: flex-start;
+}
+
 .hub-vote-closed-modal-action {
   width: 100%;
   justify-content: center;
@@ -2741,7 +2863,7 @@ button {
 
   .hub-brand {
     width: 100%;
-    padding: 0.25rem 0.5rem;
+    padding: 0.25rem 0;
   }
 
   .hub-timer {
@@ -2752,23 +2874,22 @@ button {
 
   .hub-nav {
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     align-items: stretch;
     width: 100%;
   }
 
   .hub-nav-item {
-    display: grid;
-    grid-auto-flow: column;
-    grid-auto-columns: max-content;
+    display: flex;
+    flex-direction: column;
     align-items: center;
-    align-content: center;
     justify-content: center;
     min-width: 0;
+    width: 100%;
     height: 3rem;
     min-height: 3rem;
     flex: none;
-    gap: 0.5rem;
+    gap: 0.24rem;
     padding: 0 0.5rem;
     border-width: 1px;
     border-left-width: 1px;
@@ -2780,6 +2901,7 @@ button {
   .hub-nav-item .hub-nav-icon {
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     line-height: 1;
   }
 
@@ -2787,8 +2909,8 @@ button {
     display: none !important;
   }
 
-  .hub-nav-user-name,
-  .hub-nav-user-signout {
+  .hub-nav-user,
+  .hub-header-datetime {
     display: none;
   }
 
@@ -2823,17 +2945,23 @@ button {
 
   .hub-header-group {
     flex-wrap: nowrap;
-    align-items: flex-start;
+    align-items: stretch;
     justify-content: space-between;
     gap: 0.75rem;
   }
 
-  .hub-header-datetime {
-    width: 100%;
-    text-align: left;
+  .hub-header-stat {
+    display: flex;
+    flex: 1 1 0;
+    min-width: 0;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
   }
 
-  .hub-header-group > div:not(.hub-divider) {
+  .hub-header-group > div:not(.hub-divider),
+  .hub-header-group > button {
     min-width: 0;
     flex: 1 1 0;
   }
@@ -2841,6 +2969,10 @@ button {
   .hub-header-group .hub-divider,
   .hub-header-group .hub-sparkline {
     display: none;
+  }
+
+  .hub-roi-row {
+    justify-content: center;
   }
 
   .hub-proposal-title-wrap {
@@ -2857,6 +2989,7 @@ button {
   .hub-proposal-title-wrap > div:nth-child(2) {
     flex: 1 1 auto;
     min-width: 0;
+    width: 100%;
   }
 
   .hub-proposal-heading-row {
@@ -2879,6 +3012,8 @@ button {
   .hub-proposal-icon {
     height: 2.35rem;
     width: 2.35rem;
+    min-width: 2.35rem;
+    flex: none;
     border-radius: 0.9rem;
   }
 
@@ -2889,6 +3024,7 @@ button {
 
   .hub-proposal-title {
     font-size: 1.2rem;
+    width: 100%;
   }
 
   .hub-carousel-button {
@@ -2921,19 +3057,44 @@ button {
     justify-content: center;
     gap: 0.2rem;
     height: 2.35rem;
+    width: 2.35rem;
     min-width: 2.35rem;
-    padding: 0 0.5rem;
+    padding: 0;
     border: 1px solid rgba(245, 158, 11, 0.32);
-    border-radius: 999px;
+    border-radius: 0.9rem;
     background: rgba(245, 158, 11, 0.16);
     color: #fbbf24;
     font-size: 0.56rem;
     transform: none;
   }
 
+  .hub-admin-controls-copy {
+    display: none;
+  }
+
+  .hub-admin-controls-icon {
+    display: none;
+  }
+
+  .hub-admin-controls {
+    align-items: flex-start;
+  }
+
+  .hub-admin-controls .hub-primary-button {
+    align-self: flex-start;
+    min-width: 0;
+    min-height: 2.35rem;
+    padding: 0.65rem 0.85rem;
+    font-size: 0.8rem;
+  }
+
   .hub-proposal-metrics {
     flex-wrap: nowrap;
     gap: 0.75rem;
+  }
+
+  .hub-proposal-side {
+    width: 100%;
   }
 
   .hub-proposal-metrics > div:not(.hub-metric-divider) {
@@ -2970,16 +3131,41 @@ button {
     margin-left: auto;
   }
 
-  .hub-mobile-change-vote {
+  .hub-secondary-button.hub-mobile-change-vote {
     display: inline-flex;
     width: 100%;
     margin-top: 1rem;
   }
 
-  .hub-leg-item,
-  .hub-axis {
+  .hub-mobile-vote-message {
+    display: block;
+  }
+
+  .hub-leg-item {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .hub-axis {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .hub-voter-block {
+    text-align: center;
+  }
+
+  .hub-voter-copy {
+    display: none;
+  }
+
+  .hub-voters {
+    justify-content: center;
+  }
+
+  .hub-sticky-panel .hub-vote-breakdown {
+    margin-top: calc(0.75rem + 10px);
   }
 
   .hub-avatar-badge {
@@ -3023,6 +3209,14 @@ button {
     grid-template-columns: 3.65rem minmax(0, 1fr);
   }
 
+  .hub-summary-stack {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .hub-summary-card {
+    min-height: 0;
+  }
+
   .hub-form-visual {
     gap: 0.45rem;
   }
@@ -3044,18 +3238,23 @@ button {
 
   .hub-ledger-table,
   .hub-ledger-table tbody,
-  .hub-ledger-table tr,
   .hub-ledger-table td {
     display: block;
     width: 100%;
   }
 
   .hub-ledger-table tr {
-    padding: 0.25rem 0;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    column-gap: 0.9rem;
+    row-gap: 0.1rem;
+    align-items: center;
+    padding: 0.45rem 0;
   }
 
   .hub-ledger-table td {
-    padding: 0.45rem 0;
+    width: auto;
+    padding: 0.15rem 0;
     border-top: 0;
   }
 
@@ -3063,7 +3262,34 @@ button {
     border-top: 1px solid rgba(39, 39, 42, 0.8);
   }
 
+  .hub-ledger-table td:nth-child(1) {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .hub-ledger-table td:nth-child(4) {
+    grid-column: 2;
+    grid-row: 1;
+    text-align: right;
+  }
+
+  .hub-ledger-table td:nth-child(2) {
+    grid-column: 1;
+    grid-row: 2;
+  }
+
+  .hub-ledger-table td:nth-child(3) {
+    grid-column: 2;
+    grid-row: 2;
+    text-align: right;
+  }
+
+  .hub-ledger-table-main {
+    min-width: 0;
+    gap: 0.7rem;
+  }
+
   .hub-ledger-table-amount {
-    text-align: left;
+    text-align: right;
   }
 }

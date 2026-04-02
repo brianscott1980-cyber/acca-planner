@@ -169,6 +169,7 @@ function TimelineMatchday({ entry }: { entry: TimelineEntry }) {
   const router = useRouter();
   const isNavigable = Boolean(entry.matchdayId);
   const isWin = entry.status === "win";
+  const isFundedEntry = entry.status === "funded";
   const outcomeLabel =
     entry.outcomeLabel ??
     (isWin
@@ -226,13 +227,24 @@ function TimelineMatchday({ entry }: { entry: TimelineEntry }) {
         }}
       >
         <div className="hub-timeline-head">
-          <div>
+          <div className="hub-timeline-head-row">
             <h2>{entry.title}</h2>
+            {!isFundedEntry ? (
+              <span className={`hub-outcome ${getTimelineStatusClassName(entry.status)}`}>
+                {outcomeLabel}
+              </span>
+            ) : null}
+          </div>
+          <div className="hub-timeline-meta-row">
+            {isFundedEntry ? (
+              <span className={`hub-outcome ${getTimelineStatusClassName(entry.status)}`}>
+                {outcomeLabel}
+              </span>
+            ) : (
+              <span className="hub-timeline-meta-spacer" aria-hidden="true" />
+            )}
             <p>{entry.dateRange}</p>
           </div>
-          <span className={`hub-outcome ${getTimelineStatusClassName(entry.status)}`}>
-            {outcomeLabel}
-          </span>
         </div>
 
         {shouldShowTimelineStrategyLabel(entry) ? (

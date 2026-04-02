@@ -10,6 +10,7 @@ import {
   Sparkles,
   User,
   Wallet,
+  X,
 } from "lucide-react";
 import {
   formatCurrency,
@@ -43,6 +44,7 @@ export function HubAppShell({ children }: HubAppShellProps) {
       ? 0
       : ledgerSummary.currentPot / ledgerSummary.memberCount;
   const [simulatedNow, setSimulatedNow] = useState(() => getSimulatedNow());
+  const [showMobileProfileDialog, setShowMobileProfileDialog] = useState(false);
   const initialSimulatedNowRef = useRef<Date | null>(null);
   const mountedAtRef = useRef<number | null>(null);
   const currentMatchdayNumber = getCurrentMatchdayNumber();
@@ -53,6 +55,7 @@ export function HubAppShell({ children }: HubAppShellProps) {
     router.push("/ledger");
   };
   const handleSignOut = async () => {
+    setShowMobileProfileDialog(false);
     await signOut();
     router.replace("/login");
   };
@@ -93,13 +96,15 @@ export function HubAppShell({ children }: HubAppShellProps) {
             <p className="hub-brand-subtitle">AI betting hub</p>
           </div>
           {currentUser ? (
-            <div
+            <button
+              type="button"
               className="hub-mobile-user-avatar"
               aria-label={`Logged in as ${currentUser.displayName}`}
               title={currentUser.displayName}
+              onClick={() => setShowMobileProfileDialog(true)}
             >
               {getUserInitials(currentUser.displayName)}
-            </div>
+            </button>
           ) : null}
         </div>
 
@@ -215,6 +220,60 @@ export function HubAppShell({ children }: HubAppShellProps) {
 
         <main className="hub-content">{children}</main>
       </div>
+
+      {currentUser && showMobileProfileDialog ? (
+        <div
+          className="hub-modal-backdrop"
+          role="presentation"
+          onClick={() => setShowMobileProfileDialog(false)}
+        >
+          <div
+            className="hub-modal hub-mobile-profile-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="mobile-profile-title"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="hub-modal-header">
+              <h2 id="mobile-profile-title" className="hub-panel-title">
+                Profile
+              </h2>
+
+              <button
+                className="hub-icon-button hub-mobile-profile-close"
+                type="button"
+                aria-label="Close profile dialog"
+                onClick={() => setShowMobileProfileDialog(false)}
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="hub-mobile-profile-body">
+              <div className="hub-mobile-profile-summary">
+                <span className="hub-avatar hub-mobile-profile-avatar">
+                  {getUserInitials(currentUser.displayName)}
+                </span>
+                <div>
+                  <p className="hub-profile-name">{currentUser.displayName}</p>
+                  <p className="hub-profile-meta">Signed in member</p>
+                </div>
+              </div>
+
+              <button
+                className="hub-nav-item hub-mobile-profile-signout"
+                type="button"
+                onClick={() => void handleSignOut()}
+              >
+                <span className="hub-nav-icon">
+                  <LogOut size={18} />
+                </span>
+                <span>Log Out</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }
