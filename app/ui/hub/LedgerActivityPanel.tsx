@@ -56,13 +56,13 @@ export function LedgerActivityPanel({
           }}
         >
           <div
-            className="hub-modal"
+            className="hub-modal hub-transactions-modal"
             role="dialog"
             aria-modal="true"
             aria-labelledby="all-transactions-title"
             onClick={(event) => event.stopPropagation()}
           >
-            <div className="hub-modal-header">
+            <div className="hub-modal-header hub-transactions-modal-header">
               <div>
                 <h2 id="all-transactions-title" className="hub-panel-title">
                   All Transactions

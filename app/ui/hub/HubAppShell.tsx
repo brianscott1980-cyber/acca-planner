@@ -29,6 +29,9 @@ type HubAppShellProps = {
   children: ReactNode;
 };
 
+const INSTALL_PROMPT_DISMISSED_SESSION_KEY =
+  "caddyshack-install-prompt-dismissed";
+
 type DeferredInstallPromptEvent = Event & {
   prompt: () => Promise<void>;
   userChoice: Promise<{
@@ -54,6 +57,7 @@ export function HubAppShell({ children }: HubAppShellProps) {
       : ledgerSummary.currentPot / ledgerSummary.memberCount;
   const [simulatedNow, setSimulatedNow] = useState(() => getSimulatedNow());
   const [showMobileProfileDialog, setShowMobileProfileDialog] = useState(false);
+  const [showMobileInstallDialog, setShowMobileInstallDialog] = useState(false);
   const [installPromptEvent, setInstallPromptEvent] =
     useState<DeferredInstallPromptEvent | null>(null);
   const [isInstallingApp, setIsInstallingApp] = useState(false);
@@ -72,7 +76,9 @@ export function HubAppShell({ children }: HubAppShellProps) {
     await signOut();
     router.replace("/login");
   };
-  const handleInstallApp = async (source: "sidebar" | "mobile_profile") => {
+  const handleInstallApp = async (
+    source: "sidebar" | "mobile_profile" | "mobile_install_prompt",
+  ) => {
     if (!installPromptEvent || isInstallingApp) {
       return;
     }
@@ -86,9 +92,19 @@ export function HubAppShell({ children }: HubAppShellProps) {
 
       trackEvent("install_app_choice", { source, outcome });
       setInstallPromptEvent(null);
+      setShowMobileInstallDialog(false);
     } finally {
       setIsInstallingApp(false);
     }
+  };
+
+  const dismissMobileInstallDialog = (method: "close" | "secondary_action") => {
+    if (typeof window !== "undefined") {
+      window.sessionStorage.setItem(INSTALL_PROMPT_DISMISSED_SESSION_KEY, "1");
+    }
+
+    trackEvent("install_app_dialog_dismissed", { method });
+    setShowMobileInstallDialog(false);
   };
 
   useEffect(() => {
@@ -141,6 +157,7 @@ export function HubAppShell({ children }: HubAppShellProps) {
       setInstallPromptEvent(null);
       setIsInstallingApp(false);
       setShowMobileProfileDialog(false);
+      setShowMobileInstallDialog(false);
     };
 
     syncInstallAvailability();
@@ -154,6 +171,28 @@ export function HubAppShell({ children }: HubAppShellProps) {
       window.removeEventListener("appinstalled", handleAppInstalled);
     };
   }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    if (!installPromptEvent) {
+      setShowMobileInstallDialog(false);
+      return;
+    }
+
+    const isMobileViewport = window.matchMedia("(max-width: 640px)").matches;
+    const isDismissedForSession =
+      window.sessionStorage.getItem(INSTALL_PROMPT_DISMISSED_SESSION_KEY) === "1";
+
+    if (!isMobileViewport || isDismissedForSession) {
+      return;
+    }
+
+    setShowMobileInstallDialog(true);
+    trackEvent("install_app_dialog_shown", { surface: "mobile_on_load" });
+  }, [installPromptEvent]);
 
   return (
     <div className="hub-shell">
@@ -345,28 +384,89 @@ export function HubAppShell({ children }: HubAppShellProps) {
                 </div>
               </div>
 
-              <button
-                className="hub-nav-item hub-mobile-profile-install"
-                type="button"
-                onClick={() => void handleInstallApp("mobile_profile")}
-                disabled={isInstallingApp}
-              >
-                <span className="hub-nav-icon">
-                  <Download size={18} />
-                </span>
-                <span>{isInstallingApp ? "Installing..." : "Install App"}</span>
-              </button>
+              <div className="hub-mobile-profile-actions">
+                {canInstallApp ? (
+                  <button
+                    className="hub-nav-item hub-mobile-profile-install"
+                    type="button"
+                    onClick={() => void handleInstallApp("mobile_profile")}
+                    disabled={isInstallingApp}
+                  >
+                    <span className="hub-nav-icon">
+                      <Download size={18} />
+                    </span>
+                    <span>{isInstallingApp ? "Installing..." : "Install App"}</span>
+                  </button>
+                ) : null}
+
+                <button
+                  className="hub-nav-item hub-mobile-profile-signout"
+                  type="button"
+                  onClick={() => void handleSignOut()}
+                >
+                  <span className="hub-nav-icon">
+                    <LogOut size={18} />
+                  </span>
+                  <span>Log Out</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {showMobileInstallDialog ? (
+        <div
+          className="hub-modal-backdrop"
+          role="presentation"
+          onClick={() => dismissMobileInstallDialog("close")}
+        >
+          <div
+            className="hub-modal hub-mobile-install-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="mobile-install-title"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="hub-modal-header">
+              <h2 id="mobile-install-title" className="hub-panel-title">
+                Install the App
+              </h2>
 
               <button
-                className="hub-nav-item hub-mobile-profile-signout"
+                className="hub-icon-button hub-mobile-profile-close"
                 type="button"
-                onClick={() => void handleSignOut()}
+                aria-label="Close install dialog"
+                onClick={() => dismissMobileInstallDialog("close")}
               >
-                <span className="hub-nav-icon">
-                  <LogOut size={18} />
-                </span>
-                <span>Log Out</span>
+                <X size={18} />
               </button>
+            </div>
+
+            <div className="hub-mobile-install-body">
+              <p className="hub-subtitle">
+                Install Caddyshack on your phone for a proper app experience and
+                real-time notifications for syndicate betting events and cashout
+                alerts.
+              </p>
+
+              <div className="hub-mobile-install-actions">
+                <button
+                  className="hub-primary-button"
+                  type="button"
+                  onClick={() => void handleInstallApp("mobile_install_prompt")}
+                  disabled={isInstallingApp}
+                >
+                  {isInstallingApp ? "Installing..." : "Install App"}
+                </button>
+                <button
+                  className="hub-secondary-button"
+                  type="button"
+                  onClick={() => dismissMobileInstallDialog("secondary_action")}
+                >
+                  Not Now
+                </button>
+              </div>
             </div>
           </div>
         </div>

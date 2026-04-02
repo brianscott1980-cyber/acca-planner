@@ -2743,7 +2743,19 @@ button {
   max-height: none;
 }
 
+.hub-mobile-install-modal {
+  position: relative;
+  width: min(24rem, 100%);
+  max-height: none;
+}
+
 .hub-mobile-profile-body {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.hub-mobile-install-body {
   display: flex;
   flex-direction: column;
   gap: 1rem;
@@ -2755,6 +2767,18 @@ button {
   gap: 0.9rem;
 }
 
+.hub-mobile-profile-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.hub-mobile-install-actions {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.75rem;
+}
+
 .hub-mobile-profile-close {
   position: absolute;
   top: 1rem;
@@ -2763,6 +2787,10 @@ button {
 
 .hub-transactions-modal-close {
   flex: none;
+}
+
+.hub-transactions-modal-header {
+  position: relative;
 }
 
 .hub-mobile-profile-avatar {
@@ -2881,10 +2909,32 @@ button {
     align-self: start;
   }
 
+  .hub-transactions-modal {
+    padding-top: 0;
+  }
+
+  .hub-transactions-modal-header {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    margin: 0 -1.5rem 1rem;
+    padding: 1rem 1.5rem 0.9rem;
+    background: linear-gradient(
+      180deg,
+      rgba(20, 20, 23, 0.98) 0%,
+      rgba(20, 20, 23, 0.94) 100%
+    );
+    border-bottom: 1px solid var(--hub-border);
+  }
+
   .hub-transactions-modal-close {
-    position: absolute;
-    top: 1.5rem;
-    right: 1.5rem;
+    position: static;
+    margin-left: auto;
   }
 }
 

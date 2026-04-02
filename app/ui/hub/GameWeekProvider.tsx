@@ -97,6 +97,7 @@ export function GameWeekProvider({
 
     let isActive = true;
     const currentGameWeekId = currentGameWeek.id;
+    let pollIntervalId: number | null = null;
 
     const syncVotes = async () => {
       try {
@@ -119,11 +120,25 @@ export function GameWeekProvider({
       }
     };
 
+    const syncVotesIfVisible = () => {
+      if (typeof document !== "undefined" && document.visibilityState !== "visible") {
+        return;
+      }
+
+      void syncVotes();
+    };
+
     void syncVotes();
+    pollIntervalId = window.setInterval(syncVotesIfVisible, 5000);
+    document.addEventListener("visibilitychange", syncVotesIfVisible);
     const unsubscribe = subscribeToMatchdayVotes(currentGameWeekId, syncVotes);
 
     return () => {
       isActive = false;
+      if (pollIntervalId !== null) {
+        window.clearInterval(pollIntervalId);
+      }
+      document.removeEventListener("visibilitychange", syncVotesIfVisible);
       unsubscribe();
     };
   }, [authUserId, currentGameWeek.id, isConfigured, isCurrentGameWeekLocked, loggedInUserId]);
