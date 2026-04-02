@@ -18,7 +18,7 @@ import {
 import type {
   GameWeekProposalRecord,
   SimulatedSlipLegStatus,
-} from "../../../data/gameWeeks";
+} from "../../../data/matchday_schedule";
 import {
   getBetLineDisplayOdds,
   getBetLineInsight,
@@ -44,6 +44,7 @@ import {
   ConsensusVoteBreakdown,
   VotesAvatarRow,
 } from "./ConsensusPanel";
+import { useAuth } from "../auth/AuthProvider";
 import { useCurrentGameWeek } from "./GameWeekProvider";
 import { MatchBetSummaryRow } from "./MatchBetSummaryRow";
 
@@ -68,6 +69,7 @@ export function GameweekBoard({
   viewState,
 }: GameweekBoardProps) {
   const router = useRouter();
+  const { member: currentUser } = useAuth();
   const [simulatedNow, setSimulatedNow] = useState(() => getSimulatedNow());
   const initialSimulatedNowRef = useRef<Date | null>(null);
   const mountedAtRef = useRef<number | null>(null);
@@ -80,6 +82,7 @@ export function GameweekBoard({
     voteSimulationStatus,
   } = useCurrentGameWeek();
   const isDecisionView = viewState !== "voting" && Boolean(decidedProposal);
+  const isAdminUser = currentUser?.role === "admin";
   const proposals =
     isDecisionView && decidedProposal ? [decidedProposal] : currentGameWeek.proposals;
   const members = getMembers();
@@ -287,6 +290,34 @@ export function GameweekBoard({
             members={members}
             votesByUserId={decisionVotesByUserId}
           />
+        </div>
+      ) : null}
+
+      {viewState === "voting" && isAdminUser ? (
+        <div className="hub-admin-controls">
+          <div className="hub-admin-controls-main">
+            <span className="hub-admin-controls-icon">
+              <Crown size={16} />
+            </span>
+            <div>
+              <p className="hub-admin-controls-title">Admin Controls</p>
+              <p className="hub-admin-controls-copy">
+                Review the three acca groups and commit the matchday vote once
+                the final strategy is ready to be locked in.
+              </p>
+            </div>
+          </div>
+          <button
+            className="hub-primary-button"
+            type="button"
+            onClick={() =>
+              trackEvent("admin_commit_vote_clicked", {
+                matchday_id: currentGameWeek.id,
+              })
+            }
+          >
+            Commit Vote
+          </button>
         </div>
       ) : null}
 

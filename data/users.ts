@@ -4,8 +4,9 @@ export type UserRecord = {
   lastName: string;
   displayName: string;
   initials: string;
+  email?: string;
   joinedOn: string;
-  role: "member";
+  role: "member" | "admin";
 };
 
 export const users: UserRecord[] = [
@@ -16,7 +17,8 @@ export const users: UserRecord[] = [
     displayName: "Brian Scott",
     initials: "BS",
     joinedOn: "2026-03-23",
-    role: "member",
+    role: "admin",
+    email: "brianscott1980@gmail.com"
   },
   {
     id: "tony-mclean",
@@ -26,6 +28,7 @@ export const users: UserRecord[] = [
     initials: "TM",
     joinedOn: "2026-03-23",
     role: "member",
+    email: "tonymclean@live.co.uk"
   },
   {
     id: "john-colreavey",
@@ -35,6 +38,7 @@ export const users: UserRecord[] = [
     initials: "JC",
     joinedOn: "2026-03-23",
     role: "member",
+    email: "jcolreavey@gmail.com"
   },
   {
     id: "paul-melville",
@@ -44,6 +48,7 @@ export const users: UserRecord[] = [
     initials: "PM",
     joinedOn: "2026-03-23",
     role: "member",
+    email: "p.melville@hotmail.co.uk"
   },
   {
     id: "alasdair-head",
@@ -53,6 +58,7 @@ export const users: UserRecord[] = [
     initials: "AH",
     joinedOn: "2026-03-23",
     role: "member",
+    email:"alasdairhead@hotmail.co.uk"
   },
   {
     id: "paul-devine",
@@ -71,5 +77,6 @@ export const users: UserRecord[] = [
     initials: "DM",
     joinedOn: "2026-03-23",
     role: "member",
+    email: "derek.mcmillan81@gmail.com"
   },
 ];

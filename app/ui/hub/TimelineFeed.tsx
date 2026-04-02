@@ -1,7 +1,6 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { ledgerData } from "../../../data/ledgerData";
 import {
   formatCurrency,
 } from "./ledgerService";
@@ -13,6 +12,7 @@ import {
 } from "../../../repositories/gameWeekRepository";
 import { formatGameWeekDateRange } from "../../../repositories/leagueSimulationRepository";
 import { getMembers, getUserInitials } from "../../../repositories/userService";
+import { getCurrentLedgerTransactions } from "../../../repositories/ledgerStore";
 
 type TimelineEntry = {
   id: string;
@@ -325,7 +325,7 @@ function TimelineMatchday({ entry }: { entry: TimelineEntry }) {
 }
 
 function getInitialDepositTimelineEntries(): TimelineEntry[] {
-  const depositEntries = [...ledgerData]
+  const depositEntries = [...getCurrentLedgerTransactions()]
     .filter((entry) => entry.kind === "deposit")
     .sort(
       (left, right) =>

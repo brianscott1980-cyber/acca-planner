@@ -5,7 +5,7 @@ import type {
   BetLineFormMatch,
   BetLineFormOutcome,
   SimulatedSlipLegStatus,
-} from "../../../data/gameWeeks";
+} from "../../../data/matchday_schedule";
 import type {
   BetLineInsight,
   ProposalBetLine,

@@ -1,11 +1,18 @@
-import { getMembers } from "./userService";
+import type { User } from "@supabase/supabase-js";
+import { getMemberByEmail, getMemberById } from "./userService";
 
-export function getLoggedInUser() {
-  const members = getMembers();
+function getMemberIdFromMetadata(user: User | null | undefined) {
+  const memberId =
+    user?.user_metadata?.member_id ??
+    user?.user_metadata?.memberId ??
+    user?.app_metadata?.member_id ??
+    user?.app_metadata?.memberId;
 
-  return (
-    members.find((member) => member.id === "brian-scott") ??
-    members[0] ??
-    null
-  );
+  return typeof memberId === "string" ? memberId : null;
+}
+
+export function getMemberForSupabaseUser(user: User | null | undefined) {
+  const memberId = getMemberIdFromMetadata(user);
+
+  return getMemberById(memberId) ?? getMemberByEmail(user?.email ?? null);
 }

@@ -1,8 +1,11 @@
-import { gameWeeks, type GameWeekRecord } from "../data/gameWeeks";
+import {
+  matchdaySchedule,
+  type GameWeekRecord,
+} from "../data/matchday_schedule";
 import {
   leagueData,
   type LeagueMatchdaySimulationRecord,
-} from "../data/leagueData";
+} from "../data/league_data";
 
 export type SimulatedTimelineRecord = {
   gameWeek: GameWeekRecord;
@@ -31,8 +34,8 @@ export function getSortedGameWeeks() {
   );
   const visibleGameWeeks =
     availableGameWeekIds.size > 0
-      ? gameWeeks.filter((gameWeek) => availableGameWeekIds.has(gameWeek.id))
-      : gameWeeks;
+      ? matchdaySchedule.filter((gameWeek) => availableGameWeekIds.has(gameWeek.id))
+      : matchdaySchedule;
 
   return [...visibleGameWeeks]
     .sort(

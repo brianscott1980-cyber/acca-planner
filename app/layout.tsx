@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { GoogleAnalytics } from "./ui/GoogleAnalytics";
+import { AuthProvider } from "./ui/auth/AuthProvider";
 
 export const metadata: Metadata = {
   title: "Syndicate Hub",
@@ -15,8 +16,10 @@ export default function RootLayout({ children }: RootLayoutProps) {
   return (
     <html lang="en">
       <body>
-        <GoogleAnalytics />
-        {children}
+        <AuthProvider>
+          <GoogleAnalytics />
+          {children}
+        </AuthProvider>
       </body>
     </html>
   );

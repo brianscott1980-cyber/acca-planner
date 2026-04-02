@@ -158,6 +158,39 @@ button {
   transform: translateX(2px);
 }
 
+.hub-nav-user {
+  cursor: default;
+}
+
+.hub-nav-user:hover {
+  transform: none;
+}
+
+.hub-nav-user-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--hub-text);
+}
+
+.hub-nav-user-signout {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  background: transparent;
+  color: var(--hub-muted);
+  cursor: pointer;
+  transition: color 160ms ease, transform 160ms ease;
+}
+
+.hub-nav-user-signout:hover {
+  color: var(--hub-text);
+  transform: translateX(1px);
+}
+
 .hub-nav-icon {
   display: inline-flex;
   color: inherit;
@@ -175,15 +208,6 @@ button {
   font-weight: 600;
   line-height: 1;
   text-align: center;
-}
-
-.hub-profile {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  margin-top: auto;
-  border-top: 1px solid var(--hub-border);
-  padding: 1rem 0.5rem 0;
 }
 
 .hub-avatar,
@@ -216,6 +240,82 @@ button {
   font-weight: 700;
   box-shadow: 0 0 18px rgba(138, 44, 226, 0.22);
   flex: none;
+}
+
+.auth-shell {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 2rem;
+}
+
+.auth-card {
+  width: min(100%, 28rem);
+  display: grid;
+  gap: 1rem;
+  padding: 1.75rem;
+}
+
+.auth-form {
+  display: grid;
+  gap: 1rem;
+}
+
+.auth-field {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.auth-input {
+  width: 100%;
+  border: 1px solid var(--hub-border);
+  border-radius: 0.9rem;
+  background: rgba(12, 12, 15, 0.95);
+  padding: 0.9rem 1rem;
+  color: var(--hub-text);
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.auth-input:focus {
+  outline: none;
+  border-color: rgba(178, 102, 255, 0.4);
+  box-shadow: 0 0 0 3px rgba(138, 44, 226, 0.16);
+}
+
+.auth-copy {
+  margin: 0;
+  color: var(--hub-muted);
+  font-size: 0.9rem;
+}
+
+.auth-status {
+  margin: 0;
+  border-radius: 0.85rem;
+  padding: 0.8rem 0.9rem;
+  font-size: 0.92rem;
+}
+
+.auth-status-success {
+  border: 1px solid rgba(16, 185, 129, 0.24);
+  background: rgba(16, 185, 129, 0.12);
+  color: #c5f5e1;
+}
+
+.auth-status-error {
+  border: 1px solid rgba(239, 68, 68, 0.24);
+  background: rgba(239, 68, 68, 0.12);
+  color: #fecaca;
+}
+
+.auth-link-button {
+  justify-self: start;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  color: var(--hub-primary-glow);
+  cursor: pointer;
 }
 
 .hub-main {
@@ -563,6 +663,53 @@ button {
   margin: 0.2rem 0 0;
   color: var(--hub-muted);
   font-size: 0.82rem;
+  line-height: 1.55;
+}
+
+.hub-admin-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.15rem;
+  padding: 1rem 1.05rem;
+  border: 1px solid rgba(178, 102, 255, 0.22);
+  border-radius: 1rem;
+  background:
+    linear-gradient(135deg, rgba(178, 102, 255, 0.14), rgba(178, 102, 255, 0.04)),
+    var(--hub-panel);
+}
+
+.hub-admin-controls-main {
+  display: flex;
+  min-width: 0;
+  align-items: flex-start;
+  gap: 0.9rem;
+}
+
+.hub-admin-controls-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 2rem;
+  width: 2rem;
+  border-radius: 999px;
+  background: rgba(178, 102, 255, 0.16);
+  color: var(--hub-primary-glow);
+  flex: none;
+}
+
+.hub-admin-controls-title {
+  margin: 0;
+  color: var(--hub-text);
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+.hub-admin-controls-copy {
+  margin: 0.18rem 0 0;
+  color: var(--hub-muted);
+  font-size: 0.8rem;
   line-height: 1.55;
 }
 
@@ -2524,6 +2671,7 @@ button {
 
   .hub-header,
   .hub-section-head,
+  .hub-admin-controls,
   .hub-proposal-top,
   .hub-proposal-actions,
   .hub-chart-head,
@@ -2604,7 +2752,7 @@ button {
 
   .hub-nav {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     align-items: stretch;
     width: 100%;
   }
@@ -2637,6 +2785,11 @@ button {
 
   .hub-nav-item .hub-nav-pill {
     display: none !important;
+  }
+
+  .hub-nav-user-name,
+  .hub-nav-user-signout {
+    display: none;
   }
 
   .hub-nav-item:hover {
@@ -2810,10 +2963,6 @@ button {
 
   .hub-stat-grid {
     grid-template-columns: 1fr;
-  }
-
-  .hub-profile {
-    display: none;
   }
 
   .hub-mobile-user-avatar {

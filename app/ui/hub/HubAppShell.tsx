@@ -6,7 +6,9 @@ import { usePathname, useRouter } from "next/navigation";
 import {
   History,
   LayoutDashboard,
+  LogOut,
   Sparkles,
+  User,
   Wallet,
 } from "lucide-react";
 import {
@@ -16,13 +18,10 @@ import {
 } from "./ledgerService";
 import { MiniSparkline } from "./MiniSparkline";
 import { getSimulatedNow } from "../../../repositories/leagueSimulationRepository";
-import {
-  getMemberCount,
-  getUserInitials,
-} from "../../../repositories/userService";
-import { getLoggedInUser } from "../../../repositories/authenticationService";
+import { getMemberCount, getUserInitials } from "../../../repositories/userService";
 import { getCurrentMatchdayNumber } from "../../../repositories/gameWeekRepository";
 import { trackEvent } from "../../../lib/analytics";
+import { useAuth } from "../auth/AuthProvider";
 
 type HubAppShellProps = {
   children: ReactNode;
@@ -38,8 +37,7 @@ export function HubAppShell({ children }: HubAppShellProps) {
   const pathname = usePathname();
   const router = useRouter();
   const ledgerSummary = getLedgerSummary();
-  const currentUser = getLoggedInUser();
-  const equityShare = 100 / getMemberCount();
+  const { member: currentUser, signOut } = useAuth();
   const equityShareValue =
     ledgerSummary.memberCount === 0
       ? 0
@@ -53,6 +51,10 @@ export function HubAppShell({ children }: HubAppShellProps) {
   const navigateToLedgerFromHeader = (source: string) => {
     trackEvent("navigate_ledger_from_header", { source });
     router.push("/ledger");
+  };
+  const handleSignOut = async () => {
+    await signOut();
+    router.replace("/login");
   };
 
   useEffect(() => {
@@ -129,19 +131,25 @@ export function HubAppShell({ children }: HubAppShellProps) {
               </Link>
             );
           })}
-        </nav>
 
-        {currentUser ? (
-          <div className="hub-profile">
-            <div className="hub-avatar">
-              {getUserInitials(currentUser.displayName)}
+          {currentUser ? (
+            <div className="hub-nav-item hub-nav-user" aria-label={`Logged in as ${currentUser.displayName}`}>
+              <span className="hub-nav-icon">
+                <User size={18} />
+              </span>
+              <span className="hub-nav-user-name">{currentUser.displayName}</span>
+              <button
+                className="hub-nav-user-signout"
+                type="button"
+                onClick={() => void handleSignOut()}
+                aria-label="Sign out"
+                title="Sign out"
+              >
+                <LogOut size={16} />
+              </button>
             </div>
-            <div>
-              <p className="hub-profile-name">{currentUser.displayName}</p>
-              <p className="hub-profile-meta">Eq: {equityShare.toFixed(1)}%</p>
-            </div>
-          </div>
-        ) : null}
+          ) : null}
+        </nav>
       </aside>
 
       <div className="hub-main">

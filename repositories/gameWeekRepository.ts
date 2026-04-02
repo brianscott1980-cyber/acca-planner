@@ -1,8 +1,8 @@
 import {
-  gameWeeks,
+  matchdaySchedule,
   type GameWeekRecord,
   type GameWeekProposalRecord,
-} from "../data/gameWeeks";
+} from "../data/matchday_schedule";
 import { users } from "../data/users";
 import { formatCurrency, getLedgerSummary } from "../app/ui/hub/ledgerService";
 import { getLadbrokesSelectionDisplayOdds, getLadbrokesSelectionOdds } from "./ladbrokesOddsRepository";
@@ -100,8 +100,8 @@ export function getCurrentMatchdayNumber() {
 
 export function getMatchdayNumberFromGameWeekId(gameWeekId: string) {
   const gameWeek =
-    gameWeeks.find((entry) => entry.id === gameWeekId) ??
-    gameWeeks.find((entry) => entry.slug === gameWeekId);
+    matchdaySchedule.find((entry) => entry.id === gameWeekId) ??
+    matchdaySchedule.find((entry) => entry.slug === gameWeekId);
   const match =
     gameWeek?.id.match(/\d+/) ??
     gameWeek?.slug.match(/\d+/) ??
@@ -123,7 +123,7 @@ export function getGameWeekIdFromMatchdayNumber(
     return null;
   }
 
-  const gameWeek = gameWeeks.find(
+  const gameWeek = matchdaySchedule.find(
     (entry) => getMatchdayNumberFromGameWeekId(entry.id) === Number.parseInt(normalizedNumber, 10),
   );
 
@@ -143,7 +143,7 @@ export function getMatchdayHref({
 }
 
 export function getStaticMatchdayNumberParams() {
-  return gameWeeks
+  return matchdaySchedule
     .map((gameWeek) => getMatchdayNumberFromGameWeekId(gameWeek.id))
     .filter((matchdayNumber): matchdayNumber is number => matchdayNumber !== null)
     .map((matchdayNumber) => ({

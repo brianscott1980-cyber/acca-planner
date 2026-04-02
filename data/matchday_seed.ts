@@ -178,7 +178,7 @@ const manUtdLeedsGoalsForm: BetLineForm = {
   },
 };
 
-export const gameWeeks: GameWeekRecord[] = [
+export const matchdaySeedGameWeeks: GameWeekRecord[] = [
   {
     id: "md-32",
     slug: "matchday-32",

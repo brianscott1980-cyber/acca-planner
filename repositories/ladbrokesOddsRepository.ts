@@ -1,14 +1,14 @@
 import {
-  ladbrokesOddsSnapshots,
-  type LadbrokesSelectionRecord,
-} from "../data/ladbrokesOdds";
+  marketAnalysisSnapshots,
+  type MarketAnalysisSelectionRecord,
+} from "../data/market_analysis";
 
 export function getLatestLadbrokesSnapshot(matchdayId: string) {
-  return ladbrokesOddsSnapshots.find((snapshot) => snapshot.matchdayId === matchdayId) ?? null;
+  return marketAnalysisSnapshots.find((snapshot) => snapshot.matchdayId === matchdayId) ?? null;
 }
 
 export function getLadbrokesSelection(selectionId: string) {
-  for (const snapshot of ladbrokesOddsSnapshots) {
+  for (const snapshot of marketAnalysisSnapshots) {
     const selection = snapshot.selections.find((entry) => entry.id === selectionId);
 
     if (selection) {
@@ -54,4 +54,4 @@ export function hasLadbrokesSelection(selectionId: string) {
   return Boolean(getLadbrokesSelection(selectionId));
 }
 
-export type { LadbrokesSelectionRecord };
+export type { MarketAnalysisSelectionRecord as LadbrokesSelectionRecord };

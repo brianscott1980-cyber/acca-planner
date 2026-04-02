@@ -1,11 +1,11 @@
-export type LadbrokesOddsSnapshot = {
+export type MarketAnalysisSnapshot = {
   bookmaker: "Ladbrokes";
   snapshotDate: string;
   matchdayId: string;
-  selections: LadbrokesSelectionRecord[];
+  selections: MarketAnalysisSelectionRecord[];
 };
 
-export type LadbrokesSelectionRecord = {
+export type MarketAnalysisSelectionRecord = {
   id: string;
   fixture: string;
   market: string;
@@ -13,7 +13,7 @@ export type LadbrokesSelectionRecord = {
   decimalOdds: number;
 };
 
-export const ladbrokesOddsSnapshots: LadbrokesOddsSnapshot[] = [
+export const marketAnalysisSnapshots: MarketAnalysisSnapshot[] = [
   {
     bookmaker: "Ladbrokes",
     snapshotDate: "2026-03-31",

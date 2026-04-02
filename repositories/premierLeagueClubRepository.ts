@@ -1,4 +1,4 @@
-import { premierLeagueClubs } from "../data/premierLeagueClubs";
+import { leagueClubs } from "../data/league_clubs";
 
 const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 
@@ -38,7 +38,7 @@ const CLUB_ALIAS_MAP: Record<string, string> = {
 export function getClubBadgePath(teamName: string) {
   const canonicalName = CLUB_ALIAS_MAP[normalizeClubName(teamName)] ?? teamName;
   const badgePath =
-    premierLeagueClubs.find((club) => club.name === canonicalName)?.badgePath ??
+    leagueClubs.find((club) => club.name === canonicalName)?.badgePath ??
     null;
 
   return badgePath ? withBasePath(badgePath) : null;

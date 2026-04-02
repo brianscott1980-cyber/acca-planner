@@ -71,15 +71,15 @@ async function main() {
       ? new Date()
       : parseShortDateTime(rest.join(" ").trim());
   const updatedAt = new Date();
-  const [{ users }, { gameWeeks }, { ladbrokesOddsSnapshots }] = await Promise.all([
+  const [{ users }, { matchdaySchedule }, { marketAnalysisSnapshots }] = await Promise.all([
     loadTsModule("data/users.ts"),
-    loadTsModule("data/gameWeeks.ts"),
-    loadTsModule("data/ladbrokesOdds.ts"),
+    loadTsModule("data/matchday_schedule.ts"),
+    loadTsModule("data/market_analysis.ts"),
   ]);
   const matchdaySimulations = buildMatchdaySimulations({
     users,
-    gameWeeks,
-    ladbrokesOddsSnapshots,
+    gameWeeks: matchdaySchedule,
+    ladbrokesOddsSnapshots: marketAnalysisSnapshots,
     simulatedAt,
   });
   const ledgerTransactions = buildLedgerTransactions({
@@ -90,7 +90,7 @@ async function main() {
 
   await mkdir(path.join(ROOT, "data"), { recursive: true });
   await writeFile(
-    path.join(ROOT, "data", "leagueData.ts"),
+    path.join(ROOT, "data", "league_data.ts"),
     renderLeagueData({
       simulatedAtIso: simulatedAt.toISOString(),
       updatedAtIso: updatedAt.toISOString(),
@@ -98,7 +98,7 @@ async function main() {
     }),
   );
   await writeFile(
-    path.join(ROOT, "data", "ledgerData.ts"),
+    path.join(ROOT, "data", "ledger_data.ts"),
     renderLedgerData(ledgerTransactions),
   );
 

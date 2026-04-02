@@ -12,7 +12,7 @@ import {
   type ReactNode,
   type SetStateAction,
 } from "react";
-import type { GameWeekRecord } from "../../../data/gameWeeks";
+import type { GameWeekRecord } from "../../../data/matchday_schedule";
 import {
   getAccessibleGameWeekById,
   getGameWeekById,
@@ -21,8 +21,14 @@ import {
   isGameWeekVoteLocked,
   updateUserVoteForGameWeek,
 } from "../../../repositories/gameWeekRepository";
-import { getLoggedInUser } from "../../../repositories/authenticationService";
+import {
+  deleteMatchdayVote,
+  listMatchdayVotes,
+  saveMatchdayVote,
+  subscribeToMatchdayVotes,
+} from "../../../repositories/matchdayVoteRepository";
 import { getMembers } from "../../../repositories/userService";
+import { useAuth } from "../auth/AuthProvider";
 
 type VoteSimulationStatus = "idle" | "running" | "closed";
 
@@ -54,23 +60,78 @@ export function GameWeekProvider({
   children,
   gameWeekId = null,
 }: GameWeekProviderProps) {
-  const loggedInUser = getLoggedInUser();
+  const { authUser, isConfigured, member: loggedInUser } = useAuth();
   const members = getMembers();
+  const authUserId = authUser?.id ?? null;
+  const loggedInUserId = loggedInUser?.id ?? null;
   const [currentGameWeek, setCurrentGameWeek] = useState(() =>
-    getInitialGameWeekState(loggedInUser?.id ?? null, gameWeekId),
+    getInitialGameWeekState(loggedInUserId, gameWeekId),
   );
   const [voteSimulationStatus, setVoteSimulationStatus] =
     useState<VoteSimulationStatus>("idle");
   const [voteSimulationResult, setVoteSimulationResult] =
     useState<VoteSimulationResult | null>(null);
   const voteSimulationTimeoutIdsRef = useRef<number[]>([]);
+  const isCurrentGameWeekLocked = isGameWeekVoteLocked(currentGameWeek);
 
   useEffect(() => () => clearVoteSimulationTimeouts(voteSimulationTimeoutIdsRef), []);
+
+  useEffect(() => {
+    clearVoteSimulationTimeouts(voteSimulationTimeoutIdsRef);
+
+    const timeoutId = window.setTimeout(() => {
+      setVoteSimulationStatus("idle");
+      setVoteSimulationResult(null);
+      setCurrentGameWeek(getInitialGameWeekState(loggedInUserId, gameWeekId));
+    }, 0);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, [gameWeekId, loggedInUserId]);
+
+  useEffect(() => {
+    if (!authUserId || !loggedInUserId || !isConfigured || isCurrentGameWeekLocked) {
+      return;
+    }
+
+    let isActive = true;
+    const currentGameWeekId = currentGameWeek.id;
+
+    const syncVotes = async () => {
+      try {
+        const votes = await listMatchdayVotes(currentGameWeekId);
+
+        if (!isActive) {
+          return;
+        }
+
+        setCurrentGameWeek((previous) =>
+          previous.id !== currentGameWeekId
+            ? previous
+            : {
+                ...previous,
+                votesByUserId: mapVotesByUserId(previous, votes),
+              },
+        );
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    void syncVotes();
+    const unsubscribe = subscribeToMatchdayVotes(currentGameWeekId, syncVotes);
+
+    return () => {
+      isActive = false;
+      unsubscribe();
+    };
+  }, [authUserId, currentGameWeek.id, isConfigured, isCurrentGameWeekLocked, loggedInUserId]);
 
   const value = useMemo<GameWeekContextValue>(
     () => ({
       currentGameWeek,
-      loggedInUserId: loggedInUser?.id ?? null,
+      loggedInUserId,
       castVote(proposalId: string) {
         if (!loggedInUser) {
           return;
@@ -89,6 +150,28 @@ export function GameWeekProvider({
           loggedInUser.id,
           proposalId,
         );
+
+        if (authUserId && isConfigured) {
+          const previousVotesByUserId = currentGameWeek.votesByUserId;
+
+          setCurrentGameWeek(nextGameWeek);
+          void saveMatchdayVote({
+            gameWeekId: nextGameWeek.id,
+            memberId: loggedInUser.id,
+            proposalId,
+          }).catch((error) => {
+            console.error(error);
+            setCurrentGameWeek((previous) =>
+              previous.id !== nextGameWeek.id
+                ? previous
+                : {
+                    ...previous,
+                    votesByUserId: previousVotesByUserId,
+                  },
+            );
+          });
+          return;
+        }
 
         persistVote(nextGameWeek.id, loggedInUser.id, proposalId);
         setCurrentGameWeek(nextGameWeek);
@@ -114,6 +197,36 @@ export function GameWeekProvider({
           voteSimulationStatus === "running" ||
           voteSimulationStatus === "closed"
         ) {
+          return;
+        }
+
+        if (authUserId && isConfigured) {
+          const previousVotesByUserId = currentGameWeek.votesByUserId;
+
+          setCurrentGameWeek((previous) => {
+            const nextVotesByUserId = { ...previous.votesByUserId };
+            delete nextVotesByUserId[loggedInUser.id];
+
+            return {
+              ...previous,
+              votesByUserId: nextVotesByUserId,
+            };
+          });
+
+          void deleteMatchdayVote({
+            gameWeekId: currentGameWeek.id,
+          }).catch((error) => {
+            console.error(error);
+            setCurrentGameWeek((previous) =>
+              previous.id !== currentGameWeek.id
+                ? previous
+                : {
+                    ...previous,
+                    votesByUserId: previousVotesByUserId,
+                  },
+            );
+          });
+
           return;
         }
 
@@ -144,7 +257,10 @@ export function GameWeekProvider({
     }),
     [
       currentGameWeek,
+      authUserId,
+      isConfigured,
       loggedInUser,
+      loggedInUserId,
       members,
       voteSimulationResult,
       voteSimulationStatus,
@@ -154,6 +270,22 @@ export function GameWeekProvider({
   return (
     <GameWeekContext.Provider value={value}>{children}</GameWeekContext.Provider>
   );
+}
+
+function mapVotesByUserId(
+  gameWeek: GameWeekRecord,
+  votes: Awaited<ReturnType<typeof listMatchdayVotes>>,
+) {
+  const proposalIds = new Set(gameWeek.proposals.map((proposal) => proposal.id));
+
+  return votes.reduce<Record<string, string>>((accumulator, vote) => {
+    if (!proposalIds.has(vote.proposalId)) {
+      return accumulator;
+    }
+
+    accumulator[vote.memberId] = vote.proposalId;
+    return accumulator;
+  }, {});
 }
 
 export function useCurrentGameWeek() {

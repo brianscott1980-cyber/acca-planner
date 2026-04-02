@@ -1,9 +1,7 @@
-import {
-  ledgerData,
-  type LedgerTransactionRecord,
-} from "../../../data/ledgerData";
+import { type LedgerTransactionRecord } from "../../../data/ledger_data";
 import { getMemberCount } from "../../../repositories/userService";
 import { getSimulatedNow } from "../../../repositories/leagueSimulationRepository";
+import { getCurrentLedgerTransactions } from "../../../repositories/ledgerStore";
 
 export type LedgerActivity = {
   id: string;
@@ -26,14 +24,15 @@ export type PotTimelinePoint = {
 export type LedgerRange = "1w" | "2w" | "1m" | "all";
 
 export function getLedgerSummary() {
+  const transactions = getCurrentLedgerTransactions();
   const memberCount = getMemberCount();
   const totalDeposits = roundCurrency(
-    ledgerData
+    transactions
       .filter((entry) => entry.kind === "deposit")
       .reduce((sum, entry) => sum + entry.amount, 0),
   );
   const totalProfitOverall = roundCurrency(
-    ledgerData
+    transactions
       .filter((entry) => entry.kind !== "deposit")
       .reduce((sum, entry) => sum + entry.amount, 0),
   );
@@ -55,7 +54,7 @@ export function getLedgerSummary() {
 }
 
 export function getRecentLedgerActivity(limit?: number) {
-  const normalizedActivity = [...ledgerData]
+  const normalizedActivity = [...getCurrentLedgerTransactions()]
     .sort(
       (left, right) =>
         new Date(right.dateIso).getTime() - new Date(left.dateIso).getTime(),
@@ -82,7 +81,7 @@ export function getPotTimelineForRange(
 }
 
 export function getPotTimelineSinceFirstStake(today: Date = getSimulatedNow()) {
-  const firstStakeEntry = [...ledgerData]
+  const firstStakeEntry = [...getCurrentLedgerTransactions()]
     .filter((entry) => entry.kind === "stake")
     .sort(
       (left, right) =>
@@ -104,7 +103,7 @@ function getPotTimelineFromDate(rangeStart: Date, today: Date) {
     string,
     { amount: number; titles: string[]; transactionIds: string[] }
   >();
-  const sortedEntries = [...ledgerData].sort(
+  const sortedEntries = [...getCurrentLedgerTransactions()].sort(
     (left, right) =>
       new Date(left.dateIso).getTime() - new Date(right.dateIso).getTime(),
   );
@@ -220,7 +219,8 @@ function normalizeLedgerActivity(entry: LedgerTransactionRecord): LedgerActivity
 }
 
 function getInitialPotTotal() {
-  const depositEntries = ledgerData.filter((entry) => entry.kind === "deposit");
+  const transactions = getCurrentLedgerTransactions();
+  const depositEntries = transactions.filter((entry) => entry.kind === "deposit");
 
   if (depositEntries.length === 0) {
     return 0;
@@ -258,7 +258,7 @@ function addDays(value: Date, days: number) {
 }
 
 function getEarliestLedgerDate(fallbackDate: Date) {
-  const sortedEntries = [...ledgerData].sort(
+  const sortedEntries = [...getCurrentLedgerTransactions()].sort(
     (left, right) =>
       new Date(left.dateIso).getTime() - new Date(right.dateIso).getTime(),
   );
