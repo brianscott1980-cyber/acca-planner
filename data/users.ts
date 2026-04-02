@@ -68,6 +68,7 @@ export const users: UserRecord[] = [
     initials: "PD",
     joinedOn: "2026-03-23",
     role: "member",
+    email: "pauldevine54@msn.com"
   },
   {
     id: "derek-mcmillan",

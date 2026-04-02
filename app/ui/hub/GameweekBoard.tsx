@@ -316,7 +316,7 @@ export function GameweekBoard({
               })
             }
           >
-            Commit Vote
+            End Voting
           </button>
         </div>
       ) : null}

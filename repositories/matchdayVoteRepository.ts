@@ -102,7 +102,8 @@ export function subscribeToMatchdayVotes(
     return () => undefined;
   }
 
-  const channel = supabase
+  const supabaseClient = supabase;
+  const channel = supabaseClient
     .channel(`matchday_votes:${gameWeekId}`)
     .on(
       "postgres_changes",
@@ -119,7 +120,7 @@ export function subscribeToMatchdayVotes(
     .subscribe();
 
   return () => {
-    void supabase.removeChannel(channel);
+    void supabaseClient.removeChannel(channel);
   };
 }
 

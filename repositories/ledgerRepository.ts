@@ -38,7 +38,8 @@ export function subscribeToLedgerTransactions(
     return () => undefined;
   }
 
-  const channel: RealtimeChannel = supabase
+  const supabaseClient = supabase;
+  const channel: RealtimeChannel = supabaseClient
     .channel("ledger_transactions")
     .on(
       "postgres_changes",
@@ -54,7 +55,7 @@ export function subscribeToLedgerTransactions(
     .subscribe();
 
   return () => {
-    void supabase.removeChannel(channel);
+    void supabaseClient.removeChannel(channel);
   };
 }
 
