@@ -846,6 +846,16 @@ button {
   color: var(--hub-danger);
 }
 
+.hub-secondary-button.hub-mobile-end-voting {
+  display: none;
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border-color: transparent;
+  background: transparent;
+  color: var(--hub-primary-glow);
+}
+
 .hub-secondary-button.hub-mobile-change-vote::before {
   content: "";
   position: absolute;
@@ -864,7 +874,35 @@ button {
   z-index: -2;
 }
 
+.hub-secondary-button.hub-mobile-end-voting::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  background:
+    linear-gradient(
+      90deg,
+      transparent,
+      transparent,
+      rgba(178, 102, 255, 0.78),
+      transparent,
+      transparent
+    );
+  background-size: 200% 100%;
+  animation: hub-border-flow 3s linear infinite;
+  z-index: -2;
+}
+
 .hub-secondary-button.hub-mobile-change-vote::after {
+  content: "";
+  position: absolute;
+  inset: 1px;
+  border-radius: calc(0.85rem - 1px);
+  background: var(--hub-surface);
+  z-index: -1;
+  transition: background-color 160ms ease;
+}
+
+.hub-secondary-button.hub-mobile-end-voting::after {
   content: "";
   position: absolute;
   inset: 1px;
@@ -879,8 +917,17 @@ button {
   color: #fca5a5;
 }
 
+.hub-secondary-button.hub-mobile-end-voting:hover {
+  background: transparent;
+  color: #d8b4fe;
+}
+
 .hub-secondary-button.hub-mobile-change-vote:hover::after {
   background: rgba(239, 68, 68, 0.06);
+}
+
+.hub-secondary-button.hub-mobile-end-voting:hover::after {
+  background: rgba(178, 102, 255, 0.08);
 }
 
 .hub-mobile-vote-message {
@@ -1347,6 +1394,10 @@ button {
 .hub-bet-line-fixture-separator,
 .hub-bet-line-colon {
   color: var(--hub-muted);
+}
+
+.hub-bet-line-market {
+  min-width: 0;
 }
 
 .hub-club-badge {
@@ -3080,6 +3131,10 @@ button {
     align-items: flex-start;
   }
 
+  .hub-mobile-admin-controls {
+    display: none;
+  }
+
   .hub-admin-controls .hub-primary-button {
     align-self: flex-start;
     min-width: 0;
@@ -3137,6 +3192,12 @@ button {
     margin-top: 1rem;
   }
 
+  .hub-secondary-button.hub-mobile-end-voting {
+    display: inline-flex;
+    width: 100%;
+    margin-top: 0.75rem;
+  }
+
   .hub-mobile-vote-message {
     display: block;
   }
@@ -3190,6 +3251,16 @@ button {
   .hub-bet-line-note {
     padding-left: 0;
     font-size: 0.62rem;
+  }
+
+  .hub-bet-line-colon {
+    display: none;
+  }
+
+  .hub-bet-line-market {
+    display: block;
+    flex-basis: 100%;
+    margin-top: 0.1rem;
   }
 
   .hub-bet-line-pill-wrap {

@@ -89,7 +89,9 @@ export function MatchBetSummaryRow({
                 {fixtureDisplayParts.marketLabel ? (
                   <>
                     <span className="hub-bet-line-colon">:</span>
-                    <span>{fixtureDisplayParts.marketLabel}</span>
+                    <span className="hub-bet-line-market">
+                      {fixtureDisplayParts.marketLabel}
+                    </span>
                   </>
                 ) : null}
               </span>

@@ -1,9 +1,10 @@
 "use client";
 
-import { Flame, Scale, Shield, Vote } from "lucide-react";
+import { Crown, Flame, Scale, Shield, Vote } from "lucide-react";
 import { getLeadingProposal } from "../../../repositories/gameWeekRepository";
 import { trackEvent } from "../../../lib/analytics";
 import { getMembers, getUserInitials } from "../../../repositories/userService";
+import { useAuth } from "../auth/AuthProvider";
 import { useCurrentGameWeek } from "./GameWeekProvider";
 
 export function ConsensusPanel() {
@@ -14,6 +15,7 @@ export function ConsensusPanel() {
     voteSimulationResult,
     voteSimulationStatus,
   } = useCurrentGameWeek();
+  const { member: currentUser } = useAuth();
   const members = getMembers();
   const leadingProposal = getLeadingProposal(currentGameWeek);
   const votesByUserId = currentGameWeek.votesByUserId;
@@ -21,12 +23,42 @@ export function ConsensusPanel() {
   const hasCurrentUserVote = loggedInUserId
     ? Boolean(currentUserVote)
     : false;
+  const isAdminUser = currentUser?.role === "admin";
   const votedMembers = members.filter(
     (member) => typeof votesByUserId[member.id] === "string",
   );
 
   return (
     <section className="hub-panel hub-sticky-panel">
+      {isAdminUser ? (
+        <div className="hub-admin-controls hub-mobile-admin-controls">
+          <div className="hub-admin-controls-main">
+            <span className="hub-admin-controls-icon">
+              <Crown size={16} />
+            </span>
+            <div>
+              <p className="hub-admin-controls-title">Admin Controls</p>
+              <p className="hub-admin-controls-copy">
+                Review the three acca groups and commit the matchday vote once
+                the final strategy is ready to be locked in.
+              </p>
+            </div>
+          </div>
+          <button
+            className="hub-primary-button"
+            type="button"
+            onClick={() =>
+              trackEvent("admin_commit_vote_clicked", {
+                matchday_id: currentGameWeek.id,
+                surface: "consensus_panel_mobile",
+              })
+            }
+          >
+            End Voting
+          </button>
+        </div>
+      ) : null}
+
       <div className="hub-panel-title-row">
         <Vote size={18} />
         <h2 className="hub-panel-title">Consensus State</h2>
@@ -103,6 +135,20 @@ export function ConsensusPanel() {
           >
             Change my Vote
           </button>
+          {isAdminUser ? (
+            <button
+              className="hub-secondary-button hub-mobile-end-voting"
+              type="button"
+              onClick={() =>
+                trackEvent("admin_commit_vote_clicked", {
+                  matchday_id: currentGameWeek.id,
+                  surface: "consensus_panel_mobile_post_vote",
+                })
+              }
+            >
+              End Voting
+            </button>
+          ) : null}
         </>
       ) : null}
 
