@@ -73,7 +73,7 @@ export function LedgerActivityPanel({
               </div>
 
               <button
-                className="hub-icon-button"
+                className="hub-icon-button hub-transactions-modal-close"
                 type="button"
                 aria-label="Close transactions dialog"
                 onClick={() => {

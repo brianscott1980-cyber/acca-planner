@@ -2761,6 +2761,10 @@ button {
   right: 1rem;
 }
 
+.hub-transactions-modal-close {
+  flex: none;
+}
+
 .hub-mobile-profile-avatar {
   flex: none;
 }
@@ -2870,6 +2874,12 @@ button {
 
   .hub-main {
     align-self: start;
+  }
+
+  .hub-transactions-modal-close {
+    position: absolute;
+    top: 1.5rem;
+    right: 1.5rem;
   }
 }
 
