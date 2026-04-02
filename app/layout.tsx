@@ -4,8 +4,8 @@ import { GoogleAnalytics } from "./ui/GoogleAnalytics";
 import { AuthProvider } from "./ui/auth/AuthProvider";
 
 export const metadata: Metadata = {
-  title: "Syndicate Hub",
-  description: "AI betting syndicate dashboard prototype built in React.",
+  title: "Caddyshack Syndicate",
+  description: "AI powered syndicate, much more efficient at losing your stake",
 };
 
 type RootLayoutProps = {

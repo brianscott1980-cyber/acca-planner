@@ -90,12 +90,31 @@ async function main() {
 
   await mkdir(path.join(ROOT, "data"), { recursive: true });
   await writeFile(
-    path.join(ROOT, "data", "league_data.ts"),
-    renderLeagueData({
+    path.join(ROOT, "data", "league_data_meta.ts"),
+    renderLeagueDataMeta({
       simulatedAtIso: simulatedAt.toISOString(),
       updatedAtIso: updatedAt.toISOString(),
-      matchdaySimulations,
     }),
+  );
+  await writeFile(
+    path.join(ROOT, "data", "league_data_matchday_simulations.ts"),
+    renderLeagueDataMatchdaySimulations(matchdaySimulations),
+  );
+  await writeFile(
+    path.join(ROOT, "data", "league_data_votes.ts"),
+    renderLeagueDataVotes(matchdaySimulations),
+  );
+  await writeFile(
+    path.join(ROOT, "data", "league_data_bet_line_odds.ts"),
+    renderLeagueDataBetLineOdds(matchdaySimulations),
+  );
+  await writeFile(
+    path.join(ROOT, "data", "league_data_slips.ts"),
+    renderLeagueDataSlips(matchdaySimulations),
+  );
+  await writeFile(
+    path.join(ROOT, "data", "league_data_leg_results.ts"),
+    renderLeagueDataLegResults(matchdaySimulations),
   );
   await writeFile(
     path.join(ROOT, "data", "ledger_data.ts"),
@@ -1234,48 +1253,132 @@ function formatProposalTitle(proposalId) {
   return proposalId.charAt(0).toUpperCase() + proposalId.slice(1);
 }
 
-function renderLeagueData(record) {
+function renderLeagueDataMeta(record) {
   return `${[
-    'export type LeagueSimulationLegStatus = "won" | "lost" | "cashed_out";',
+    'import type { LeagueDataMetaRecord } from "./league_data_entities";',
     "",
-    "export type LeagueSimulationLegRecord = {",
-    "  betLineLabel: string;",
-    "  kickoffAt: string;",
-    "  settledAt: string;",
-    "  finalScore: string;",
-    "  status: LeagueSimulationLegStatus;",
-    '  actualStatus: "won" | "lost";',
-    "};",
+    `export const leagueDataMeta: LeagueDataMetaRecord[] = ${JSON.stringify(
+      [{ id: "primary", ...record }],
+      null,
+      2,
+    )};`,
     "",
-    "export type LeagueSimulationSlipRecord = {",
-    '  proposalId: string;',
-    '  timelineLabel: string;',
-    '  stake: number;',
-    '  stakePlacedAt: string;',
-    '  settledAt: string;',
-    '  settlementKind: "settled" | "cashout";',
-    '  returnAmount: number;',
-    '  status: "win" | "loss";',
-    "  legResults: LeagueSimulationLegRecord[];",
-    "};",
+  ].join("\n")}`;
+}
+
+function renderLeagueDataMatchdaySimulations(matchdaySimulations) {
+  return `${[
+    'import type { LeagueMatchdaySimulationRow } from "./league_data_entities";',
     "",
-    "export type LeagueMatchdaySimulationRecord = {",
-    "  gameWeekId: string;",
-    "  voteResolvedAtIso: string;",
-    "  betPlacedAtIso: string;",
-    "  selectedProposalId: string;",
-    "  votesByUserId: Record<string, string>;",
-    "  betLineOddsByLabel: Record<string, string>;",
-    "  simulatedSlip: LeagueSimulationSlipRecord;",
-    "};",
+    `export const leagueDataMatchdaySimulations: LeagueMatchdaySimulationRow[] = ${JSON.stringify(
+      matchdaySimulations.map((simulation) => ({
+        id: `${simulation.gameWeekId}:simulation`,
+        gameWeekId: simulation.gameWeekId,
+        voteResolvedAtIso: simulation.voteResolvedAtIso,
+        betPlacedAtIso: simulation.betPlacedAtIso,
+        selectedProposalId: simulation.selectedProposalId,
+        slipId: `${simulation.gameWeekId}:${simulation.simulatedSlip.proposalId}:slip`,
+      })),
+      null,
+      2,
+    )};`,
     "",
-    "export type LeagueDataRecord = {",
-    "  simulatedAtIso: string;",
-    "  updatedAtIso: string;",
-    "  matchdaySimulations: LeagueMatchdaySimulationRecord[];",
-    "};",
+  ].join("\n")}`;
+}
+
+function renderLeagueDataVotes(matchdaySimulations) {
+  return `${[
+    'import type { LeagueMatchdayVoteRow } from "./league_data_entities";',
     "",
-    `export const leagueData: LeagueDataRecord = ${JSON.stringify(record, null, 2)};`,
+    `export const leagueDataVotes: LeagueMatchdayVoteRow[] = ${JSON.stringify(
+      matchdaySimulations.flatMap((simulation) =>
+        Object.entries(simulation.votesByUserId).map(([userId, proposalId]) => ({
+          id: `${simulation.gameWeekId}:vote:${userId}`,
+          simulationId: `${simulation.gameWeekId}:simulation`,
+          gameWeekId: simulation.gameWeekId,
+          userId,
+          proposalId,
+        })),
+      ),
+      null,
+      2,
+    )};`,
+    "",
+  ].join("\n")}`;
+}
+
+function renderLeagueDataBetLineOdds(matchdaySimulations) {
+  return `${[
+    'import type { LeagueMatchdayBetLineOddsRow } from "./league_data_entities";',
+    "",
+    `export const leagueDataBetLineOdds: LeagueMatchdayBetLineOddsRow[] = ${JSON.stringify(
+      matchdaySimulations.flatMap((simulation) =>
+        Object.entries(simulation.betLineOddsByLabel).map(
+          ([betLineLabel, odds], index) => ({
+            id: `${simulation.gameWeekId}:odds:${index + 1}`,
+            simulationId: `${simulation.gameWeekId}:simulation`,
+            gameWeekId: simulation.gameWeekId,
+            order: index,
+            betLineLabel,
+            odds,
+          }),
+        ),
+      ),
+      null,
+      2,
+    )};`,
+    "",
+  ].join("\n")}`;
+}
+
+function renderLeagueDataSlips(matchdaySimulations) {
+  return `${[
+    'import type { LeagueSimulationSlipRow } from "./league_data_entities";',
+    "",
+    `export const leagueDataSlips: LeagueSimulationSlipRow[] = ${JSON.stringify(
+      matchdaySimulations.map((simulation) => ({
+        id: `${simulation.gameWeekId}:${simulation.simulatedSlip.proposalId}:slip`,
+        simulationId: `${simulation.gameWeekId}:simulation`,
+        gameWeekId: simulation.gameWeekId,
+        proposalId: simulation.simulatedSlip.proposalId,
+        timelineLabel: simulation.simulatedSlip.timelineLabel,
+        stake: simulation.simulatedSlip.stake,
+        stakePlacedAt: simulation.simulatedSlip.stakePlacedAt,
+        settledAt: simulation.simulatedSlip.settledAt,
+        settlementKind: simulation.simulatedSlip.settlementKind,
+        returnAmount: simulation.simulatedSlip.returnAmount,
+        status: simulation.simulatedSlip.status,
+      })),
+      null,
+      2,
+    )};`,
+    "",
+  ].join("\n")}`;
+}
+
+function renderLeagueDataLegResults(matchdaySimulations) {
+  return `${[
+    'import type { LeagueSimulationLegResultRow } from "./league_data_entities";',
+    "",
+    `export const leagueDataLegResults: LeagueSimulationLegResultRow[] = ${JSON.stringify(
+      matchdaySimulations.flatMap((simulation) =>
+        simulation.simulatedSlip.legResults.map((legResult, index) => ({
+          id: `${simulation.gameWeekId}:${simulation.simulatedSlip.proposalId}:slip:leg:${index + 1}`,
+          simulationId: `${simulation.gameWeekId}:simulation`,
+          slipId: `${simulation.gameWeekId}:${simulation.simulatedSlip.proposalId}:slip`,
+          gameWeekId: simulation.gameWeekId,
+          order: index,
+          betLineLabel: legResult.betLineLabel,
+          kickoffAt: legResult.kickoffAt,
+          settledAt: legResult.settledAt,
+          finalScore: legResult.finalScore,
+          status: legResult.status,
+          actualStatus: legResult.actualStatus,
+        })),
+      ),
+      null,
+      2,
+    )};`,
     "",
   ].join("\n")}`;
 }

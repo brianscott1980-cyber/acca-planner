@@ -2,10 +2,44 @@ import {
   matchdaySchedule,
   type GameWeekRecord,
 } from "../data/matchday_schedule";
+import type { LeagueMatchdaySimulationRow } from "../data/league_data_entities";
+import { leagueDataMatchdaySimulations } from "../data/league_data_matchday_simulations";
 import {
-  leagueData,
-  type LeagueMatchdaySimulationRecord,
-} from "../data/league_data";
+  getLeagueSimulatedAtIso,
+  getLeagueUpdatedAtIso,
+} from "./leagueMetaRepository";
+import { getSimulationBetLineOddsByLabel } from "./leagueSimulationOddsRepository";
+import {
+  getSimulationSlipRecord,
+  type LeagueSimulationSlipRecord,
+} from "./leagueSimulationSlipRepository";
+import { getSimulationVotesByUserId } from "./leagueSimulationVoteRepository";
+
+export type LeagueMatchdaySimulationRecord = {
+  gameWeekId: string;
+  voteResolvedAtIso: string;
+  betPlacedAtIso: string;
+  selectedProposalId: string;
+  votesByUserId: Record<string, string>;
+  betLineOddsByLabel: Record<string, string>;
+  simulatedSlip: LeagueSimulationSlipRecord;
+};
+
+export type LeagueDataRecord = {
+  simulatedAtIso: string;
+  updatedAtIso: string;
+  matchdaySimulations: LeagueMatchdaySimulationRecord[];
+};
+
+export function getLeagueData(): LeagueDataRecord {
+  return {
+    simulatedAtIso: getLeagueSimulatedAtIso(),
+    updatedAtIso: getLeagueUpdatedAtIso(),
+    matchdaySimulations: leagueDataMatchdaySimulations.map(
+      composeMatchdaySimulationRecord,
+    ),
+  };
+}
 
 export type SimulatedTimelineRecord = {
   gameWeek: GameWeekRecord;
@@ -13,14 +47,16 @@ export type SimulatedTimelineRecord = {
 };
 
 export function getSimulatedNow() {
-  return new Date(leagueData.simulatedAtIso);
+  return new Date(getLeagueSimulatedAtIso());
 }
 
 export function getSimulationUpdatedAtIso() {
-  return leagueData.updatedAtIso;
+  return getLeagueUpdatedAtIso();
 }
 
 export function getGameWeekSimulation(gameWeekId: string) {
+  const leagueData = getLeagueData();
+
   return (
     leagueData.matchdaySimulations.find(
       (simulation) => simulation.gameWeekId === gameWeekId,
@@ -29,6 +65,7 @@ export function getGameWeekSimulation(gameWeekId: string) {
 }
 
 export function getSortedGameWeeks() {
+  const leagueData = getLeagueData();
   const availableGameWeekIds = new Set(
     leagueData.matchdaySimulations.map((simulation) => simulation.gameWeekId),
   );
@@ -44,6 +81,20 @@ export function getSortedGameWeeks() {
         new Date(right.windowStartIso).getTime(),
     )
     .map(applySimulationToGameWeek);
+}
+
+function composeMatchdaySimulationRecord(
+  simulation: LeagueMatchdaySimulationRow,
+): LeagueMatchdaySimulationRecord {
+  return {
+    gameWeekId: simulation.gameWeekId,
+    voteResolvedAtIso: simulation.voteResolvedAtIso,
+    betPlacedAtIso: simulation.betPlacedAtIso,
+    selectedProposalId: simulation.selectedProposalId,
+    votesByUserId: getSimulationVotesByUserId(simulation.id),
+    betLineOddsByLabel: getSimulationBetLineOddsByLabel(simulation.id),
+    simulatedSlip: getSimulationSlipRecord(simulation.slipId),
+  };
 }
 
 export function getCurrentSimulatedGameWeek() {
