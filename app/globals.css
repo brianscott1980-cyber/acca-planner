@@ -2774,6 +2774,11 @@ button {
   justify-content: flex-start;
 }
 
+.hub-mobile-profile-install {
+  width: 100%;
+  justify-content: flex-start;
+}
+
 .hub-vote-closed-modal-action {
   width: 100%;
   justify-content: center;
@@ -2971,6 +2976,7 @@ button {
   }
 
   .hub-nav-user,
+  .hub-nav-install,
   .hub-header-datetime {
     display: none;
   }

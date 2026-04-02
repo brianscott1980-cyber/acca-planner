@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
+  Download,
   History,
   LayoutDashboard,
   LogOut,
@@ -28,6 +29,14 @@ type HubAppShellProps = {
   children: ReactNode;
 };
 
+type DeferredInstallPromptEvent = Event & {
+  prompt: () => Promise<void>;
+  userChoice: Promise<{
+    outcome: "accepted" | "dismissed";
+    platform: string;
+  }>;
+};
+
 const navItems = [
   { href: "/matchday", label: "Matchday", icon: LayoutDashboard },
   { href: "/timeline", label: "Timeline", icon: History },
@@ -45,11 +54,15 @@ export function HubAppShell({ children }: HubAppShellProps) {
       : ledgerSummary.currentPot / ledgerSummary.memberCount;
   const [simulatedNow, setSimulatedNow] = useState(() => getSimulatedNow());
   const [showMobileProfileDialog, setShowMobileProfileDialog] = useState(false);
+  const [installPromptEvent, setInstallPromptEvent] =
+    useState<DeferredInstallPromptEvent | null>(null);
+  const [isInstallingApp, setIsInstallingApp] = useState(false);
   const initialSimulatedNowRef = useRef<Date | null>(null);
   const mountedAtRef = useRef<number | null>(null);
   const currentMatchdayNumber = getCurrentMatchdayNumber();
   const roiToneClass =
     ledgerSummary.roiPercentage < 0 ? "is-negative" : "is-positive";
+  const canInstallApp = Boolean(installPromptEvent);
   const navigateToLedgerFromHeader = (source: string) => {
     trackEvent("navigate_ledger_from_header", { source });
     router.push("/ledger");
@@ -58,6 +71,24 @@ export function HubAppShell({ children }: HubAppShellProps) {
     setShowMobileProfileDialog(false);
     await signOut();
     router.replace("/login");
+  };
+  const handleInstallApp = async (source: "sidebar" | "mobile_profile") => {
+    if (!installPromptEvent || isInstallingApp) {
+      return;
+    }
+
+    trackEvent("install_app_prompted", { source });
+    setIsInstallingApp(true);
+
+    try {
+      await installPromptEvent.prompt();
+      const { outcome } = await installPromptEvent.userChoice;
+
+      trackEvent("install_app_choice", { source, outcome });
+      setInstallPromptEvent(null);
+    } finally {
+      setIsInstallingApp(false);
+    }
   };
 
   useEffect(() => {
@@ -81,6 +112,46 @@ export function HubAppShell({ children }: HubAppShellProps) {
 
     return () => {
       window.clearInterval(intervalId);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const standaloneMediaQuery = window.matchMedia("(display-mode: standalone)");
+    const syncInstallAvailability = () => {
+      const isStandalone =
+        standaloneMediaQuery.matches ||
+        (window.navigator as Navigator & { standalone?: boolean }).standalone === true;
+
+      if (isStandalone) {
+        setInstallPromptEvent(null);
+      }
+    };
+
+    const handleBeforeInstallPrompt = (event: Event) => {
+      event.preventDefault();
+      setInstallPromptEvent(event as DeferredInstallPromptEvent);
+    };
+
+    const handleAppInstalled = () => {
+      trackEvent("app_installed");
+      setInstallPromptEvent(null);
+      setIsInstallingApp(false);
+      setShowMobileProfileDialog(false);
+    };
+
+    syncInstallAvailability();
+    standaloneMediaQuery.addEventListener("change", syncInstallAvailability);
+    window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+    window.addEventListener("appinstalled", handleAppInstalled);
+
+    return () => {
+      standaloneMediaQuery.removeEventListener("change", syncInstallAvailability);
+      window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+      window.removeEventListener("appinstalled", handleAppInstalled);
     };
   }, []);
 
@@ -153,6 +224,20 @@ export function HubAppShell({ children }: HubAppShellProps) {
                 <LogOut size={16} />
               </button>
             </div>
+          ) : null}
+
+          {canInstallApp ? (
+            <button
+              className="hub-nav-item hub-nav-install"
+              type="button"
+              onClick={() => void handleInstallApp("sidebar")}
+              disabled={isInstallingApp}
+            >
+              <span className="hub-nav-icon">
+                <Download size={18} />
+              </span>
+              <span>{isInstallingApp ? "Installing..." : "Install App"}</span>
+            </button>
           ) : null}
         </nav>
       </aside>
@@ -259,6 +344,18 @@ export function HubAppShell({ children }: HubAppShellProps) {
                   <p className="hub-profile-meta">Signed in member</p>
                 </div>
               </div>
+
+              <button
+                className="hub-nav-item hub-mobile-profile-install"
+                type="button"
+                onClick={() => void handleInstallApp("mobile_profile")}
+                disabled={isInstallingApp}
+              >
+                <span className="hub-nav-icon">
+                  <Download size={18} />
+                </span>
+                <span>{isInstallingApp ? "Installing..." : "Install App"}</span>
+              </button>
 
               <button
                 className="hub-nav-item hub-mobile-profile-signout"
