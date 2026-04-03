@@ -26,8 +26,18 @@ export async function endMatchdayVoting(gameWeek: GameWeekRecord) {
 
   const currentSnapshot = getCurrentAppDataSnapshot();
   const nowIso = new Date().toISOString();
-  const simulationId = `simulation-${gameWeek.id}`;
-  const slipId = `slip-${gameWeek.id}`;
+  const existingSimulationRow =
+    currentSnapshot.leagueDataMatchdaySimulations.find(
+      (simulationRow) => simulationRow.gameWeekId === gameWeek.id,
+    ) ?? null;
+  const existingSlipRow =
+    currentSnapshot.leagueDataSlips.find((slipRow) => slipRow.gameWeekId === gameWeek.id) ??
+    null;
+  const existingVoteRows = currentSnapshot.leagueDataVotes.filter(
+    (voteRow) => voteRow.gameWeekId === gameWeek.id,
+  );
+  const simulationId = existingSimulationRow?.id ?? `simulation-${gameWeek.id}`;
+  const slipId = existingSimulationRow?.slipId ?? existingSlipRow?.id ?? `slip-${gameWeek.id}`;
   const betPlacedAtIso = new Date(Date.now() + LOCKED_STAGE_BUFFER_MS).toISOString();
   const settledAtIso = new Date(Date.now() + LOCKED_SETTLEMENT_BUFFER_MS).toISOString();
   const metaBase = currentSnapshot.leagueDataMeta[0];
@@ -59,7 +69,9 @@ export async function endMatchdayVoting(gameWeek: GameWeekRecord) {
   };
   const voteRows: LeagueMatchdayVoteRow[] = Object.entries(gameWeek.votesByUserId).map(
     ([userId, proposalId]) => ({
-      id: `${simulationId}:${userId}`,
+      id:
+        existingVoteRows.find((voteRow) => voteRow.userId === userId)?.id ??
+        `${simulationId}:${userId}`,
       simulationId,
       gameWeekId: gameWeek.id,
       userId,
