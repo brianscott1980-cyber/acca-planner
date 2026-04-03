@@ -1,10 +1,10 @@
 "use client";
 
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
-import type { LedgerTransactionRecord } from "../../../data/ledger_data";
 import { ledgerData } from "../../../data/ledger_data";
-import { listLedgerTransactions, subscribeToLedgerTransactions } from "../../../repositories/ledgerRepository";
-import { getCurrentLedgerTransactions, setCurrentLedgerTransactions } from "../../../repositories/ledgerStore";
+import { listLedgerTransactions, subscribeToLedgerTransactions } from "../../../repositories/ledger_repository";
+import { getCurrentLedgerTransactions, setCurrentLedgerTransactions } from "../../../services/ledger_service";
+import type { LedgerTransactionRecord } from "../../../types/ledger_type";
 import { useAuth } from "../auth/AuthProvider";
 
 type LedgerContextValue = {

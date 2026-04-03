@@ -71,15 +71,22 @@ async function main() {
       ? new Date()
       : parseShortDateTime(rest.join(" ").trim());
   const updatedAt = new Date();
-  const [{ users }, { matchdaySchedule }, { marketAnalysisSnapshots }] = await Promise.all([
+  const [
+    { users },
+    { matchdaySchedule },
+    { marketAnalysisSnapshotRows },
+    { marketAnalysisSelectionRows },
+  ] = await Promise.all([
     loadTsModule("data/users.ts"),
-    loadTsModule("data/matchday_schedule.ts"),
-    loadTsModule("data/market_analysis.ts"),
+    loadTsModule("services/matchday_schedule_service.ts"),
+    loadTsModule("data/market_analysis_snapshots.ts"),
+    loadTsModule("data/market_analysis_selections.ts"),
   ]);
   const matchdaySimulations = buildMatchdaySimulations({
     users,
     gameWeeks: matchdaySchedule,
-    ladbrokesOddsSnapshots: marketAnalysisSnapshots,
+    ladbrokesOddsSnapshotRows: marketAnalysisSnapshotRows,
+    ladbrokesOddsSelectionRows: marketAnalysisSelectionRows,
     simulatedAt,
   });
   const ledgerTransactions = buildLedgerTransactions({
@@ -176,7 +183,8 @@ async function loadTsModule(relativePath) {
 function buildMatchdaySimulations({
   users,
   gameWeeks,
-  ladbrokesOddsSnapshots,
+  ladbrokesOddsSnapshotRows,
+  ladbrokesOddsSelectionRows,
   simulatedAt,
 }) {
   const includedGameWeeks = getIncludedGameWeeks(gameWeeks, simulatedAt);
@@ -202,7 +210,8 @@ function buildMatchdaySimulations({
     const betPlacedAt = addHours(new Date(gameWeek.windowStartIso), -18);
     const betLineOddsByLabel = buildBetLineOddsByLabel(
       gameWeek,
-      ladbrokesOddsSnapshots,
+      ladbrokesOddsSnapshotRows,
+      ladbrokesOddsSelectionRows,
     );
     const initialVotesByUserId = buildVotesByUserId({
       users,
@@ -442,10 +451,17 @@ function ensureWinningProposalMajority({
   return updatedVotesByUserId;
 }
 
-function buildBetLineOddsByLabel(gameWeek, ladbrokesOddsSnapshots) {
-  const snapshotSelections =
-    ladbrokesOddsSnapshots.find((snapshot) => snapshot.matchdayId === gameWeek.id)
-      ?.selections ?? [];
+function buildBetLineOddsByLabel(
+  gameWeek,
+  ladbrokesOddsSnapshotRows,
+  ladbrokesOddsSelectionRows,
+) {
+  const snapshotId =
+    ladbrokesOddsSnapshotRows.find((snapshot) => snapshot.matchdayId === gameWeek.id)?.id ??
+    null;
+  const snapshotSelections = snapshotId
+    ? ladbrokesOddsSelectionRows.filter((selection) => selection.snapshotId === snapshotId)
+    : [];
   const snapshotOddsById = Object.fromEntries(
     snapshotSelections.map((selection) => [selection.id, selection.decimalOdds]),
   );
@@ -1255,7 +1271,7 @@ function formatProposalTitle(proposalId) {
 
 function renderLeagueDataMeta(record) {
   return `${[
-    'import type { LeagueDataMetaRecord } from "./league_data_entities";',
+    'import type { LeagueDataMetaRecord } from "../types/league_simulation_type";',
     "",
     `export const leagueDataMeta: LeagueDataMetaRecord[] = ${JSON.stringify(
       [{ id: "primary", ...record }],
@@ -1268,7 +1284,7 @@ function renderLeagueDataMeta(record) {
 
 function renderLeagueDataMatchdaySimulations(matchdaySimulations) {
   return `${[
-    'import type { LeagueMatchdaySimulationRow } from "./league_data_entities";',
+    'import type { LeagueMatchdaySimulationRow } from "../types/league_simulation_type";',
     "",
     `export const leagueDataMatchdaySimulations: LeagueMatchdaySimulationRow[] = ${JSON.stringify(
       matchdaySimulations.map((simulation) => ({
@@ -1288,7 +1304,7 @@ function renderLeagueDataMatchdaySimulations(matchdaySimulations) {
 
 function renderLeagueDataVotes(matchdaySimulations) {
   return `${[
-    'import type { LeagueMatchdayVoteRow } from "./league_data_entities";',
+    'import type { LeagueMatchdayVoteRow } from "../types/league_simulation_type";',
     "",
     `export const leagueDataVotes: LeagueMatchdayVoteRow[] = ${JSON.stringify(
       matchdaySimulations.flatMap((simulation) =>
@@ -1309,7 +1325,7 @@ function renderLeagueDataVotes(matchdaySimulations) {
 
 function renderLeagueDataBetLineOdds(matchdaySimulations) {
   return `${[
-    'import type { LeagueMatchdayBetLineOddsRow } from "./league_data_entities";',
+    'import type { LeagueMatchdayBetLineOddsRow } from "../types/league_simulation_type";',
     "",
     `export const leagueDataBetLineOdds: LeagueMatchdayBetLineOddsRow[] = ${JSON.stringify(
       matchdaySimulations.flatMap((simulation) =>
@@ -1333,7 +1349,7 @@ function renderLeagueDataBetLineOdds(matchdaySimulations) {
 
 function renderLeagueDataSlips(matchdaySimulations) {
   return `${[
-    'import type { LeagueSimulationSlipRow } from "./league_data_entities";',
+    'import type { LeagueSimulationSlipRow } from "../types/league_simulation_type";',
     "",
     `export const leagueDataSlips: LeagueSimulationSlipRow[] = ${JSON.stringify(
       matchdaySimulations.map((simulation) => ({
@@ -1358,7 +1374,7 @@ function renderLeagueDataSlips(matchdaySimulations) {
 
 function renderLeagueDataLegResults(matchdaySimulations) {
   return `${[
-    'import type { LeagueSimulationLegResultRow } from "./league_data_entities";',
+    'import type { LeagueSimulationLegResultRow } from "../types/league_simulation_type";',
     "",
     `export const leagueDataLegResults: LeagueSimulationLegResultRow[] = ${JSON.stringify(
       matchdaySimulations.flatMap((simulation) =>
@@ -1385,17 +1401,7 @@ function renderLeagueDataLegResults(matchdaySimulations) {
 
 function renderLedgerData(records) {
   return `${[
-    'export type LedgerTransactionKind = "deposit" | "stake" | "settlement";',
-    "",
-    "export type LedgerTransactionRecord = {",
-    "  id: string;",
-    "  title: string;",
-    "  dateIso: string;",
-    "  amount: number;",
-    "  kind: LedgerTransactionKind;",
-    "  gameWeekId?: string;",
-    "  proposalId?: string;",
-    "};",
+    'import type { LedgerTransactionRecord } from "../types/ledger_type";',
     "",
     `export const ledgerData: LedgerTransactionRecord[] = ${JSON.stringify(records, null, 2)};`,
     "",

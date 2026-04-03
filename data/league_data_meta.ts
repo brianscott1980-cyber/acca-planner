@@ -1,4 +1,4 @@
-import type { LeagueDataMetaRecord } from "./league_data_entities";
+import type { LeagueDataMetaRecord } from "../types/league_simulation_type";
 
 export const leagueDataMeta: LeagueDataMetaRecord[] = [
   {

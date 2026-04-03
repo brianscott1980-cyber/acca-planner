@@ -1,27 +1,24 @@
-import { type LedgerTransactionRecord } from "../../../data/ledger_data";
-import { getMemberCount } from "../../../repositories/userService";
-import { getSimulatedNow } from "../../../repositories/leagueSimulationRepository";
-import { getCurrentLedgerTransactions } from "../../../repositories/ledgerStore";
+import { ledgerData } from "../data/ledger_data";
+import { getMemberCount } from "../repositories/user_repository";
+import { getSimulatedNow } from "./league_simulation_service";
+import type {
+  LedgerActivity,
+  LedgerRange,
+  LedgerTransactionRecord,
+  PotTimelinePoint,
+} from "../types/ledger_type";
 
-export type LedgerActivity = {
-  id: string;
-  title: string;
-  date: string;
-  amount: number;
-  tone: "positive" | "negative";
-  kind: "deposit" | "stake" | "settlement";
-};
+let currentLedgerTransactions: LedgerTransactionRecord[] = ledgerData;
 
-export type PotTimelinePoint = {
-  date: string;
-  label: string;
-  potValue: number;
-  changeAmount: number;
-  eventTitle: string | null;
-  eventTransactionIds: string[];
-};
+export function getCurrentLedgerTransactions() {
+  return currentLedgerTransactions;
+}
 
-export type LedgerRange = "1w" | "2w" | "1m" | "all";
+export function setCurrentLedgerTransactions(
+  transactions: LedgerTransactionRecord[],
+) {
+  currentLedgerTransactions = transactions;
+}
 
 export function getLedgerSummary() {
   const transactions = getCurrentLedgerTransactions();
@@ -93,6 +90,37 @@ export function getPotTimelineSinceFirstStake(today: Date = getSimulatedNow()) {
   }
 
   return getPotTimelineFromDate(new Date(firstStakeEntry.dateIso), today);
+}
+
+export function formatCurrency(
+  value: number,
+  options?: Intl.NumberFormatOptions,
+) {
+  return new Intl.NumberFormat("en-GB", {
+    style: "currency",
+    currency: "GBP",
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2,
+    ...options,
+  }).format(value);
+}
+
+export function formatSignedCurrency(value: number) {
+  const amount = formatCurrency(Math.abs(value), {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+
+  return `${value >= 0 ? "+" : "-"}${amount}`;
+}
+
+export function formatPercent(value: number) {
+  const amount = new Intl.NumberFormat("en-GB", {
+    minimumFractionDigits: 1,
+    maximumFractionDigits: 1,
+  }).format(Math.abs(value));
+
+  return `${value >= 0 ? "+" : "-"}${amount}%`;
 }
 
 function getPotTimelineFromDate(rangeStart: Date, today: Date) {
@@ -172,37 +200,6 @@ function getPotTimelineFromDate(rangeStart: Date, today: Date) {
   return timeline;
 }
 
-export function formatCurrency(
-  value: number,
-  options?: Intl.NumberFormatOptions,
-) {
-  return new Intl.NumberFormat("en-GB", {
-    style: "currency",
-    currency: "GBP",
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 2,
-    ...options,
-  }).format(value);
-}
-
-export function formatSignedCurrency(value: number) {
-  const amount = formatCurrency(Math.abs(value), {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
-
-  return `${value >= 0 ? "+" : "-"}${amount}`;
-}
-
-export function formatPercent(value: number) {
-  const amount = new Intl.NumberFormat("en-GB", {
-    minimumFractionDigits: 1,
-    maximumFractionDigits: 1,
-  }).format(Math.abs(value));
-
-  return `${value >= 0 ? "+" : "-"}${amount}%`;
-}
-
 function roundCurrency(value: number) {
   return Math.round(value * 100) / 100;
 }
@@ -258,37 +255,30 @@ function addDays(value: Date, days: number) {
 }
 
 function getEarliestLedgerDate(fallbackDate: Date) {
-  const sortedEntries = [...getCurrentLedgerTransactions()].sort(
-    (left, right) =>
-      new Date(left.dateIso).getTime() - new Date(right.dateIso).getTime(),
-  );
+  const earliest = [...getCurrentLedgerTransactions()]
+    .sort(
+      (left, right) =>
+        new Date(left.dateIso).getTime() - new Date(right.dateIso).getTime(),
+    )[0];
 
-  return sortedEntries[0] ? new Date(sortedEntries[0].dateIso) : fallbackDate;
+  return earliest ? new Date(earliest.dateIso) : fallbackDate;
 }
 
-function getRangeStart(today: Date, range: LedgerRange) {
-  const normalizedToday = new Date(
+function getRangeStart(today: Date, range: Exclude<LedgerRange, "all">) {
+  const dayCount = range === "1w" ? 6 : range === "2w" ? 13 : 29;
+  const rangeStart = new Date(
     Date.UTC(today.getFullYear(), today.getMonth(), today.getDate()),
   );
-
-  if (range === "1w") {
-    return addDays(normalizedToday, -6);
-  }
-
-  if (range === "2w") {
-    return addDays(normalizedToday, -13);
-  }
-
-  return addDays(normalizedToday, -29);
+  rangeStart.setUTCDate(rangeStart.getUTCDate() - dayCount);
+  return rangeStart;
 }
 
 function formatChartDateLabel(dateKey: string) {
   return new Intl.DateTimeFormat("en-GB", {
-    day: "2-digit",
+    day: "numeric",
     month: "short",
-  })
-    .format(new Date(dateKey))
-    .toUpperCase();
+    timeZone: "Europe/London",
+  }).format(new Date(`${dateKey}T00:00:00.000Z`));
 }
 
 function formatLedgerActivityDate(value: string) {
@@ -296,5 +286,6 @@ function formatLedgerActivityDate(value: string) {
     day: "numeric",
     month: "short",
     year: "numeric",
+    timeZone: "Europe/London",
   }).format(new Date(value));
 }

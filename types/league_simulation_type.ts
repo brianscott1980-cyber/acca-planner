@@ -1,3 +1,5 @@
+import type { GameWeekRecord } from "./matchday_type";
+
 export type LeagueSimulationLegStatus = "won" | "lost" | "cashed_out";
 
 export type LeagueDataMetaRecord = {
@@ -58,4 +60,46 @@ export type LeagueSimulationLegResultRow = {
   finalScore: string;
   status: LeagueSimulationLegStatus;
   actualStatus: "won" | "lost";
+};
+
+export type LeagueSimulationLegRecord = {
+  betLineLabel: string;
+  kickoffAt: string;
+  settledAt: string;
+  finalScore: string;
+  status: LeagueSimulationLegStatus;
+  actualStatus: "won" | "lost";
+};
+
+export type LeagueSimulationSlipRecord = {
+  proposalId: string;
+  timelineLabel: string;
+  stake: number;
+  stakePlacedAt: string;
+  settledAt: string;
+  settlementKind: "settled" | "cashout";
+  returnAmount: number;
+  status: "win" | "loss";
+  legResults: LeagueSimulationLegRecord[];
+};
+
+export type LeagueMatchdaySimulationRecord = {
+  gameWeekId: string;
+  voteResolvedAtIso: string;
+  betPlacedAtIso: string;
+  selectedProposalId: string;
+  votesByUserId: Record<string, string>;
+  betLineOddsByLabel: Record<string, string>;
+  simulatedSlip: LeagueSimulationSlipRecord;
+};
+
+export type LeagueDataRecord = {
+  simulatedAtIso: string;
+  updatedAtIso: string;
+  matchdaySimulations: LeagueMatchdaySimulationRecord[];
+};
+
+export type SimulatedTimelineRecord = {
+  gameWeek: GameWeekRecord;
+  simulation: LeagueMatchdaySimulationRecord;
 };

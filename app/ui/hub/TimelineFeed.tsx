@@ -3,16 +3,17 @@
 import { useRouter } from "next/navigation";
 import {
   formatCurrency,
-} from "./ledgerService";
-import { getSimulatedNow } from "../../../repositories/leagueSimulationRepository";
+} from "../../../services/ledger_service";
+import { getSimulatedNow } from "../../../services/league_simulation_service";
 import {
   getMatchdayHref,
   getProposalDisplayOdds,
   getVisibleGameWeekTimelineRecords,
-} from "../../../repositories/gameWeekRepository";
-import { formatGameWeekDateRange } from "../../../repositories/leagueSimulationRepository";
-import { getMembers, getUserInitials } from "../../../repositories/userService";
-import { getCurrentLedgerTransactions } from "../../../repositories/ledgerStore";
+} from "../../../services/game_week_service";
+import { formatGameWeekDateRange } from "../../../services/league_simulation_service";
+import { getMembers } from "../../../repositories/user_repository";
+import { getCurrentLedgerTransactions } from "../../../services/ledger_service";
+import { getUserInitials } from "../../../services/user_service";
 
 type TimelineEntry = {
   id: string;

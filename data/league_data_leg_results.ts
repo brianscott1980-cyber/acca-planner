@@ -1,4 +1,4 @@
-import type { LeagueSimulationLegResultRow } from "./league_data_entities";
+import type { LeagueSimulationLegResultRow } from "../types/league_simulation_type";
 
 export const leagueDataLegResults: LeagueSimulationLegResultRow[] = [
   {

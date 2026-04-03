@@ -1,4 +1,4 @@
-import type { MatchdayProposalRecord } from "./matchday_entities";
+import type { MatchdayProposalRecord } from "../types/matchday_type";
 
 export const matchdayProposals: MatchdayProposalRecord[] = [
   {

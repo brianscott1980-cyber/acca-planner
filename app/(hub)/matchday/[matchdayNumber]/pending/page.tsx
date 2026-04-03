@@ -12,7 +12,7 @@ import {
   getMatchdayHref,
   getPendingProposalIdForGameWeek,
   getStaticMatchdayNumberParams,
-} from "../../../../../repositories/gameWeekRepository";
+} from "../../../../../services/game_week_service";
 
 export function generateStaticParams() {
   return getStaticMatchdayNumberParams();

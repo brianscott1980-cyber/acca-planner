@@ -1,9 +1,10 @@
 "use client";
 
 import { Crown, Flame, Scale, Shield, Vote } from "lucide-react";
-import { getLeadingProposal } from "../../../repositories/gameWeekRepository";
+import { getLeadingProposal } from "../../../services/game_week_service";
 import { trackEvent } from "../../../lib/analytics";
-import { getMembers, getUserInitials } from "../../../repositories/userService";
+import { getMembers } from "../../../repositories/user_repository";
+import { getUserInitials } from "../../../services/user_service";
 import { useAuth } from "../auth/AuthProvider";
 import { useCurrentGameWeek } from "./GameWeekProvider";
 

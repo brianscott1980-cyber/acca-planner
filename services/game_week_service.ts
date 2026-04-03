@@ -1,11 +1,17 @@
-import {
-  matchdaySchedule,
-  type GameWeekRecord,
-  type GameWeekProposalRecord,
-} from "../data/matchday_schedule";
-import { users } from "../data/users";
-import { formatCurrency, getLedgerSummary } from "../app/ui/hub/ledgerService";
-import { getLadbrokesSelectionDisplayOdds, getLadbrokesSelectionOdds } from "./ladbrokesOddsRepository";
+import { matchdaySchedule } from "./matchday_schedule_service";
+import type {
+  GameWeekRecord,
+  GameWeekProposalRecord,
+} from "../types/matchday_type";
+import type {
+  BetLineInsight,
+  CashoutStrategy,
+  GameWeekViewState,
+  ProposalBetLine,
+} from "../types/game_week_type";
+import { getMemberCount } from "../repositories/user_repository";
+import { formatCurrency, getLedgerSummary } from "./ledger_service";
+import { getLadbrokesSelectionDisplayOdds, getLadbrokesSelectionOdds } from "./ladbrokes_odds_service";
 import {
   getCurrentSimulatedGameWeek,
   getCompletedSimulatedGameWeeks,
@@ -15,27 +21,7 @@ import {
   getSettledSimulatedTimelineRecords,
   getSortedGameWeeks,
   getVisibleSimulatedTimelineRecords,
-} from "./leagueSimulationRepository";
-
-export type ProposalBetLine = GameWeekProposalRecord["betLines"][number];
-
-export type CashoutStrategy = {
-  upperTarget: string;
-  lowerTarget: string;
-  noCashoutValue: string;
-  watchList: string[];
-};
-
-export type BetLineInsight = {
-  aiReasoning: string;
-  sequenceReasoning: string | null;
-};
-
-export type GameWeekViewState =
-  | "voting"
-  | "locked"
-  | "placed"
-  | "review";
+} from "./league_simulation_service";
 
 export function getCurrentGameWeek() {
   return getCurrentSimulatedGameWeek();
@@ -189,7 +175,7 @@ export function getGameWeekConsensusProposalId(gameWeek: GameWeekRecord) {
     (proposalId) => proposalId === simulation.selectedProposalId,
   ).length;
 
-  return selectedProposalVoteCount > users.length / 2
+  return selectedProposalVoteCount > getMemberCount() / 2
     ? simulation.selectedProposalId
     : null;
 }

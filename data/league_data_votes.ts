@@ -1,4 +1,4 @@
-import type { LeagueMatchdayVoteRow } from "./league_data_entities";
+import type { LeagueMatchdayVoteRow } from "../types/league_simulation_type";
 
 export const leagueDataVotes: LeagueMatchdayVoteRow[] = [
   {

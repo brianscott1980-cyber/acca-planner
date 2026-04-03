@@ -1,14 +1,4 @@
-export type LedgerTransactionKind = "deposit" | "stake" | "settlement";
-
-export type LedgerTransactionRecord = {
-  id: string;
-  title: string;
-  dateIso: string;
-  amount: number;
-  kind: LedgerTransactionKind;
-  gameWeekId?: string;
-  proposalId?: string;
-};
+import type { LedgerTransactionRecord } from "../types/ledger_type";
 
 export const ledgerData: LedgerTransactionRecord[] = [
   {

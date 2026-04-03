@@ -1,5 +1,6 @@
 import { ArrowDownRight, ArrowUpRight } from "lucide-react";
-import { formatSignedCurrency, type LedgerActivity } from "./ledgerService";
+import { formatSignedCurrency } from "../../../services/ledger_service";
+import type { LedgerActivity } from "../../../types/ledger_type";
 
 type LedgerTableProps = {
   items: LedgerActivity[];

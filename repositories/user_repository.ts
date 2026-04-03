@@ -1,6 +1,4 @@
-import { users, type UserRecord } from "../data/users";
-
-export type HubUser = UserRecord;
+import { users } from "../data/users";
 
 export function getMembers() {
   return users;
@@ -29,13 +27,4 @@ export function getMemberByEmail(email: string | null | undefined) {
 
 export function getMemberCount() {
   return users.length;
-}
-
-export function getUserInitials(name: string) {
-  return name
-    .split(" ")
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase() ?? "")
-    .join("");
 }

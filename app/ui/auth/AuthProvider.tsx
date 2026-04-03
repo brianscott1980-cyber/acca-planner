@@ -9,9 +9,9 @@ import {
   type ReactNode,
 } from "react";
 import type { User } from "@supabase/supabase-js";
-import type { HubUser } from "../../../repositories/userService";
+import type { HubUser } from "../../../types/user_type";
 import { supabase } from "../../../lib/supabase/client";
-import { getMemberForSupabaseUser } from "../../../repositories/authenticationService";
+import { getMemberForSupabaseUser } from "../../../services/authentication_service";
 
 type AuthContextValue = {
   authUser: User | null;

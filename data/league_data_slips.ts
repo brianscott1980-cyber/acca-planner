@@ -1,4 +1,4 @@
-import type { LeagueSimulationSlipRow } from "./league_data_entities";
+import type { LeagueSimulationSlipRow } from "../types/league_simulation_type";
 
 export const leagueDataSlips: LeagueSimulationSlipRow[] = [
   {

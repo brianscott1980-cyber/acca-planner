@@ -1,50 +1,27 @@
-import {
-  matchdaySchedule,
-  type GameWeekRecord,
-} from "../data/matchday_schedule";
-import type { LeagueMatchdaySimulationRow } from "../data/league_data_entities";
-import { leagueDataMatchdaySimulations } from "../data/league_data_matchday_simulations";
-import {
-  getLeagueSimulatedAtIso,
-  getLeagueUpdatedAtIso,
-} from "./leagueMetaRepository";
-import { getSimulationBetLineOddsByLabel } from "./leagueSimulationOddsRepository";
-import {
-  getSimulationSlipRecord,
-  type LeagueSimulationSlipRecord,
-} from "./leagueSimulationSlipRepository";
-import { getSimulationVotesByUserId } from "./leagueSimulationVoteRepository";
-
-export type LeagueMatchdaySimulationRecord = {
-  gameWeekId: string;
-  voteResolvedAtIso: string;
-  betPlacedAtIso: string;
-  selectedProposalId: string;
-  votesByUserId: Record<string, string>;
-  betLineOddsByLabel: Record<string, string>;
-  simulatedSlip: LeagueSimulationSlipRecord;
-};
-
-export type LeagueDataRecord = {
-  simulatedAtIso: string;
-  updatedAtIso: string;
-  matchdaySimulations: LeagueMatchdaySimulationRecord[];
-};
+import { matchdaySchedule } from "./matchday_schedule_service";
+import { getLeagueSimulatedAtIso, getLeagueUpdatedAtIso } from "../repositories/league_meta_repository";
+import { getLeagueMatchdaySimulationRows, getLeagueMatchdaySimulationRowByGameWeekId } from "../repositories/league_simulation_repository";
+import { getLeagueSimulationBetLineOddsRows } from "../repositories/league_simulation_odds_repository";
+import { getLeagueSimulationVoteRows } from "../repositories/league_simulation_vote_repository";
+import { getSimulationSlipRecord } from "./league_simulation_slip_service";
+import type {
+  GameWeekRecord,
+} from "../types/matchday_type";
+import type {
+  LeagueDataRecord,
+  LeagueMatchdaySimulationRecord,
+  LeagueMatchdaySimulationRow,
+} from "../types/league_simulation_type";
 
 export function getLeagueData(): LeagueDataRecord {
   return {
     simulatedAtIso: getLeagueSimulatedAtIso(),
     updatedAtIso: getLeagueUpdatedAtIso(),
-    matchdaySimulations: leagueDataMatchdaySimulations.map(
+    matchdaySimulations: getLeagueMatchdaySimulationRows().map(
       composeMatchdaySimulationRecord,
     ),
   };
 }
-
-export type SimulatedTimelineRecord = {
-  gameWeek: GameWeekRecord;
-  simulation: LeagueMatchdaySimulationRecord;
-};
 
 export function getSimulatedNow() {
   return new Date(getLeagueSimulatedAtIso());
@@ -55,19 +32,13 @@ export function getSimulationUpdatedAtIso() {
 }
 
 export function getGameWeekSimulation(gameWeekId: string) {
-  const leagueData = getLeagueData();
-
-  return (
-    leagueData.matchdaySimulations.find(
-      (simulation) => simulation.gameWeekId === gameWeekId,
-    ) ?? null
-  );
+  const simulationRow = getLeagueMatchdaySimulationRowByGameWeekId(gameWeekId);
+  return simulationRow ? composeMatchdaySimulationRecord(simulationRow) : null;
 }
 
 export function getSortedGameWeeks() {
-  const leagueData = getLeagueData();
   const availableGameWeekIds = new Set(
-    leagueData.matchdaySimulations.map((simulation) => simulation.gameWeekId),
+    getLeagueMatchdaySimulationRows().map((simulation) => simulation.gameWeekId),
   );
   const visibleGameWeeks =
     availableGameWeekIds.size > 0
@@ -81,20 +52,6 @@ export function getSortedGameWeeks() {
         new Date(right.windowStartIso).getTime(),
     )
     .map(applySimulationToGameWeek);
-}
-
-function composeMatchdaySimulationRecord(
-  simulation: LeagueMatchdaySimulationRow,
-): LeagueMatchdaySimulationRecord {
-  return {
-    gameWeekId: simulation.gameWeekId,
-    voteResolvedAtIso: simulation.voteResolvedAtIso,
-    betPlacedAtIso: simulation.betPlacedAtIso,
-    selectedProposalId: simulation.selectedProposalId,
-    votesByUserId: getSimulationVotesByUserId(simulation.id),
-    betLineOddsByLabel: getSimulationBetLineOddsByLabel(simulation.id),
-    simulatedSlip: getSimulationSlipRecord(simulation.slipId),
-  };
 }
 
 export function getCurrentSimulatedGameWeek() {
@@ -224,6 +181,32 @@ export function formatGameWeekDateRange(gameWeek: GameWeekRecord) {
   }
 
   return `${startLabel} - ${endLabel}`;
+}
+
+function composeMatchdaySimulationRecord(
+  simulation: LeagueMatchdaySimulationRow,
+): LeagueMatchdaySimulationRecord {
+  return {
+    gameWeekId: simulation.gameWeekId,
+    voteResolvedAtIso: simulation.voteResolvedAtIso,
+    betPlacedAtIso: simulation.betPlacedAtIso,
+    selectedProposalId: simulation.selectedProposalId,
+    votesByUserId: getLeagueSimulationVoteRows(simulation.id).reduce<Record<string, string>>(
+      (accumulator, voteRow) => {
+        accumulator[voteRow.userId] = voteRow.proposalId;
+        return accumulator;
+      },
+      {},
+    ),
+    betLineOddsByLabel: getLeagueSimulationBetLineOddsRows(simulation.id).reduce<Record<string, string>>(
+      (accumulator, oddsRow) => {
+        accumulator[oddsRow.betLineLabel] = oddsRow.odds;
+        return accumulator;
+      },
+      {},
+    ),
+    simulatedSlip: getSimulationSlipRecord(simulation.slipId),
+  };
 }
 
 function applySimulationToGameWeek(gameWeek: GameWeekRecord) {

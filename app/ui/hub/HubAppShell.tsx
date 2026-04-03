@@ -17,11 +17,12 @@ import {
   formatCurrency,
   formatPercent,
   getLedgerSummary,
-} from "./ledgerService";
+} from "../../../services/ledger_service";
 import { MiniSparkline } from "./MiniSparkline";
-import { getSimulatedNow } from "../../../repositories/leagueSimulationRepository";
-import { getMemberCount, getUserInitials } from "../../../repositories/userService";
-import { getCurrentMatchdayNumber } from "../../../repositories/gameWeekRepository";
+import { getMemberCount } from "../../../repositories/user_repository";
+import { getCurrentMatchdayNumber } from "../../../services/game_week_service";
+import { getSimulatedNow } from "../../../services/league_simulation_service";
+import { getUserInitials } from "../../../services/user_service";
 import { trackEvent } from "../../../lib/analytics";
 import { withBasePath } from "../../../lib/site";
 import { useAuth } from "../auth/AuthProvider";

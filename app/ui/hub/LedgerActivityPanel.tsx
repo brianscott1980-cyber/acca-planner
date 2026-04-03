@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { X } from "lucide-react";
 import { trackEvent } from "../../../lib/analytics";
-import { getRecentLedgerActivity } from "./ledgerService";
+import { getRecentLedgerActivity } from "../../../services/ledger_service";
 import { LedgerTable } from "./LedgerTable";
 
 export function LedgerActivityPanel({

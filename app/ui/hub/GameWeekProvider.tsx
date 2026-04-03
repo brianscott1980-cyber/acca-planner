@@ -12,7 +12,7 @@ import {
   type ReactNode,
   type SetStateAction,
 } from "react";
-import type { GameWeekRecord } from "../../../data/matchday_schedule";
+import type { GameWeekRecord } from "../../../types/matchday_type";
 import {
   getAccessibleGameWeekById,
   getGameWeekById,
@@ -20,14 +20,14 @@ import {
   getMatchdayHref,
   isGameWeekVoteLocked,
   updateUserVoteForGameWeek,
-} from "../../../repositories/gameWeekRepository";
+} from "../../../services/game_week_service";
 import {
   deleteMatchdayVote,
   listMatchdayVotes,
   saveMatchdayVote,
   subscribeToMatchdayVotes,
-} from "../../../repositories/matchdayVoteRepository";
-import { getMembers } from "../../../repositories/userService";
+} from "../../../repositories/matchday_vote_repository";
+import { getMembers } from "../../../repositories/user_repository";
 import { useAuth } from "../auth/AuthProvider";
 
 type VoteSimulationStatus = "idle" | "running" | "closed";

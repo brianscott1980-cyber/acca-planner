@@ -9,8 +9,8 @@ import {
   formatSignedCurrency,
   getPotTimelineForRange,
   getLedgerSummary,
-  type LedgerRange,
-} from "./ledgerService";
+} from "../../../services/ledger_service";
+import type { LedgerRange } from "../../../types/ledger_type";
 import { LedgerActivityPanel } from "./LedgerActivityPanel";
 
 export function LedgerOverview() {

@@ -1,5 +1,5 @@
 import type { RealtimeChannel } from "@supabase/supabase-js";
-import type { LedgerTransactionRecord } from "../data/ledger_data";
+import type { LedgerTransactionRecord } from "../types/ledger_type";
 import { supabase } from "../lib/supabase/client";
 
 const LEDGER_TRANSACTIONS_TABLE = "ledger_transactions";

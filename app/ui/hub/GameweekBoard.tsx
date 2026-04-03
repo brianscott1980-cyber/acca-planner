@@ -18,7 +18,7 @@ import {
 import type {
   GameWeekProposalRecord,
   SimulatedSlipLegStatus,
-} from "../../../data/matchday_schedule";
+} from "../../../types/matchday_type";
 import {
   getBetLineDisplayOdds,
   getBetLineInsight,
@@ -32,14 +32,14 @@ import {
   getProposalDisplayOdds,
   getRecommendedStake,
   getUserVoteForGameWeek,
-} from "../../../repositories/gameWeekRepository";
-import { formatLadbrokesSourceLabel } from "../../../repositories/ladbrokesOddsRepository";
+} from "../../../services/game_week_service";
+import { formatLadbrokesSourceLabel } from "../../../services/ladbrokes_odds_service";
 import { trackEvent } from "../../../lib/analytics";
-import { getMembers } from "../../../repositories/userService";
+import { getMembers } from "../../../repositories/user_repository";
 import {
   getGameWeekSimulation,
   getSimulatedNow,
-} from "../../../repositories/leagueSimulationRepository";
+} from "../../../services/league_simulation_service";
 import {
   ConsensusVoteBreakdown,
   VotesAvatarRow,

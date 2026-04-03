@@ -1,4 +1,4 @@
-import { getPotTimelineSinceFirstStake } from "./ledgerService";
+import { getPotTimelineSinceFirstStake } from "../../../services/ledger_service";
 
 export function MiniSparkline() {
   const timeline = getPotTimelineSinceFirstStake();

@@ -1,14 +1,7 @@
 import { supabase } from "../lib/supabase/client";
+import type { MatchdayVoteRecord } from "../types/matchday_vote_type";
 
 const MATCHDAY_VOTES_TABLE = "matchday_votes";
-
-export type MatchdayVoteRecord = {
-  gameWeekId: string;
-  authUserId: string;
-  memberId: string;
-  proposalId: string;
-  updatedAt: string;
-};
 
 type SaveMatchdayVoteInput = {
   gameWeekId: string;

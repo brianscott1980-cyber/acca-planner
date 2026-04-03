@@ -5,13 +5,13 @@ import type {
   BetLineFormMatch,
   BetLineFormOutcome,
   SimulatedSlipLegStatus,
-} from "../../../data/matchday_schedule";
+} from "../../../types/matchday_type";
 import type {
   BetLineInsight,
   ProposalBetLine,
-} from "../../../repositories/gameWeekRepository";
+} from "../../../types/game_week_type";
 import { trackEvent } from "../../../lib/analytics";
-import { getFixtureDisplayParts } from "../../../repositories/premierLeagueClubRepository";
+import { getFixtureDisplayParts } from "../../../services/premier_league_club_service";
 
 type MatchBetSummaryRowProps = {
   betLine: ProposalBetLine;

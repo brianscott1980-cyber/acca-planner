@@ -1,4 +1,4 @@
-import type { LeagueMatchdaySimulationRow } from "./league_data_entities";
+import type { LeagueMatchdaySimulationRow } from "../types/league_simulation_type";
 
 export const leagueDataMatchdaySimulations: LeagueMatchdaySimulationRow[] = [
   {

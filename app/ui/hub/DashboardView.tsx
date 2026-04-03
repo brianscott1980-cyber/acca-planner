@@ -7,8 +7,8 @@ import {
   type GameWeekViewState,
   getGameWeekViewState,
   getUserVoteForGameWeek,
-} from "../../../repositories/gameWeekRepository";
-import { getSimulationUpdatedAtIso } from "../../../repositories/leagueSimulationRepository";
+} from "../../../services/game_week_service";
+import { getSimulationUpdatedAtIso } from "../../../services/league_simulation_service";
 import { ConsensusPanel } from "./ConsensusPanel";
 import { GameWeekProvider } from "./GameWeekProvider";
 import { useCurrentGameWeek } from "./GameWeekProvider";

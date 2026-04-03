@@ -941,7 +941,7 @@ button {
 }
 
 .hub-mobile-vote-message {
-  display: none;
+  display: block;
   margin: 1rem 0;
   font-size: 0.88rem;
   font-weight: 600;

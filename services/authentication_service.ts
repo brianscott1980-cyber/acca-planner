@@ -1,5 +1,5 @@
 import type { User } from "@supabase/supabase-js";
-import { getMemberByEmail, getMemberById } from "./userService";
+import { getMemberByEmail, getMemberById } from "../repositories/user_repository";
 
 function getMemberIdFromMetadata(user: User | null | undefined) {
   const memberId =

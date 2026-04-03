@@ -1,4 +1,4 @@
-import type { MatchdayGameWeekRecord } from "./matchday_entities";
+import type { MatchdayGameWeekRecord } from "../types/matchday_type";
 
 export const matchdayGameWeeks: MatchdayGameWeekRecord[] = [
   {
