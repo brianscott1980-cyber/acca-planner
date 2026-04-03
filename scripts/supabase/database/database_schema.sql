@@ -76,6 +76,7 @@ create table if not exists public.matchday_proposals (
   summary text,
   legs integer,
   status_label text,
+  cashout_watch_list jsonb,
   bet_line_ids jsonb,
   ai_recommended boolean,
   primary key (id),

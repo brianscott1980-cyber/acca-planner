@@ -280,6 +280,7 @@ export function getUserVoteForGameWeek(
 export function getLeadingProposal(gameWeek: GameWeekRecord) {
   let leadingProposal: GameWeekProposalRecord | null = null;
   let highestVoteCount = -1;
+  let hasTieAtHighestVoteCount = false;
 
   for (const proposal of gameWeek.proposals) {
     const voteCount = getProposalVotes(gameWeek, proposal.id).length;
@@ -287,10 +288,16 @@ export function getLeadingProposal(gameWeek: GameWeekRecord) {
     if (voteCount > highestVoteCount) {
       highestVoteCount = voteCount;
       leadingProposal = proposal;
+      hasTieAtHighestVoteCount = false;
+      continue;
+    }
+
+    if (voteCount === highestVoteCount) {
+      hasTieAtHighestVoteCount = true;
     }
   }
 
-  return leadingProposal;
+  return hasTieAtHighestVoteCount ? null : leadingProposal;
 }
 
 export function updateUserVoteForGameWeek(

@@ -372,10 +372,21 @@ async function upsertTargetRows(supabase, target) {
       continue;
     }
 
-    const payload = step.rows.map(mapRowToSupabaseShape);
-    const { error } = await supabase.from(step.table).upsert(payload, {
+    let payload = step.rows.map(mapRowToSupabaseShape);
+    let { error } = await supabase.from(step.table).upsert(payload, {
       onConflict: "id",
     });
+
+    if (
+      error &&
+      step.table === DATASETS.matchdayProposals.tableName &&
+      isMissingColumnError(error, "cashout_watch_list")
+    ) {
+      payload = payload.map((row) => omitKeys(row, ["cashout_watch_list"]));
+      ({ error } = await supabase.from(step.table).upsert(payload, {
+        onConflict: "id",
+      }));
+    }
 
     if (error) {
       if (step.optional && isMissingRelationError(error)) {
@@ -403,6 +414,26 @@ function mapRowToSupabaseShape(row) {
 
 function toSnakeCase(value) {
   return value.replace(/[A-Z]/g, (character) => `_${character.toLowerCase()}`);
+}
+
+function omitKeys(row, keys) {
+  const nextRow = { ...row };
+
+  for (const key of keys) {
+    delete nextRow[key];
+  }
+
+  return nextRow;
+}
+
+function isMissingColumnError(error, columnName) {
+  return (
+    error &&
+    typeof error === "object" &&
+    "message" in error &&
+    typeof error.message === "string" &&
+    error.message.includes(`'${columnName}' column`)
+  );
 }
 
 async function runNodeScript(scriptPath, args) {

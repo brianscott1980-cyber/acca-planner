@@ -2,6 +2,7 @@ import { supabase } from "../lib/supabase/client";
 import { getDefaultAppDataSnapshot } from "../services/app_data_service";
 import type { AppDataSnapshot } from "../types/app_data_type";
 import type { LeagueClubRecord } from "../types/league_club_type";
+import type { MatchdayProposalRecord } from "../types/matchday_type";
 
 type TableLoader = {
   tableName: string;
@@ -97,6 +98,13 @@ function resolveSnapshotRows(
     );
   }
 
+  if (snapshotKey === "matchdayProposals") {
+    return mergeMatchdayProposalRows(
+      mappedRows as MatchdayProposalRecord[],
+      fallbackRows as MatchdayProposalRecord[],
+    );
+  }
+
   return mappedRows.length > 0 ? mappedRows : fallbackRows;
 }
 
@@ -120,6 +128,34 @@ function mergeLeagueClubRows(
   }
 
   return mergedRows;
+}
+
+function mergeMatchdayProposalRows(
+  remoteRows: MatchdayProposalRecord[],
+  fallbackRows: MatchdayProposalRecord[],
+) {
+  if (remoteRows.length === 0) {
+    return fallbackRows;
+  }
+
+  const fallbackRowsById = new Map(fallbackRows.map((row) => [row.id, row]));
+
+  return remoteRows.map((row) => {
+    const fallbackRow = fallbackRowsById.get(row.id);
+
+    if (!fallbackRow) {
+      return row;
+    }
+
+    return {
+      ...fallbackRow,
+      ...row,
+      cashoutWatchList:
+        row.cashoutWatchList && row.cashoutWatchList.length > 0
+          ? row.cashoutWatchList
+          : fallbackRow.cashoutWatchList,
+    };
+  });
 }
 
 function toCamelCase(value: string) {

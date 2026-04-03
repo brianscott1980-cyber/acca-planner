@@ -88,7 +88,7 @@ export function ConsensusPanel() {
                 : ""
               }`}
             >
-            {formatProposalLabel(leadingProposal?.riskLevel) ?? "TBD"}
+            {formatProposalLabel(leadingProposal?.riskLevel) ?? "currently tied"}
           </span>.
         </p>
       </div>

@@ -54,7 +54,13 @@ export function resetCurrentAppDataSnapshot() {
 }
 
 export function getAppDataSourceMode() {
-  return process.env.NEXT_PUBLIC_APP_DATA_SOURCE?.trim().toLowerCase() ?? "remote";
+  if (process.env.NODE_ENV === "production") {
+    return "remote";
+  }
+
+  const configuredMode = process.env.NEXT_PUBLIC_APP_DATA_SOURCE?.trim().toLowerCase();
+
+  return configuredMode === "local" ? "local" : "remote";
 }
 
 export function shouldUseLocalAppData() {

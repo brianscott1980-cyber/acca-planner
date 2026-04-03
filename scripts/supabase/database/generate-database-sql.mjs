@@ -121,6 +121,7 @@ const DATASETS = [
       "summary",
       "legs",
       "statusLabel",
+      "cashoutWatchList",
       "betLineIds",
       "aiRecommended",
     ],
@@ -135,6 +136,7 @@ const DATASETS = [
     ],
     columns: {
       riskLevel: { type: "text", check: ["safe", "balanced", "aggressive"] },
+      cashoutWatchList: { type: "jsonb" },
       betLineIds: { type: "jsonb" },
     },
   },
