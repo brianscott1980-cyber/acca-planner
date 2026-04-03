@@ -1,5 +1,4 @@
 import { getMatchdaySchedule } from "./matchday_schedule_service";
-import { withBasePath } from "../lib/site";
 import type {
   GameWeekRecord,
   GameWeekProposalRecord,
@@ -128,7 +127,7 @@ export function getMatchdayHref({
   const encodedMatchday = encodeURIComponent(
     matchdayNumber ? String(matchdayNumber) : gameWeekId,
   );
-  const basePathname = withBasePath("/matchday/");
+  const basePathname = "/matchday/";
 
   return `${basePathname}?matchday=${encodedMatchday}`;
 }

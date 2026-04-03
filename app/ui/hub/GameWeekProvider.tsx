@@ -12,6 +12,7 @@ import {
   type ReactNode,
   type SetStateAction,
 } from "react";
+import { useRouter } from "next/navigation";
 import type { GameWeekRecord } from "../../../types/matchday_type";
 import {
   getAccessibleGameWeekById,
@@ -79,6 +80,7 @@ export function GameWeekProvider({
   children,
   gameWeekId = null,
 }: GameWeekProviderProps) {
+  const router = useRouter();
   const { authUser, isConfigured, member: loggedInUser } = useAuth();
   const isRemoteData = shouldUseRemoteAppData();
   const members = getMembers();
@@ -273,14 +275,12 @@ export function GameWeekProvider({
               await endMatchdayVoting(nextGameWeek);
               setCurrentGameWeek(getInitialGameWeekState(loggedInUserId, nextGameWeek.id));
 
-              if (typeof window !== "undefined") {
-                window.location.assign(
-                  getMatchdayHref({
-                    gameWeekId: nextGameWeek.id,
-                    stage: "pending",
-                  }),
-                );
-              }
+              router.replace(
+                getMatchdayHref({
+                  gameWeekId: nextGameWeek.id,
+                  stage: "pending",
+                }),
+              );
             } catch (error) {
               console.error(error);
               if (!hasSavedVote) {
@@ -387,14 +387,12 @@ export function GameWeekProvider({
           await endMatchdayVoting(currentGameWeek);
           setCurrentGameWeek(getInitialGameWeekState(loggedInUserId, currentGameWeek.id));
 
-          if (typeof window !== "undefined") {
-            window.location.assign(
-              getMatchdayHref({
-                gameWeekId: currentGameWeek.id,
-                stage: "pending",
-              }),
-            );
-          }
+          router.replace(
+            getMatchdayHref({
+              gameWeekId: currentGameWeek.id,
+              stage: "pending",
+            }),
+          );
         } catch (error) {
           console.error(error);
         } finally {
@@ -405,11 +403,7 @@ export function GameWeekProvider({
       voteSimulationStatus,
       voteSimulationResult,
       refreshVoteSimulation() {
-        if (typeof window === "undefined") {
-          return;
-        }
-
-        window.location.assign(
+        router.replace(
           getMatchdayHref({
             gameWeekId: currentGameWeek.id,
           }),
@@ -425,6 +419,7 @@ export function GameWeekProvider({
       loggedInUser,
       loggedInUserId,
       members,
+      router,
       voteSimulationResult,
       voteSimulationStatus,
     ],
@@ -534,7 +529,7 @@ async function syncRemoteMatchdayStage({
       return;
     }
 
-    window.location.assign(nextHref);
+    window.location.assign(withBasePath(nextHref));
   } catch (error) {
     console.error(error);
   }

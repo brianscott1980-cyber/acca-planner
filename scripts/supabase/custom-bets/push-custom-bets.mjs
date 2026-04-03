@@ -13,6 +13,7 @@ const ENV_FILES = [".env.local", ".env"];
 
 async function main() {
   const isDryRun = process.argv.includes("--dry-run");
+  const shouldReplaceFuture = process.argv.includes("--replace-future");
 
   await loadEnvironmentVariables();
 
@@ -40,28 +41,45 @@ async function main() {
     process.stdout.write(`- ${customBet.title} (${customBet.id}) starts ${customBet.eventStartIso}\n`);
   }
 
-  const remoteFutureIds = await fetchOptionalIds(
+  const existingRemoteIds = await fetchOptionalIds(
     supabase,
     "custom_bets",
-    (query) => query.gt("event_start_iso", nowIso),
+    (query) => query.in("id", futureCustomBets.map((entry) => entry.id)),
   );
 
-  process.stdout.write(`Future remote custom bets matched for replacement: ${remoteFutureIds.length}\n`);
+  process.stdout.write(`Existing remote custom bets matched by id: ${existingRemoteIds.length}\n`);
+  process.stdout.write(
+    shouldReplaceFuture
+      ? "Mode: replace future remote custom bets before upsert.\n"
+      : "Mode: non-destructive upsert only. Unrelated remote custom bets will be kept.\n",
+  );
 
   if (isDryRun) {
     process.stdout.write("Dry run only. No remote rows were changed.\n");
     return;
   }
 
-  if (remoteFutureIds.length > 0) {
-    const { error } = await supabase.from("custom_bets").delete().in("id", remoteFutureIds);
+  if (shouldReplaceFuture) {
+    const remoteFutureIds = await fetchOptionalIds(
+      supabase,
+      "custom_bets",
+      (query) => query.gt("event_start_iso", nowIso),
+    );
 
-    if (error) {
-      throw new Error(`Failed to clear future remote custom bets: ${error.message}`);
+    process.stdout.write(
+      `Future remote custom bets matched for replacement: ${remoteFutureIds.length}\n`,
+    );
+
+    if (remoteFutureIds.length > 0) {
+      const { error } = await supabase.from("custom_bets").delete().in("id", remoteFutureIds);
+
+      if (error) {
+        throw new Error(`Failed to clear future remote custom bets: ${error.message}`);
+      }
     }
   }
 
-  const payload = customBets.map(mapRowToSupabaseShape);
+  const payload = futureCustomBets.map(mapRowToSupabaseShape);
   const { error } = await supabase.from("custom_bets").upsert(payload, {
     onConflict: "id",
   });
