@@ -7,7 +7,7 @@ import ts from "typescript";
 import { createClient } from "@supabase/supabase-js";
 
 const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
-const REPO_ROOT = path.resolve(SCRIPT_DIR, "../..");
+const REPO_ROOT = path.resolve(SCRIPT_DIR, "../..", "..");
 const USERS_FILE = path.join(REPO_ROOT, "data", "users.ts");
 const ENV_FILES = [".env.local", ".env"];
 
@@ -15,11 +15,12 @@ async function main() {
   await loadEnvironmentVariables();
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const serviceRoleKey =
+    process.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.SUPABASE_SECRET_KEY;
 
   if (!supabaseUrl || !serviceRoleKey) {
     throw new Error(
-      "Missing NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY. Add them to .env.local first.",
+      "Missing NEXT_PUBLIC_SUPABASE_URL and/or SUPABASE_SERVICE_ROLE_KEY (or SUPABASE_SECRET_KEY). Add them to .env.local first.",
     );
   }
 
