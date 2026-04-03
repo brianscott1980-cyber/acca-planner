@@ -421,7 +421,8 @@ function isMissingColumnError(error, table, column) {
 function isMissingRelationError(error) {
   return (
     error?.code === "42P01" ||
-    String(error?.message ?? "").toLowerCase().includes("does not exist")
+    String(error?.message ?? "").toLowerCase().includes("does not exist") ||
+    String(error?.message ?? "").toLowerCase().includes("could not find the table")
   );
 }
 

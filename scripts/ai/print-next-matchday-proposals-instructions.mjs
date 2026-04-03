@@ -214,11 +214,14 @@ Required repo contract:
 - Update matchday_proposals.ts with exactly three proposals: safe, balanced, aggressive.
 - Update matchday_bet_lines.ts so every proposal references ordered bet lines for its chosen markets.
 - Update matchday_forms.ts and matchday_form_matches.ts only if you have enough concrete recent-form evidence to populate them credibly; otherwise leave form rows absent and rely on formNote text instead.
+- When form rows are provided, they must support the UI's visual five-circle row: one circle per recent match, circle background driven by win/draw/loss, and the text inside each circle set to that team's goals scored in that match.
 - Update timeline_events.ts with one timeline marker row titled "Next Matchday Proposal Generated" dated at generation time for the next matchday id.
 - Do not edit ledger_data.ts for proposal-generation messages. Ledger data must preserve the opening seven player deposits and any real bankroll transactions.
 
 Proposal construction rules:
 - Generate exactly three proposals with proposal ids safe, balanced, and aggressive.
+- Each proposal may contain between 2 and 5 legs.
+- Choose the leg count for each proposal from the available Ladbrokes odds in the target weekend window so the final slip best matches its intended risk profile.
 - The safe proposal must have the lowest combined decimal odds of the three.
 - The balanced proposal must sit clearly between the safe and aggressive proposals on total odds and volatility.
 - The aggressive proposal must have the highest combined decimal odds and the highest upside.
@@ -230,14 +233,17 @@ Risk and sequencing rules:
 - Sequence the legs in kickoff order using the scheduleNote format expected by the app, matching this shape: "Sat 12 Apr, 15:00 BST".
 - Respect cashout sequencing. Earlier legs should generally stabilise the slip, while later legs should carry more of the payout swing.
 - Safe:
+  - usually fewer legs unless the available short prices require another stabilising selection
   - shortest combined odds
   - strongest favourites and lower-volatility selections
   - preserve cashout optionality after early legs land
 - Balanced:
+  - typically lands in the middle on both leg count and price
   - medium combined odds
   - mix of strong favourites and a limited number of price-enhancing legs
   - one or two more volatile legs can appear later in the sequence
 - Aggressive:
+  - can use more legs when that is the best route to the highest credible upside
   - longest combined odds
   - highest variance profile
   - later legs should carry the largest upside and the largest cashout swing
@@ -255,7 +261,8 @@ Recent-form evidence rules:
 - For every fixture used in a proposed leg, look up the last 5 matches for both teams before finalising the selection.
 - Capture the goal count for each team across those previous 5 matches, and use that evidence when deciding whether an over-goals or both-teams-to-score market is justified.
 - Reflect the last-5 scoring evidence in aiReasoning, summary text, and formNote content rather than making unsupported claims.
-- Update matchday_forms.ts and matchday_form_matches.ts when you have enough concrete last-5 evidence to do so accurately. If the evidence cannot be verified cleanly, do not invent form data.
+- Update matchday_forms.ts and matchday_form_matches.ts when you have enough concrete last-5 evidence to do so accurately. Populate exactly 5 matches per team side when you do this. If the evidence cannot be verified cleanly, do not invent form data.
+- For each stored form match row, set outcome to W, D, or L for the circle background and set goalsScored to the number that should appear inside the circle.
 
 Local timeline marker rule:
 - Append a timeline_events row with:
@@ -270,6 +277,7 @@ Local timeline marker rule:
 Validation checklist before finishing:
 - Exactly one next-matchday row exists in matchday_game_weeks.ts for the generated weekend.
 - Exactly three proposal rows exist for that matchday.
+- Every proposal has between 2 and 5 bet lines, chosen to fit its risk profile.
 - Every proposal betLineId points to a bet line row for that same matchday.
 - Every marketId used by a bet line exists in market_analysis_selections.ts and belongs to the snapshot row for this matchday.
 - Safe total odds < balanced total odds < aggressive total odds.

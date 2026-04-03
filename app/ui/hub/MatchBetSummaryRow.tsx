@@ -172,20 +172,16 @@ function getBetLineFormContent(
   fixtureDisplayParts: ReturnType<typeof getFixtureDisplayParts>,
 ) {
   if (betLine.form) {
-    const formDisplayMode = getBetLineFormDisplayMode(betLine);
-
     return (
       <div className="hub-form-visual">
         <FormTeamBlock
           alignment="end"
-          displayMode={formDisplayMode}
           matches={betLine.form.home.matches}
           teamName={fixtureDisplayParts?.homeTeam.name ?? "Home team"}
         />
         <span className="hub-form-versus">vs</span>
         <FormTeamBlock
           alignment="start"
-          displayMode={formDisplayMode}
           matches={betLine.form.away.matches}
           teamName={fixtureDisplayParts?.awayTeam.name ?? "Away team"}
         />
@@ -200,12 +196,10 @@ function getBetLineFormContent(
 
 function FormTeamBlock({
   alignment,
-  displayMode,
   matches,
   teamName,
 }: {
   alignment: "start" | "end";
-  displayMode: "outcome" | "goals";
   matches: BetLineFormMatch[];
   teamName: string;
 }) {
@@ -218,31 +212,15 @@ function FormTeamBlock({
             className={`hub-form-outcome hub-form-outcome-${getOutcomeTone(
               match.outcome,
             )}`}
-            title={getMatchTooltip(match, teamName, displayMode)}
-            aria-label={getMatchTooltip(match, teamName, displayMode)}
+            title={getMatchTooltip(match, teamName)}
+            aria-label={getMatchTooltip(match, teamName)}
           >
-            {displayMode === "outcome" ? match.outcome : match.goalsScored}
+            {match.goalsScored}
           </span>
         ))}
       </div>
     </div>
   );
-}
-
-function getBetLineFormDisplayMode(betLine: ProposalBetLine) {
-  const marketLabel = betLine.label.split(":")[1]?.trim().toLowerCase() ?? "";
-
-  if (
-    marketLabel.includes("draw no bet") ||
-    marketLabel.includes("to win") ||
-    marketLabel.includes("or draw") ||
-    marketLabel.includes("handicap") ||
-    marketLabel.includes("win to nil")
-  ) {
-    return "outcome";
-  }
-
-  return "goals";
 }
 
 function getBetLineFormSummary(betLine: ProposalBetLine) {
@@ -320,16 +298,12 @@ function getOutcomeLabel(outcome: BetLineFormOutcome) {
 function getMatchTooltip(
   match: BetLineFormMatch,
   teamName: string,
-  displayMode: "outcome" | "goals",
 ) {
   const fixture =
     match.venue === "H"
       ? `${teamName} vs ${match.opponent}`
       : `${match.opponent} vs ${teamName}`;
-  const detail =
-    displayMode === "outcome"
-      ? getOutcomeLabel(match.outcome)
-      : `${getOutcomeLabel(match.outcome)}, ${match.goalsScored} goals`;
+  const detail = `${getOutcomeLabel(match.outcome)}, ${match.goalsScored} goals`;
 
   return `${fixture}: ${match.finalScore} (${detail})`;
 }
