@@ -17,12 +17,29 @@ export const metadata: Metadata = {
   icons: {
     icon: [
       {
+        url: withBasePath("/assets/app_logos/logo_64px.png"),
+        sizes: "64x64",
+        type: "image/png",
+      },
+      {
+        url: withBasePath("/assets/app_logos/logo_192px.png"),
+        sizes: "192x192",
+        type: "image/png",
+      },
+      {
         url: withBasePath("/assets/app_logos/logo_512px.png"),
+        sizes: "512x512",
+        type: "image/png",
+      },
+      {
+        url: withBasePath("/assets/app_logos/logo_1024px.png"),
+        sizes: "1024x1024",
         type: "image/png",
       },
     ],
     apple: {
-      url: withBasePath("/assets/app_logos/logo_512px.png"),
+      url: withBasePath("/assets/app_logos/logo_180px.png"),
+      sizes: "180x180",
       type: "image/png",
     },
   },
