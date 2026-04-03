@@ -44,7 +44,7 @@ function composeProposalRecord(
 ): GameWeekProposalRecord {
   const proposalBetLines = getMatchdayBetLineRowsByProposalId(proposal.id)
     .slice()
-    .sort((left, right) => left.order - right.order);
+    .sort((left, right) => left.sortOrder - right.sortOrder);
 
   return {
     id: proposal.proposalId,
@@ -79,7 +79,7 @@ function composeBetLineForm(formId: string) {
 
   const orderedMatches = getMatchdayFormMatchRowsByFormId(formId)
     .slice()
-    .sort((left, right) => left.order - right.order);
+    .sort((left, right) => left.sortOrder - right.sortOrder);
 
   return {
     home: {

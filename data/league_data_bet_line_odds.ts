@@ -5,7 +5,7 @@ export const leagueDataBetLineOdds: LeagueMatchdayBetLineOddsRow[] = [
     "id": "md-32:odds:1",
     "simulationId": "md-32:simulation",
     "gameWeekId": "md-32",
-    "order": 0,
+    "sortOrder": 0,
     "betLineLabel": "Arsenal v Bournemouth: Arsenal Draw No Bet",
     "odds": "1.28"
   },
@@ -13,7 +13,7 @@ export const leagueDataBetLineOdds: LeagueMatchdayBetLineOddsRow[] = [
     "id": "md-32:odds:2",
     "simulationId": "md-32:simulation",
     "gameWeekId": "md-32",
-    "order": 1,
+    "sortOrder": 1,
     "betLineLabel": "Liverpool v Fulham: Over 1.5 Goals",
     "odds": "1.22"
   },
@@ -21,7 +21,7 @@ export const leagueDataBetLineOdds: LeagueMatchdayBetLineOddsRow[] = [
     "id": "md-32:odds:3",
     "simulationId": "md-32:simulation",
     "gameWeekId": "md-32",
-    "order": 2,
+    "sortOrder": 2,
     "betLineLabel": "Chelsea v Man City: Over 1.5 Goals",
     "odds": "1.33"
   },
@@ -29,7 +29,7 @@ export const leagueDataBetLineOdds: LeagueMatchdayBetLineOddsRow[] = [
     "id": "md-32:odds:4",
     "simulationId": "md-32:simulation",
     "gameWeekId": "md-32",
-    "order": 3,
+    "sortOrder": 3,
     "betLineLabel": "Arsenal v Bournemouth: Arsenal to Win",
     "odds": "1.50"
   },
@@ -37,7 +37,7 @@ export const leagueDataBetLineOdds: LeagueMatchdayBetLineOddsRow[] = [
     "id": "md-32:odds:5",
     "simulationId": "md-32:simulation",
     "gameWeekId": "md-32",
-    "order": 4,
+    "sortOrder": 4,
     "betLineLabel": "Liverpool v Fulham: Liverpool to Win",
     "odds": "1.42"
   },
@@ -45,7 +45,7 @@ export const leagueDataBetLineOdds: LeagueMatchdayBetLineOddsRow[] = [
     "id": "md-32:odds:6",
     "simulationId": "md-32:simulation",
     "gameWeekId": "md-32",
-    "order": 5,
+    "sortOrder": 5,
     "betLineLabel": "Chelsea v Man City: Both Teams To Score",
     "odds": "1.57"
   },
@@ -53,7 +53,7 @@ export const leagueDataBetLineOdds: LeagueMatchdayBetLineOddsRow[] = [
     "id": "md-32:odds:7",
     "simulationId": "md-32:simulation",
     "gameWeekId": "md-32",
-    "order": 6,
+    "sortOrder": 6,
     "betLineLabel": "Man Utd v Leeds United: Over 2.5 Goals",
     "odds": "1.72"
   },
@@ -61,7 +61,7 @@ export const leagueDataBetLineOdds: LeagueMatchdayBetLineOddsRow[] = [
     "id": "md-32:odds:8",
     "simulationId": "md-32:simulation",
     "gameWeekId": "md-32",
-    "order": 7,
+    "sortOrder": 7,
     "betLineLabel": "Arsenal v Bournemouth: Arsenal -1 Handicap",
     "odds": "1.95"
   },
@@ -69,7 +69,7 @@ export const leagueDataBetLineOdds: LeagueMatchdayBetLineOddsRow[] = [
     "id": "md-32:odds:9",
     "simulationId": "md-32:simulation",
     "gameWeekId": "md-32",
-    "order": 8,
+    "sortOrder": 8,
     "betLineLabel": "Liverpool v Fulham: Liverpool to Win & Over 2.5 Goals",
     "odds": "1.83"
   },
@@ -77,7 +77,7 @@ export const leagueDataBetLineOdds: LeagueMatchdayBetLineOddsRow[] = [
     "id": "md-32:odds:10",
     "simulationId": "md-32:simulation",
     "gameWeekId": "md-32",
-    "order": 9,
+    "sortOrder": 9,
     "betLineLabel": "Chelsea v Man City: Both Teams To Score & Over 2.5 Goals",
     "odds": "1.91"
   },
@@ -85,7 +85,7 @@ export const leagueDataBetLineOdds: LeagueMatchdayBetLineOddsRow[] = [
     "id": "md-32:odds:11",
     "simulationId": "md-32:simulation",
     "gameWeekId": "md-32",
-    "order": 10,
+    "sortOrder": 10,
     "betLineLabel": "Man Utd v Leeds United: Man Utd to Win & Over 2.5 Goals",
     "odds": "1.89"
   }

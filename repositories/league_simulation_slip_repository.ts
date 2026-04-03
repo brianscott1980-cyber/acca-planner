@@ -8,5 +8,5 @@ export function getLeagueSimulationSlipRowById(slipId: string) {
 export function getLeagueSimulationLegResultRowsBySlipId(slipId: string) {
   return leagueDataLegResults
     .filter((legRow) => legRow.slipId === slipId)
-    .sort((left, right) => left.order - right.order);
+    .sort((left, right) => left.sortOrder - right.sortOrder);
 }

@@ -29,7 +29,7 @@ export type LeagueMatchdayBetLineOddsRow = {
   id: string;
   simulationId: string;
   gameWeekId: string;
-  order: number;
+  sortOrder: number;
   betLineLabel: string;
   odds: string;
 };
@@ -53,7 +53,7 @@ export type LeagueSimulationLegResultRow = {
   simulationId: string;
   slipId: string;
   gameWeekId: string;
-  order: number;
+  sortOrder: number;
   betLineLabel: string;
   kickoffAt: string;
   settledAt: string;

@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "generate:pl-clubs": "node scripts/premier-league/generate-club-data.mjs",
+    "supabase:generate-db-sql": "node scripts/supabase/database/generate-database-sql.mjs",
     "supabase:sync-users": "node scripts/supabase/identity/sync-auth-users.mjs",
     "supabase:sync-ledger": "node scripts/supabase/ledger/sync-ledger-transactions.mjs",
     "simulate:league:reset": "node scripts/league/simulate-league.mjs reset",

@@ -86,7 +86,7 @@ export type MatchdayFormMatchRecord = {
   id: string;
   formId: string;
   teamSide: keyof BetLineForm;
-  order: number;
+  sortOrder: number;
   opponent: string;
   venue: "H" | "A";
   finalScore: string;
@@ -98,7 +98,7 @@ export type MatchdayBetLineRecord = {
   id: string;
   gameWeekId: string;
   proposalEntityId: string;
-  order: number;
+  sortOrder: number;
   label: string;
   scheduleNote?: string;
   aiReasoning?: string;
