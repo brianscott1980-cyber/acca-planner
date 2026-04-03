@@ -29,6 +29,7 @@ import {
   saveMatchdayVote,
   subscribeToMatchdayVotes,
 } from "../../../repositories/matchday_vote_repository";
+import { supabase } from "../../../lib/supabase/client";
 import { getMembers } from "../../../repositories/user_repository";
 import { useAuth } from "../auth/AuthProvider";
 import { shouldUseRemoteAppData } from "../../../services/app_data_service";
@@ -175,6 +176,50 @@ export function GameWeekProvider({
     loggedInUserId,
   ]);
 
+  useEffect(() => {
+    if (
+      !isRemoteData ||
+      !authUserId ||
+      !loggedInUserId ||
+      !isConfigured ||
+      isCurrentGameWeekLocked ||
+      !supabase
+    ) {
+      return;
+    }
+
+    let isActive = true;
+    const currentGameWeekId = currentGameWeek.id;
+
+    const syncStageIfVisible = () => {
+      if (typeof document !== "undefined" && document.visibilityState !== "visible") {
+        return;
+      }
+
+      void syncRemoteMatchdayStage({
+        currentGameWeekId,
+        isActive: () => isActive,
+      });
+    };
+
+    const pollIntervalId = window.setInterval(syncStageIfVisible, 5000);
+    document.addEventListener("visibilitychange", syncStageIfVisible);
+    void syncStageIfVisible();
+
+    return () => {
+      isActive = false;
+      window.clearInterval(pollIntervalId);
+      document.removeEventListener("visibilitychange", syncStageIfVisible);
+    };
+  }, [
+    authUserId,
+    currentGameWeek.id,
+    isConfigured,
+    isCurrentGameWeekLocked,
+    isRemoteData,
+    loggedInUserId,
+  ]);
+
   const value = useMemo<GameWeekContextValue>(
     () => ({
       currentGameWeek,
@@ -203,21 +248,56 @@ export function GameWeekProvider({
           const previousVotesByUserId = currentGameWeek.votesByUserId;
 
           setCurrentGameWeek(nextGameWeek);
-          void saveMatchdayVote({
-            gameWeekId: nextGameWeek.id,
-            memberId: loggedInUser.id,
-            proposalId,
-          }).catch((error) => {
-            console.error(error);
-            setCurrentGameWeek((previous) =>
-              previous.id !== nextGameWeek.id
-                ? previous
-                : {
-                    ...previous,
-                    votesByUserId: previousVotesByUserId,
-                  },
-            );
-          });
+          void (async () => {
+            let hasSavedVote = false;
+
+            try {
+              await saveMatchdayVote({
+                gameWeekId: nextGameWeek.id,
+                memberId: loggedInUser.id,
+                proposalId,
+              });
+              hasSavedVote = true;
+
+              const consensusResult = getImmediateConsensusResult(nextGameWeek, members);
+
+              if (!consensusResult) {
+                return;
+              }
+
+              setIsEndingVote(true);
+              setVoteSimulationStatus("closed");
+              setVoteSimulationResult(consensusResult);
+
+              await endMatchdayVoting(nextGameWeek);
+              setCurrentGameWeek(getInitialGameWeekState(loggedInUserId, nextGameWeek.id));
+
+              if (typeof window !== "undefined") {
+                window.location.assign(
+                  getMatchdayHref({
+                    gameWeekId: nextGameWeek.id,
+                    stage: "pending",
+                  }),
+                );
+              }
+            } catch (error) {
+              console.error(error);
+              if (!hasSavedVote) {
+                setCurrentGameWeek((previous) =>
+                  previous.id !== nextGameWeek.id
+                    ? previous
+                    : {
+                        ...previous,
+                        votesByUserId: previousVotesByUserId,
+                      },
+                );
+              }
+              setVoteSimulationStatus("idle");
+              setVoteSimulationResult(null);
+            } finally {
+              setIsEndingVote(false);
+            }
+          })();
           return;
         }
 
@@ -368,6 +448,92 @@ function mapVotesByUserId(
     accumulator[vote.memberId] = vote.proposalId;
     return accumulator;
   }, {});
+}
+
+function getImmediateConsensusResult(
+  gameWeek: GameWeekRecord,
+  members: ReturnType<typeof getMembers>,
+): VoteSimulationResult | null {
+  const consensusThreshold = Math.floor(members.length / 2) + 1;
+  const voteCounts = Object.values(gameWeek.votesByUserId).reduce<Record<string, number>>(
+    (accumulator, proposalId) => {
+      accumulator[proposalId] = (accumulator[proposalId] ?? 0) + 1;
+      return accumulator;
+    },
+    {},
+  );
+  const sortedVoteEntries = Object.entries(voteCounts).sort((left, right) => right[1] - left[1]);
+  const leadingEntry = sortedVoteEntries[0] ?? null;
+  const runnerUpEntry = sortedVoteEntries[1] ?? null;
+
+  if (!leadingEntry || leadingEntry[1] < consensusThreshold) {
+    return null;
+  }
+
+  if (runnerUpEntry && runnerUpEntry[1] === leadingEntry[1]) {
+    return null;
+  }
+
+  const leadingProposal = gameWeek.proposals.find(
+    (proposal) => proposal.id === leadingEntry[0],
+  );
+
+  return {
+    closedReason: "consensus",
+    leadingProposalId: leadingProposal?.id ?? leadingEntry[0],
+    leadingProposalTitle: leadingProposal?.title ?? null,
+    hasConsensus: true,
+  };
+}
+
+async function syncRemoteMatchdayStage({
+  currentGameWeekId,
+  isActive,
+}: {
+  currentGameWeekId: string;
+  isActive: () => boolean;
+}) {
+  if (!supabase) {
+    return;
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from("league_data_matchday_simulations")
+      .select("vote_resolved_at_iso")
+      .eq("game_week_id", currentGameWeekId)
+      .maybeSingle();
+
+    if (error) {
+      throw error;
+    }
+
+    if (!isActive() || !data?.vote_resolved_at_iso) {
+      return;
+    }
+
+    if (new Date(data.vote_resolved_at_iso).getTime() > Date.now()) {
+      return;
+    }
+
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const nextHref = getMatchdayHref({
+      gameWeekId: currentGameWeekId,
+      stage: "pending",
+    });
+
+    if (window.location.pathname === "/matchday/pending/" && window.location.search === new URL(nextHref, window.location.origin).search) {
+      window.location.reload();
+      return;
+    }
+
+    window.location.assign(nextHref);
+  } catch (error) {
+    console.error(error);
+  }
 }
 
 export function useCurrentGameWeek() {

@@ -217,6 +217,10 @@ Required repo contract:
 - When form rows are provided, they must support the UI's visual five-circle row: one circle per recent match, circle background driven by win/draw/loss, and the text inside each circle set to that team's goals scored in that match.
 - Update timeline_events.ts with one timeline marker row titled "Next Matchday Proposal Generated" dated at generation time for the next matchday id.
 - Do not edit ledger_data.ts for proposal-generation messages. Ledger data must preserve the opening seven player deposits and any real bankroll transactions.
+- Before deciding which proposal is AI recommended, inspect the existing bankroll context in the repo:
+  - use ledger_data.ts to understand the current pot against the original deposit baseline
+  - use completed matchday outcomes, settlement history, and recent bankroll movement to judge whether recent betting form is strong, mixed, or deteriorating
+  - use that broader context as part of the recommendation decision rather than looking at the weekend slate in isolation
 
 Proposal construction rules:
 - Generate exactly three proposals with proposal ids safe, balanced, and aggressive.
@@ -225,9 +229,14 @@ Proposal construction rules:
 - The safe proposal must have the lowest combined decimal odds of the three.
 - The balanced proposal must sit clearly between the safe and aggressive proposals on total odds and volatility.
 - The aggressive proposal must have the highest combined decimal odds and the highest upside.
-- Exactly one proposal may be marked aiRecommended: true. Choose the strongest overall blend of price, sequencing, and survivability rather than defaulting blindly.
+- Exactly one proposal may be marked aiRecommended: true.
+- Choose the recommendation from both market fit and bankroll situation:
+  - if recent results are strong and the pot is healthy or growing, the recommendation may lean more aggressive when the odds structure justifies it
+  - if recent results are mixed or the pot is roughly stable, the recommendation should usually stay balanced unless the slate strongly points elsewhere
+  - if the pot is dwindling or recent betting results have been poor, the recommendation should become more protective and prefer the safer profile unless there is a compelling reason not to
+- Do not recommend a proposal blindly from odds alone. Explain why the selected recommendation fits both the current match slate and the recent bankroll trend.
 - Status labels must be concise and readable in the UI.
-- Titles must align with the app language, for example "Defensive Accumulator", "Neutral Accumulator", and "Aggressive Accumulator".
+- Titles must align with the app language, for example "Defensive Accumulator", "Balanced Accumulator", and "Aggressive Accumulator".
 
 Risk and sequencing rules:
 - Sequence the legs in kickoff order using the scheduleNote format expected by the app, matching this shape: "Sat 12 Apr, 15:00 BST".
@@ -248,6 +257,20 @@ Risk and sequencing rules:
   - highest variance profile
   - later legs should carry the largest upside and the largest cashout swing
 
+Cashout guidance rules:
+- Every proposal must include cashout guidance that is genuinely specific to that proposal's legs and sequence.
+- Cashout guidance must not be generic boilerplate reused across all three proposals.
+- For each proposal, check the latest credible team news for any clubs used in its legs, including injuries, suspensions, likely absences, rotation risk, and major availability changes.
+- Use that team-news context to shape the "what to watch" advice and explain what matters most for that exact strategy during live play.
+- The "what to watch" advice should mention the main in-play patterns that affect cashout relevance for that proposal, such as:
+  - whether an early goal improves or weakens the intended slip path
+  - whether a slow opening period should make the user more cautious
+  - whether missing attackers or defenders materially changes the expected match script
+  - whether the proposal depends more on control, clean-sheet security, or open-game goal volume
+- Defensive proposals should usually have more protective and earlier-warning cashout advice.
+- Balanced proposals should explain the trade-off between protecting a decent return and letting the strategy's remaining edge play out.
+- Aggressive proposals should still prioritise upside, but they must identify the key negative team-news or in-play signals that would justify taking a cashout instead of letting the full variance ride.
+
 Selection quality rules:
 - Consider goals-based Ladbrokes markets and match-outcome markets equally when building proposed legs.
 - Goals-based options such as over-goals lines and both-teams-to-score should be weighed alongside standard match-outcome prices based on value, fit, and risk profile.
@@ -256,6 +279,7 @@ Selection quality rules:
 - Do not stuff every proposal with the same legs unless the price structure makes that unavoidable.
 - Summaries and aiReasoning text should explain why the market fits the slip profile, not just restate the selection.
 - Keep proposal summaries concise but specific about price, sequencing, and weekend context.
+- For the single aiRecommended proposal, the summary or aiReasoning should also make clear why that option suits the current pot level and the recent betting trend.
 
 Recent-form evidence rules:
 - For every fixture used in a proposed leg, look up the last 5 matches for both teams before finalising the selection.
@@ -281,6 +305,8 @@ Validation checklist before finishing:
 - Every proposal betLineId points to a bet line row for that same matchday.
 - Every marketId used by a bet line exists in market_analysis_selections.ts and belongs to the snapshot row for this matchday.
 - Safe total odds < balanced total odds < aggressive total odds.
+- The aiRecommended choice is justified by both the current market slate and the current bankroll / recent-results context.
+- Cashout guidance is meaningfully differentiated across safe, balanced, and aggressive and references relevant team-news or in-play patterns for that proposal.
 - No generated fixture falls outside ${weekendWindow.startLabel} to ${weekendWindow.endLabel}.
 - Only local data files were modified.
 

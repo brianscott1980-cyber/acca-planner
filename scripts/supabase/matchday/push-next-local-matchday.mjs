@@ -2,6 +2,7 @@
 
 import { readFile } from "node:fs/promises";
 import { spawn } from "node:child_process";
+import { createInterface } from "node:readline/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import ts from "typescript";
@@ -18,6 +19,7 @@ const CLEAR_FUTURE_SCRIPT = path.join(
   "database",
   "clear-future-data.mjs",
 );
+const VOTE_HANDLING_MODES = new Set(["clear", "retain", "cancel"]);
 
 const DATASETS = {
   matchdayGameWeeks: {
@@ -64,7 +66,7 @@ const DATASETS = {
 };
 
 async function main() {
-  const isDryRun = process.argv.includes("--dry-run");
+  const { isDryRun, voteHandlingMode } = parseArgs(process.argv.slice(2));
 
   await loadEnvironmentVariables();
 
@@ -79,6 +81,12 @@ async function main() {
   }
 
   const target = collectTargetRows(datasets, nextGameWeek.id);
+  const remoteExisting = await fetchRemoteTargetState(supabase, nextGameWeek.id);
+  const resolvedVoteHandlingMode = await resolveVoteHandlingMode({
+    gameWeek: nextGameWeek,
+    remoteExisting,
+    presetMode: voteHandlingMode,
+  });
 
   process.stdout.write(
     `${isDryRun ? "Dry run" : "Preparing"} remote reset-and-publish for ${nextGameWeek.name} (${nextGameWeek.id}).\n`,
@@ -91,8 +99,29 @@ async function main() {
     process.stdout.write(`- ${label}: ${rows}\n`);
   }
 
+  if (resolvedVoteHandlingMode === "cancel") {
+    process.stdout.write(
+      `\nCancelled because ${remoteExisting.matchdayVoteCount} remote vote(s) already exist for ${nextGameWeek.id}.\n`,
+    );
+    return;
+  }
+
+  if (remoteExisting.matchdayVoteCount > 0) {
+    process.stdout.write(
+      `\nVote handling: ${
+        resolvedVoteHandlingMode === "retain"
+          ? "replace rows and retain existing votes"
+          : "replace rows and clear existing votes"
+      }.\n`,
+    );
+  }
+
   process.stdout.write("\nRunning supabase:clear-future first.\n");
-  await runNodeScript(CLEAR_FUTURE_SCRIPT, isDryRun ? ["--dry-run"] : []);
+  await runNodeScript(CLEAR_FUTURE_SCRIPT, getClearFutureArgs({
+    isDryRun,
+    gameWeekId: nextGameWeek.id,
+    voteHandlingMode: resolvedVoteHandlingMode,
+  }));
 
   if (isDryRun) {
     process.stdout.write(
@@ -101,9 +130,15 @@ async function main() {
     return;
   }
 
-  const remoteExisting = await fetchRemoteTargetState(supabase, nextGameWeek.id);
-  await resetRemoteTargetState(supabase, nextGameWeek.id, remoteExisting);
-  await upsertTargetRows(supabase, target);
+  const publishTarget =
+    resolvedVoteHandlingMode === "retain"
+      ? applyRetainedVotesToTarget(target, remoteExisting.matchdayVotes)
+      : target;
+
+  await resetRemoteTargetState(supabase, nextGameWeek.id, remoteExisting, {
+    retainVotes: resolvedVoteHandlingMode === "retain",
+  });
+  await upsertTargetRows(supabase, publishTarget);
 
   process.stdout.write(
     `\nPublished ${nextGameWeek.id} from local files to Supabase successfully.\n`,
@@ -226,6 +261,13 @@ async function fetchRemoteTargetState(supabase, gameWeekId) {
       "matchday_id",
       [gameWeekId],
     ),
+    matchdayVotes: await fetchRows(
+      supabase,
+      "matchday_votes",
+      "member_id, proposal_id",
+      (query) => query.eq("game_week_id", gameWeekId),
+      true,
+    ),
     matchdayVoteCount: await fetchCountByOptionalIn(
       supabase,
       "matchday_votes",
@@ -235,18 +277,27 @@ async function fetchRemoteTargetState(supabase, gameWeekId) {
   };
 }
 
-async function resetRemoteTargetState(supabase, gameWeekId, remoteExisting) {
+async function resetRemoteTargetState(
+  supabase,
+  gameWeekId,
+  remoteExisting,
+  { retainVotes = false } = {},
+) {
   process.stdout.write("\nResetting existing remote rows for the target matchday.\n");
 
   const operations = [
     { table: "matchday_form_matches", ids: remoteExisting.formMatchIds },
-    {
-      table: "matchday_votes",
-      column: "game_week_id",
-      values: [gameWeekId],
-      count: remoteExisting.matchdayVoteCount,
-      optional: true,
-    },
+    ...(!retainVotes
+      ? [
+          {
+            table: "matchday_votes",
+            column: "game_week_id",
+            values: [gameWeekId],
+            count: remoteExisting.matchdayVoteCount,
+            optional: true,
+          },
+        ]
+      : []),
     { table: "timeline_events", ids: remoteExisting.timelineEventIds, optional: true },
     { table: "matchday_forms", ids: remoteExisting.formIds },
     { table: "matchday_bet_lines", ids: remoteExisting.betLineIds },
@@ -449,6 +500,148 @@ function stripWrappingQuotes(value) {
   }
 
   return value;
+}
+
+function parseArgs(args) {
+  let isDryRun = false;
+  let voteHandlingMode = null;
+
+  for (const arg of args) {
+    if (arg === "--dry-run") {
+      isDryRun = true;
+      continue;
+    }
+
+    if (arg === "--replace-clear-votes") {
+      voteHandlingMode = "clear";
+      continue;
+    }
+
+    if (arg === "--replace-retain-votes") {
+      voteHandlingMode = "retain";
+      continue;
+    }
+
+    if (arg === "--cancel-on-votes") {
+      voteHandlingMode = "cancel";
+      continue;
+    }
+
+    if (arg.startsWith("--on-existing-votes=")) {
+      const nextMode = arg.split("=")[1]?.trim().toLowerCase() ?? "";
+
+      if (!VOTE_HANDLING_MODES.has(nextMode)) {
+        throw new Error(
+          `Unsupported --on-existing-votes value "${nextMode}". Use clear, retain, or cancel.`,
+        );
+      }
+
+      voteHandlingMode = nextMode;
+    }
+  }
+
+  return {
+    isDryRun,
+    voteHandlingMode,
+  };
+}
+
+async function resolveVoteHandlingMode({
+  gameWeek,
+  remoteExisting,
+  presetMode,
+}) {
+  if (remoteExisting.matchdayVoteCount === 0) {
+    return "clear";
+  }
+
+  if (presetMode) {
+    return presetMode;
+  }
+
+  if (!process.stdin.isTTY || !process.stdout.isTTY) {
+    throw new Error(
+      `Remote votes already exist for ${gameWeek.id}. Re-run with --replace-clear-votes, --replace-retain-votes, or --cancel-on-votes.`,
+    );
+  }
+
+  process.stdout.write(
+    `\nWarning: ${remoteExisting.matchdayVoteCount} remote vote(s) already exist for ${gameWeek.name} (${gameWeek.id}).\n`,
+  );
+  process.stdout.write("Choose how to continue:\n");
+  process.stdout.write("  1. Replace and clear votes\n");
+  process.stdout.write("  2. Replace and retain votes\n");
+  process.stdout.write("  3. Cancel\n");
+
+  const readline = createInterface({
+    input: process.stdin,
+    output: process.stdout,
+  });
+
+  try {
+    while (true) {
+      const answer = (await readline.question("Select 1, 2, or 3: ")).trim();
+
+      if (answer === "1") {
+        return "clear";
+      }
+
+      if (answer === "2") {
+        return "retain";
+      }
+
+      if (answer === "3") {
+        return "cancel";
+      }
+
+      process.stdout.write("Please enter 1, 2, or 3.\n");
+    }
+  } finally {
+    readline.close();
+  }
+}
+
+function getClearFutureArgs({ isDryRun, gameWeekId, voteHandlingMode }) {
+  const args = [];
+
+  if (isDryRun) {
+    args.push("--dry-run");
+  }
+
+  if (voteHandlingMode === "retain") {
+    args.push(`--exclude-game-week=${gameWeekId}`);
+  }
+
+  return args;
+}
+
+function applyRetainedVotesToTarget(target, matchdayVotes) {
+  const validProposalIds = new Set(target.proposalRows.map((row) => row.proposalId));
+  const retainedVotesByUserId = {};
+  let droppedVoteCount = 0;
+
+  for (const voteRow of matchdayVotes) {
+    if (!validProposalIds.has(voteRow.proposal_id)) {
+      droppedVoteCount += 1;
+      continue;
+    }
+
+    retainedVotesByUserId[voteRow.member_id] = voteRow.proposal_id;
+  }
+
+  if (droppedVoteCount > 0) {
+    process.stdout.write(
+      `Dropping ${droppedVoteCount} retained vote(s) that do not match the current local proposal ids.\n`,
+    );
+  }
+
+  return {
+    ...target,
+    gameWeekRows: target.gameWeekRows.map((row) => ({
+      ...row,
+      votesByUserId: retainedVotesByUserId,
+    })),
+  };
 }
 
 async function fetchRows(supabase, table, columns, buildQuery, optional = false) {

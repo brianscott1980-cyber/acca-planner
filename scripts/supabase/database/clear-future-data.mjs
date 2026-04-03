@@ -10,25 +10,34 @@ const REPO_ROOT = path.resolve(SCRIPT_DIR, "../..", "..");
 const ENV_FILES = [".env.local", ".env"];
 
 async function main() {
-  const isDryRun = process.argv.includes("--dry-run");
+  const { isDryRun, excludedGameWeekIds } = parseArgs(process.argv.slice(2));
 
   await loadEnvironmentVariables();
 
   const supabase = createSupabaseAdminClient();
   const nowIso = new Date().toISOString();
 
-  const futureGameWeeks = await fetchRows(
+  const futureGameWeeks = (await fetchRows(
     supabase,
     "matchday_game_weeks",
     "id, name, window_start_iso",
     (query) => query.gt("window_start_iso", nowIso).order("window_start_iso", { ascending: true }),
-  );
+  )).filter((gameWeek) => !excludedGameWeekIds.has(gameWeek.id));
   const futureGameWeekIds = getUniqueStringValues(futureGameWeeks, "id");
 
-  const futureSeedIds = await fetchIds(
+  const futureSeedRows = await fetchRows(
     supabase,
     "matchday_seed",
+    "id, slug",
     (query) => query.gt("window_start_iso", nowIso),
+  );
+  const futureSeedIds = getUniqueStringValues(
+    futureSeedRows.filter(
+      (row) =>
+        !excludedGameWeekIds.has(row.id) &&
+        !excludedGameWeekIds.has(typeof row.slug === "string" ? row.slug : ""),
+    ),
+    "id",
   );
   const futureSnapshotIds = await fetchIdsByIn(
     supabase,
@@ -110,19 +119,24 @@ async function main() {
       (query) => query.gt("date_iso", nowIso),
     )),
   ]);
-  const futureTimelineEventIds = getUniqueValues([
-    ...(await fetchIdsByOptionalQuery(
+  const futureTimelineEventRows = getUniqueRowsById([
+    ...(await fetchOptionalRows(
       supabase,
       "timeline_events",
+      "id, matchday_id",
       (query) => query.gt("timestamp_iso", nowIso),
     )),
-    ...(await fetchIdsByOptionalIn(
+    ...(await fetchOptionalRows(
       supabase,
       "timeline_events",
-      "matchday_id",
-      futureGameWeekIds,
+      "id, matchday_id",
+      (query) => query.in("matchday_id", futureGameWeekIds),
     )),
-  ]);
+  ]).filter(
+    (row) =>
+      !excludedGameWeekIds.has(typeof row.matchday_id === "string" ? row.matchday_id : ""),
+  );
+  const futureTimelineEventIds = getUniqueStringValues(futureTimelineEventRows, "id");
   const futureMatchdayVoteCount = await fetchCountByIn(
     supabase,
     "matchday_votes",
@@ -169,6 +183,12 @@ async function main() {
   process.stdout.write(
     `${isDryRun ? "Dry run" : "Preparing"} future Supabase cleanup as of ${nowIso}.\n`,
   );
+
+  if (excludedGameWeekIds.size > 0) {
+    process.stdout.write(
+      `Excluding matchday ids from cleanup: ${[...excludedGameWeekIds].join(", ")}\n`,
+    );
+  }
 
   if (futureGameWeeks.length > 0) {
     process.stdout.write("\nFuture matchdays:\n");
@@ -296,6 +316,47 @@ function stripWrappingQuotes(value) {
   return value;
 }
 
+function parseArgs(args) {
+  const excludedGameWeekIds = new Set();
+  let isDryRun = false;
+
+  for (let index = 0; index < args.length; index += 1) {
+    const arg = args[index];
+
+    if (arg === "--dry-run") {
+      isDryRun = true;
+      continue;
+    }
+
+    if (arg === "--exclude-game-week") {
+      const nextValue = args[index + 1]?.trim();
+
+      if (!nextValue) {
+        throw new Error("Expected a matchday id after --exclude-game-week.");
+      }
+
+      excludedGameWeekIds.add(nextValue);
+      index += 1;
+      continue;
+    }
+
+    if (arg.startsWith("--exclude-game-week=")) {
+      const nextValue = arg.split("=")[1]?.trim();
+
+      if (!nextValue) {
+        throw new Error("Expected a matchday id after --exclude-game-week=.");
+      }
+
+      excludedGameWeekIds.add(nextValue);
+    }
+  }
+
+  return {
+    isDryRun,
+    excludedGameWeekIds,
+  };
+}
+
 async function fetchRows(supabase, table, columns, buildQuery) {
   const query = buildQuery(supabase.from(table).select(columns));
   const { data, error } = await query;
@@ -358,6 +419,23 @@ async function fetchIdsByOptionalQuery(supabase, table, buildQuery) {
   return getUniqueStringValues(data ?? [], "id");
 }
 
+async function fetchOptionalRows(supabase, table, columns, buildQuery) {
+  const { data, error } = await buildQuery(supabase.from(table).select(columns));
+
+  if (error) {
+    if (isMissingRelationError(error)) {
+      process.stdout.write(
+        `Skipping ${table} because that table is not present in the live schema.\n`,
+      );
+      return [];
+    }
+
+    throw new Error(`Failed to list ${table}: ${error.message}`);
+  }
+
+  return data ?? [];
+}
+
 async function fetchCountByIn(supabase, table, column, values) {
   if (values.length === 0) {
     return 0;
@@ -409,6 +487,24 @@ function getUniqueStringValues(rows, key) {
 
 function getUniqueValues(values) {
   return [...new Set(values)];
+}
+
+function getUniqueRowsById(rows) {
+  const seenIds = new Set();
+  const uniqueRows = [];
+
+  for (const row of rows) {
+    const id = row?.id;
+
+    if (typeof id !== "string" || seenIds.has(id)) {
+      continue;
+    }
+
+    seenIds.add(id);
+    uniqueRows.push(row);
+  }
+
+  return uniqueRows;
 }
 
 function isMissingColumnError(error, table, column) {
