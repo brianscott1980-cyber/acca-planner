@@ -17,6 +17,12 @@ export const metadata: Metadata = {
   icons: {
     icon: [
       {
+        rel: "shortcut icon",
+        url: withBasePath("/assets/app_logos/logo_64px.png"),
+        sizes: "64x64",
+        type: "image/png",
+      },
+      {
         url: withBasePath("/assets/app_logos/logo_64px.png"),
         sizes: "64x64",
         type: "image/png",

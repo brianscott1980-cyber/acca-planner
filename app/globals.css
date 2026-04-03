@@ -87,10 +87,16 @@ button {
   width: 2.25rem;
   place-items: center;
   border-radius: 0.75rem;
-  background:
-    linear-gradient(135deg, rgba(138, 44, 226, 0.28), rgba(178, 102, 255, 0.1));
-  color: var(--hub-primary-glow);
-  box-shadow: 0 0 24px rgba(138, 44, 226, 0.22);
+  overflow: hidden;
+  background: rgba(20, 20, 23, 0.9);
+  box-shadow: 0 0 24px rgba(138, 44, 226, 0.16);
+}
+
+.hub-brand-logo {
+  display: block;
+  height: 100%;
+  width: 100%;
+  object-fit: cover;
 }
 
 .hub-brand-title,

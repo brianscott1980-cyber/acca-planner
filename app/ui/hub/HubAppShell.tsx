@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
@@ -8,7 +9,6 @@ import {
   History,
   LayoutDashboard,
   LogOut,
-  Sparkles,
   User,
   Wallet,
   X,
@@ -23,6 +23,7 @@ import { getSimulatedNow } from "../../../repositories/leagueSimulationRepositor
 import { getMemberCount, getUserInitials } from "../../../repositories/userService";
 import { getCurrentMatchdayNumber } from "../../../repositories/gameWeekRepository";
 import { trackEvent } from "../../../lib/analytics";
+import { withBasePath } from "../../../lib/site";
 import { useAuth } from "../auth/AuthProvider";
 
 type HubAppShellProps = {
@@ -199,7 +200,14 @@ export function HubAppShell({ children }: HubAppShellProps) {
       <aside className="hub-sidebar">
         <div className="hub-brand">
           <div className="hub-brand-mark">
-            <Sparkles size={18} />
+            <Image
+              className="hub-brand-logo"
+              src={withBasePath("/assets/app_logos/logo_64px.png")}
+              alt="Caddyshack logo"
+              width={36}
+              height={36}
+              priority
+            />
           </div>
           <div>
             <p className="hub-brand-title">Caddyshack</p>
