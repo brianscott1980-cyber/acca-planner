@@ -1,6 +1,7 @@
 import { supabase } from "../lib/supabase/client";
 import { getDefaultAppDataSnapshot } from "../services/app_data_service";
 import type { AppDataSnapshot } from "../types/app_data_type";
+import type { LeagueClubRecord } from "../types/league_club_type";
 
 type TableLoader = {
   tableName: string;
@@ -70,7 +71,7 @@ export async function loadRemoteAppDataSnapshot(): Promise<AppDataSnapshot> {
       const mappedRows = (data ?? []).map(mapRemoteRowToAppShape);
       return [
         snapshotKey,
-        mappedRows.length > 0 ? mappedRows : fallbackSnapshot[snapshotKey],
+        resolveSnapshotRows(snapshotKey, mappedRows, fallbackSnapshot[snapshotKey]),
       ] as const;
     }),
   );
@@ -82,6 +83,43 @@ function mapRemoteRowToAppShape(row: Record<string, unknown>) {
   return Object.fromEntries(
     Object.entries(row).map(([key, value]) => [toCamelCase(key), value]),
   );
+}
+
+function resolveSnapshotRows(
+  snapshotKey: keyof AppDataSnapshot,
+  mappedRows: unknown[],
+  fallbackRows: AppDataSnapshot[keyof AppDataSnapshot],
+) {
+  if (snapshotKey === "leagueClubs") {
+    return mergeLeagueClubRows(
+      mappedRows as LeagueClubRecord[],
+      fallbackRows as LeagueClubRecord[],
+    );
+  }
+
+  return mappedRows.length > 0 ? mappedRows : fallbackRows;
+}
+
+function mergeLeagueClubRows(
+  remoteRows: LeagueClubRecord[],
+  fallbackRows: LeagueClubRecord[],
+) {
+  if (remoteRows.length === 0) {
+    return fallbackRows;
+  }
+
+  const mergedRows = [...remoteRows];
+  const seenNames = new Set(remoteRows.map((row) => row.name));
+
+  for (const row of fallbackRows) {
+    if (seenNames.has(row.name)) {
+      continue;
+    }
+
+    mergedRows.push(row);
+  }
+
+  return mergedRows;
 }
 
 function toCamelCase(value: string) {
