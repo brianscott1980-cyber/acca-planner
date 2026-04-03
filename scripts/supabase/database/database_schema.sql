@@ -3,91 +3,256 @@
 
 create table if not exists public.users (
   id text not null,
-  first_name text not null,
-  last_name text not null,
-  display_name text not null,
-  initials text not null,
-  joined_on date not null,
-  role text not null check (role in ('member', 'admin')),
-  email text not null,
+  first_name text,
+  last_name text,
+  display_name text,
+  initials text,
+  joined_on date,
+  role text check (role in ('member', 'admin')),
+  email text,
   primary key (id),
   unique (email)
 );
 
+alter table public.users enable row level security;
+
 create table if not exists public.league_clubs (
-  name text not null,
+  name text,
   slug text not null,
-  badge_path text not null,
-  badge_source_url text not null,
+  badge_path text,
+  badge_source_url text,
   primary key (slug),
   unique (name)
 );
 
+alter table public.league_clubs enable row level security;
+
 create table if not exists public.matchday_game_weeks (
+  id text not null,
+  slug text,
+  name text,
+  description text,
+  window_start_iso timestamptz,
+  window_end_iso timestamptz,
+  starts_in text,
+  proposal_ids jsonb,
+  votes_by_user_id jsonb,
+  simulated_slip jsonb,
   primary key (id)
 );
+
+alter table public.matchday_game_weeks enable row level security;
 
 create table if not exists public.market_analysis_snapshots (
-  primary key (id)
+  id text not null,
+  bookmaker text check (bookmaker in ('Ladbrokes')),
+  snapshot_date date,
+  matchday_id text,
+  primary key (id),
+  foreign key (matchday_id) references public.matchday_game_weeks (id)
 );
+
+alter table public.market_analysis_snapshots enable row level security;
 
 create table if not exists public.market_analysis_selections (
-  primary key (id)
+  id text not null,
+  snapshot_id text,
+  fixture text,
+  market text,
+  selection text,
+  decimal_odds numeric(10, 2),
+  primary key (id),
+  foreign key (snapshot_id) references public.market_analysis_snapshots (id)
 );
+
+alter table public.market_analysis_selections enable row level security;
 
 create table if not exists public.matchday_proposals (
+  id text not null,
+  game_week_id text,
+  proposal_id text,
+  risk_level text check (risk_level in ('safe', 'balanced', 'aggressive')),
+  title text,
+  summary text,
+  legs text,
+  status_label text,
+  bet_line_ids jsonb,
+  ai_recommended text,
   primary key (id),
-  unique (game_week_id, proposal_id)
+  unique (game_week_id, proposal_id),
+  foreign key (game_week_id) references public.matchday_game_weeks (id)
 );
+
+alter table public.matchday_proposals enable row level security;
 
 create table if not exists public.matchday_bet_lines (
-  primary key (id)
+  id text not null,
+  game_week_id text,
+  proposal_entity_id text,
+  sort_order integer,
+  label text,
+  schedule_note text,
+  ai_reasoning text,
+  form_id text,
+  form_note text,
+  market_id text,
+  odds text,
+  primary key (id),
+  foreign key (game_week_id) references public.matchday_game_weeks (id),
+  foreign key (proposal_entity_id) references public.matchday_proposals (id),
+  foreign key (market_id) references public.market_analysis_selections (id)
 );
+
+alter table public.matchday_bet_lines enable row level security;
 
 create table if not exists public.matchday_forms (
-  primary key (id)
+  id text not null,
+  game_week_id text,
+  proposal_id text,
+  bet_line_id text,
+  primary key (id),
+  foreign key (game_week_id) references public.matchday_game_weeks (id),
+  foreign key (bet_line_id) references public.matchday_bet_lines (id)
 );
 
+alter table public.matchday_forms enable row level security;
+
 create table if not exists public.matchday_form_matches (
-  primary key (id)
+  id text not null,
+  form_id text,
+  team_side text check (team_side in ('home', 'away')),
+  sort_order integer,
+  opponent text,
+  venue text check (venue in ('H', 'A')),
+  final_score text,
+  goals_scored integer,
+  outcome text check (outcome in ('W', 'D', 'L')),
+  primary key (id),
+  foreign key (form_id) references public.matchday_forms (id)
 );
+
+alter table public.matchday_form_matches enable row level security;
 
 create table if not exists public.league_data_meta (
   id text not null,
-  simulated_at_iso timestamptz not null,
-  updated_at_iso timestamptz not null,
+  simulated_at_iso timestamptz,
+  updated_at_iso timestamptz,
   primary key (id)
 );
+
+alter table public.league_data_meta enable row level security;
 
 create table if not exists public.league_data_matchday_simulations (
+  id text not null,
+  game_week_id text,
+  vote_resolved_at_iso timestamptz,
+  bet_placed_at_iso timestamptz,
+  selected_proposal_id text,
+  slip_id text,
   primary key (id),
-  unique (game_week_id)
+  unique (game_week_id),
+  foreign key (game_week_id) references public.matchday_game_weeks (id)
 );
+
+alter table public.league_data_matchday_simulations enable row level security;
 
 create table if not exists public.league_data_votes (
+  id text not null,
+  simulation_id text,
+  game_week_id text,
+  user_id text,
+  proposal_id text,
   primary key (id),
-  unique (simulation_id, user_id)
+  unique (simulation_id, user_id),
+  foreign key (simulation_id) references public.league_data_matchday_simulations (id),
+  foreign key (game_week_id) references public.matchday_game_weeks (id),
+  foreign key (user_id) references public.users (id)
 );
+
+alter table public.league_data_votes enable row level security;
 
 create table if not exists public.league_data_bet_line_odds (
-  primary key (id)
+  id text not null,
+  simulation_id text,
+  game_week_id text,
+  sort_order integer,
+  bet_line_label text,
+  odds numeric(10, 2),
+  primary key (id),
+  foreign key (simulation_id) references public.league_data_matchday_simulations (id),
+  foreign key (game_week_id) references public.matchday_game_weeks (id)
 );
+
+alter table public.league_data_bet_line_odds enable row level security;
 
 create table if not exists public.league_data_slips (
-  primary key (id)
+  id text not null,
+  simulation_id text,
+  game_week_id text,
+  proposal_id text,
+  timeline_label text,
+  stake numeric(12, 2),
+  stake_placed_at timestamptz,
+  settled_at timestamptz,
+  settlement_kind text check (settlement_kind in ('settled', 'cashout')),
+  return_amount numeric(12, 2),
+  status text check (status in ('win', 'loss')),
+  primary key (id),
+  foreign key (simulation_id) references public.league_data_matchday_simulations (id),
+  foreign key (game_week_id) references public.matchday_game_weeks (id)
 );
+
+alter table public.league_data_slips enable row level security;
 
 create table if not exists public.league_data_leg_results (
-  primary key (id)
+  id text not null,
+  simulation_id text,
+  slip_id text,
+  game_week_id text,
+  sort_order integer,
+  bet_line_label text,
+  kickoff_at timestamptz,
+  settled_at timestamptz,
+  final_score text,
+  status text check (status in ('won', 'lost', 'cashed_out')),
+  actual_status text check (actual_status in ('won', 'lost')),
+  primary key (id),
+  foreign key (simulation_id) references public.league_data_matchday_simulations (id),
+  foreign key (slip_id) references public.league_data_slips (id),
+  foreign key (game_week_id) references public.matchday_game_weeks (id)
 );
+
+alter table public.league_data_leg_results enable row level security;
 
 create table if not exists public.ledger_data (
+  id text not null,
+  title text,
+  date_iso timestamptz,
+  amount numeric(12, 2),
+  kind text check (kind in ('deposit', 'stake', 'settlement')),
+  game_week_id text,
+  proposal_id text,
+  primary key (id),
+  foreign key (game_week_id) references public.matchday_game_weeks (id)
+);
+
+alter table public.ledger_data enable row level security;
+
+create table if not exists public.matchday_seed (
+  id text not null,
+  slug text,
+  name text,
+  description text,
+  window_start_iso timestamptz,
+  window_end_iso timestamptz,
+  starts_in text,
+  proposals jsonb,
+  votes_by_user_id jsonb,
+  simulated_slip jsonb,
   primary key (id)
 );
 
-create table if not exists public.matchday_seed (
-  primary key (id)
-);
+alter table public.matchday_seed enable row level security;
 
 grant usage on schema public to authenticated;
 
@@ -114,6 +279,21 @@ on public.matchday_game_weeks
 for select
 to authenticated
 using (true);
+
+grant insert, update on public.matchday_game_weeks to authenticated;
+drop policy if exists "Authenticated admins can insert matchday_game_weeks" on public.matchday_game_weeks;
+create policy "Authenticated admins can insert matchday_game_weeks"
+on public.matchday_game_weeks
+for insert
+to authenticated
+with check (coalesce(auth.jwt() -> 'app_metadata' ->> 'role', '') = 'admin');
+drop policy if exists "Authenticated admins can update matchday_game_weeks" on public.matchday_game_weeks;
+create policy "Authenticated admins can update matchday_game_weeks"
+on public.matchday_game_weeks
+for update
+to authenticated
+using (coalesce(auth.jwt() -> 'app_metadata' ->> 'role', '') = 'admin')
+with check (coalesce(auth.jwt() -> 'app_metadata' ->> 'role', '') = 'admin');
 
 grant select on public.market_analysis_snapshots to authenticated;
 drop policy if exists "Authenticated users can read market_analysis_snapshots" on public.market_analysis_snapshots;
@@ -171,6 +351,21 @@ for select
 to authenticated
 using (true);
 
+grant insert, update on public.league_data_meta to authenticated;
+drop policy if exists "Authenticated admins can insert league_data_meta" on public.league_data_meta;
+create policy "Authenticated admins can insert league_data_meta"
+on public.league_data_meta
+for insert
+to authenticated
+with check (coalesce(auth.jwt() -> 'app_metadata' ->> 'role', '') = 'admin');
+drop policy if exists "Authenticated admins can update league_data_meta" on public.league_data_meta;
+create policy "Authenticated admins can update league_data_meta"
+on public.league_data_meta
+for update
+to authenticated
+using (coalesce(auth.jwt() -> 'app_metadata' ->> 'role', '') = 'admin')
+with check (coalesce(auth.jwt() -> 'app_metadata' ->> 'role', '') = 'admin');
+
 grant select on public.league_data_matchday_simulations to authenticated;
 drop policy if exists "Authenticated users can read league_data_matchday_simulations" on public.league_data_matchday_simulations;
 create policy "Authenticated users can read league_data_matchday_simulations"
@@ -179,6 +374,21 @@ for select
 to authenticated
 using (true);
 
+grant insert, update on public.league_data_matchday_simulations to authenticated;
+drop policy if exists "Authenticated admins can insert league_data_matchday_simulations" on public.league_data_matchday_simulations;
+create policy "Authenticated admins can insert league_data_matchday_simulations"
+on public.league_data_matchday_simulations
+for insert
+to authenticated
+with check (coalesce(auth.jwt() -> 'app_metadata' ->> 'role', '') = 'admin');
+drop policy if exists "Authenticated admins can update league_data_matchday_simulations" on public.league_data_matchday_simulations;
+create policy "Authenticated admins can update league_data_matchday_simulations"
+on public.league_data_matchday_simulations
+for update
+to authenticated
+using (coalesce(auth.jwt() -> 'app_metadata' ->> 'role', '') = 'admin')
+with check (coalesce(auth.jwt() -> 'app_metadata' ->> 'role', '') = 'admin');
+
 grant select on public.league_data_votes to authenticated;
 drop policy if exists "Authenticated users can read league_data_votes" on public.league_data_votes;
 create policy "Authenticated users can read league_data_votes"
@@ -186,6 +396,21 @@ on public.league_data_votes
 for select
 to authenticated
 using (true);
+
+grant insert, update on public.league_data_votes to authenticated;
+drop policy if exists "Authenticated admins can insert league_data_votes" on public.league_data_votes;
+create policy "Authenticated admins can insert league_data_votes"
+on public.league_data_votes
+for insert
+to authenticated
+with check (coalesce(auth.jwt() -> 'app_metadata' ->> 'role', '') = 'admin');
+drop policy if exists "Authenticated admins can update league_data_votes" on public.league_data_votes;
+create policy "Authenticated admins can update league_data_votes"
+on public.league_data_votes
+for update
+to authenticated
+using (coalesce(auth.jwt() -> 'app_metadata' ->> 'role', '') = 'admin')
+with check (coalesce(auth.jwt() -> 'app_metadata' ->> 'role', '') = 'admin');
 
 grant select on public.league_data_bet_line_odds to authenticated;
 drop policy if exists "Authenticated users can read league_data_bet_line_odds" on public.league_data_bet_line_odds;
@@ -202,6 +427,21 @@ on public.league_data_slips
 for select
 to authenticated
 using (true);
+
+grant insert, update on public.league_data_slips to authenticated;
+drop policy if exists "Authenticated admins can insert league_data_slips" on public.league_data_slips;
+create policy "Authenticated admins can insert league_data_slips"
+on public.league_data_slips
+for insert
+to authenticated
+with check (coalesce(auth.jwt() -> 'app_metadata' ->> 'role', '') = 'admin');
+drop policy if exists "Authenticated admins can update league_data_slips" on public.league_data_slips;
+create policy "Authenticated admins can update league_data_slips"
+on public.league_data_slips
+for update
+to authenticated
+using (coalesce(auth.jwt() -> 'app_metadata' ->> 'role', '') = 'admin')
+with check (coalesce(auth.jwt() -> 'app_metadata' ->> 'role', '') = 'admin');
 
 grant select on public.league_data_leg_results to authenticated;
 drop policy if exists "Authenticated users can read league_data_leg_results" on public.league_data_leg_results;

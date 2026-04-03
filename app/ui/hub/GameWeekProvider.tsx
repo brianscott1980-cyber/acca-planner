@@ -22,6 +22,7 @@ import {
   isGameWeekVoteLocked,
   updateUserVoteForGameWeek,
 } from "../../../services/game_week_service";
+import { endMatchdayVoting } from "../../../services/matchday_admin_service";
 import {
   deleteMatchdayVote,
   listMatchdayVotes,
@@ -46,6 +47,8 @@ type GameWeekContextValue = {
   loggedInUserId: string | null;
   castVote: (proposalId: string) => void;
   clearVote: () => void;
+  endVoting: () => Promise<void>;
+  isEndingVote: boolean;
   voteSimulationStatus: VoteSimulationStatus;
   voteSimulationResult: VoteSimulationResult | null;
   refreshVoteSimulation: () => void;
@@ -86,6 +89,7 @@ export function GameWeekProvider({
     useState<VoteSimulationStatus>("idle");
   const [voteSimulationResult, setVoteSimulationResult] =
     useState<VoteSimulationResult | null>(null);
+  const [isEndingVote, setIsEndingVote] = useState(false);
   const voteSimulationTimeoutIdsRef = useRef<number[]>([]);
   const isCurrentGameWeekLocked = isGameWeekVoteLocked(currentGameWeek);
 
@@ -182,6 +186,7 @@ export function GameWeekProvider({
 
         if (
           isGameWeekVoteLocked(currentGameWeek) ||
+          isEndingVote ||
           voteSimulationStatus === "running" ||
           voteSimulationStatus === "closed"
         ) {
@@ -237,6 +242,7 @@ export function GameWeekProvider({
 
         if (
           isGameWeekVoteLocked(currentGameWeek) ||
+          isEndingVote ||
           voteSimulationStatus === "running" ||
           voteSimulationStatus === "closed"
         ) {
@@ -284,6 +290,37 @@ export function GameWeekProvider({
           };
         });
       },
+      async endVoting() {
+        if (
+          !loggedInUser ||
+          loggedInUser.role !== "admin" ||
+          isGameWeekVoteLocked(currentGameWeek) ||
+          isEndingVote
+        ) {
+          return;
+        }
+
+        setIsEndingVote(true);
+
+        try {
+          await endMatchdayVoting(currentGameWeek);
+          setCurrentGameWeek(getInitialGameWeekState(loggedInUserId, currentGameWeek.id));
+
+          if (typeof window !== "undefined") {
+            window.location.assign(
+              getMatchdayHref({
+                gameWeekId: currentGameWeek.id,
+                stage: "pending",
+              }),
+            );
+          }
+        } catch (error) {
+          console.error(error);
+        } finally {
+          setIsEndingVote(false);
+        }
+      },
+      isEndingVote,
       voteSimulationStatus,
       voteSimulationResult,
       refreshVoteSimulation() {
@@ -302,6 +339,7 @@ export function GameWeekProvider({
       currentGameWeek,
       authUserId,
       isConfigured,
+      isEndingVote,
       isRemoteData,
       loggedInUser,
       loggedInUserId,

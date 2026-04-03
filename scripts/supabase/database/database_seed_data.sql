@@ -36,77 +36,35 @@ values
   ('Wolverhampton Wanderers', 'wolverhampton-wanderers', '/assets/clubs/premier-league/wolverhampton-wanderers.png', 'https://r2.thesportsdb.com/images/media/team/badge/u9qr031621593327.png')
 on conflict (slug) do nothing;
 
-insert into public.matchday_game_weeks ()
-values
+-- No seed rows for public.matchday_game_weeks.
 
-on conflict (id) do nothing;
+-- No seed rows for public.market_analysis_snapshots.
 
-insert into public.market_analysis_snapshots ()
-values
+-- No seed rows for public.market_analysis_selections.
 
-on conflict (id) do nothing;
+-- No seed rows for public.matchday_proposals.
 
-insert into public.market_analysis_selections ()
-values
+-- No seed rows for public.matchday_bet_lines.
 
-on conflict (id) do nothing;
+-- No seed rows for public.matchday_forms.
 
-insert into public.matchday_proposals ()
-values
-
-on conflict (id) do nothing;
-
-insert into public.matchday_bet_lines ()
-values
-
-on conflict (id) do nothing;
-
-insert into public.matchday_forms ()
-values
-
-on conflict (id) do nothing;
-
-insert into public.matchday_form_matches ()
-values
-
-on conflict (id) do nothing;
+-- No seed rows for public.matchday_form_matches.
 
 insert into public.league_data_meta (id, simulated_at_iso, updated_at_iso)
 values
   ('primary', '2026-04-03T08:59:10.218Z', '2026-04-03T08:59:10.218Z')
 on conflict (id) do nothing;
 
-insert into public.league_data_matchday_simulations ()
-values
+-- No seed rows for public.league_data_matchday_simulations.
 
-on conflict (id) do nothing;
+-- No seed rows for public.league_data_votes.
 
-insert into public.league_data_votes ()
-values
+-- No seed rows for public.league_data_bet_line_odds.
 
-on conflict (id) do nothing;
+-- No seed rows for public.league_data_slips.
 
-insert into public.league_data_bet_line_odds ()
-values
+-- No seed rows for public.league_data_leg_results.
 
-on conflict (id) do nothing;
+-- No seed rows for public.ledger_data.
 
-insert into public.league_data_slips ()
-values
-
-on conflict (id) do nothing;
-
-insert into public.league_data_leg_results ()
-values
-
-on conflict (id) do nothing;
-
-insert into public.ledger_data ()
-values
-
-on conflict (id) do nothing;
-
-insert into public.matchday_seed ()
-values
-
-on conflict (id) do nothing;
+-- No seed rows for public.matchday_seed.

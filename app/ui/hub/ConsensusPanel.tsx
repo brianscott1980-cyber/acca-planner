@@ -13,6 +13,8 @@ export function ConsensusPanel() {
     currentGameWeek,
     loggedInUserId,
     clearVote,
+    endVoting,
+    isEndingVote,
     voteSimulationResult,
     voteSimulationStatus,
   } = useCurrentGameWeek();
@@ -48,14 +50,16 @@ export function ConsensusPanel() {
           <button
             className="hub-primary-button"
             type="button"
-            onClick={() =>
+            disabled={isEndingVote}
+            onClick={() => {
               trackEvent("admin_commit_vote_clicked", {
                 matchday_id: currentGameWeek.id,
                 surface: "consensus_panel_mobile",
-              })
-            }
+              });
+              void endVoting();
+            }}
           >
-            End Voting
+            {isEndingVote ? "Ending Voting..." : "End Voting"}
           </button>
         </div>
       ) : null}
@@ -140,14 +144,16 @@ export function ConsensusPanel() {
             <button
               className="hub-secondary-button hub-mobile-end-voting"
               type="button"
-              onClick={() =>
+              disabled={isEndingVote}
+              onClick={() => {
                 trackEvent("admin_commit_vote_clicked", {
                   matchday_id: currentGameWeek.id,
                   surface: "consensus_panel_mobile_post_vote",
-                })
-              }
+                });
+                void endVoting();
+              }}
             >
-              End Voting
+              {isEndingVote ? "Ending Voting..." : "End Voting"}
             </button>
           ) : null}
         </>

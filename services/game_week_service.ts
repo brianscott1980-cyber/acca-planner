@@ -171,13 +171,7 @@ export function getGameWeekConsensusProposalId(gameWeek: GameWeekRecord) {
     return null;
   }
 
-  const selectedProposalVoteCount = Object.values(simulation.votesByUserId).filter(
-    (proposalId) => proposalId === simulation.selectedProposalId,
-  ).length;
-
-  return selectedProposalVoteCount > getMemberCount() / 2
-    ? simulation.selectedProposalId
-    : null;
+  return simulation.selectedProposalId;
 }
 
 export function getGameWeekSelectedProposal(gameWeek: GameWeekRecord) {

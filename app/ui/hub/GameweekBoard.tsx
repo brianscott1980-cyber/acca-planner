@@ -77,6 +77,8 @@ export function GameweekBoard({
     currentGameWeek,
     loggedInUserId,
     castVote,
+    endVoting,
+    isEndingVote,
     refreshVoteSimulation,
     voteSimulationResult,
     voteSimulationStatus,
@@ -310,13 +312,15 @@ export function GameweekBoard({
           <button
             className="hub-primary-button"
             type="button"
-            onClick={() =>
+            disabled={isEndingVote}
+            onClick={() => {
               trackEvent("admin_commit_vote_clicked", {
                 matchday_id: currentGameWeek.id,
-              })
-            }
+              });
+              void endVoting();
+            }}
           >
-            End Voting
+            {isEndingVote ? "Ending Voting..." : "End Voting"}
           </button>
         </div>
       ) : null}

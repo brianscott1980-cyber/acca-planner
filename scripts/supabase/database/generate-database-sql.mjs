@@ -10,12 +10,29 @@ const REPO_ROOT = path.resolve(SCRIPT_DIR, "../../..");
 const DATA_DIR = path.join(REPO_ROOT, "data");
 const OUTPUT_SCHEMA_FILE = path.join(SCRIPT_DIR, "database_schema.sql");
 const OUTPUT_SEED_FILE = path.join(SCRIPT_DIR, "database_seed_data.sql");
+const ADMIN_WRITE_TABLES = new Set([
+  "matchday_game_weeks",
+  "league_data_meta",
+  "league_data_matchday_simulations",
+  "league_data_votes",
+  "league_data_slips",
+]);
 
 const DATASETS = [
   {
     fileName: "users.ts",
     exportName: "users",
     tableName: "users",
+    fieldNames: [
+      "id",
+      "firstName",
+      "lastName",
+      "displayName",
+      "initials",
+      "joinedOn",
+      "role",
+      "email",
+    ],
     primaryKey: ["id"],
     uniqueKeys: [["email"]],
     columns: {
@@ -27,6 +44,7 @@ const DATASETS = [
     fileName: "league_clubs.ts",
     exportName: "leagueClubs",
     tableName: "league_clubs",
+    fieldNames: ["name", "slug", "badgePath", "badgeSourceUrl"],
     primaryKey: ["slug"],
     uniqueKeys: [["name"]],
   },
@@ -34,6 +52,18 @@ const DATASETS = [
     fileName: "matchday_game_weeks.ts",
     exportName: "matchdayGameWeeks",
     tableName: "matchday_game_weeks",
+    fieldNames: [
+      "id",
+      "slug",
+      "name",
+      "description",
+      "windowStartIso",
+      "windowEndIso",
+      "startsIn",
+      "proposalIds",
+      "votesByUserId",
+      "simulatedSlip",
+    ],
     primaryKey: ["id"],
     columns: {
       windowStartIso: { type: "timestamptz" },
@@ -47,6 +77,7 @@ const DATASETS = [
     fileName: "market_analysis_snapshots.ts",
     exportName: "marketAnalysisSnapshotRows",
     tableName: "market_analysis_snapshots",
+    fieldNames: ["id", "bookmaker", "snapshotDate", "matchdayId"],
     primaryKey: ["id"],
     foreignKeys: [
       {
@@ -64,6 +95,7 @@ const DATASETS = [
     fileName: "market_analysis_selections.ts",
     exportName: "marketAnalysisSelectionRows",
     tableName: "market_analysis_selections",
+    fieldNames: ["id", "snapshotId", "fixture", "market", "selection", "decimalOdds"],
     primaryKey: ["id"],
     foreignKeys: [
       {
@@ -80,6 +112,18 @@ const DATASETS = [
     fileName: "matchday_proposals.ts",
     exportName: "matchdayProposals",
     tableName: "matchday_proposals",
+    fieldNames: [
+      "id",
+      "gameWeekId",
+      "proposalId",
+      "riskLevel",
+      "title",
+      "summary",
+      "legs",
+      "statusLabel",
+      "betLineIds",
+      "aiRecommended",
+    ],
     primaryKey: ["id"],
     uniqueKeys: [["gameWeekId", "proposalId"]],
     foreignKeys: [
@@ -98,6 +142,19 @@ const DATASETS = [
     fileName: "matchday_bet_lines.ts",
     exportName: "matchdayBetLines",
     tableName: "matchday_bet_lines",
+    fieldNames: [
+      "id",
+      "gameWeekId",
+      "proposalEntityId",
+      "sortOrder",
+      "label",
+      "scheduleNote",
+      "aiReasoning",
+      "formId",
+      "formNote",
+      "marketId",
+      "odds",
+    ],
     primaryKey: ["id"],
     foreignKeys: [
       {
@@ -124,6 +181,7 @@ const DATASETS = [
     fileName: "matchday_forms.ts",
     exportName: "matchdayForms",
     tableName: "matchday_forms",
+    fieldNames: ["id", "gameWeekId", "proposalId", "betLineId"],
     primaryKey: ["id"],
     foreignKeys: [
       {
@@ -142,6 +200,17 @@ const DATASETS = [
     fileName: "matchday_form_matches.ts",
     exportName: "matchdayFormMatches",
     tableName: "matchday_form_matches",
+    fieldNames: [
+      "id",
+      "formId",
+      "teamSide",
+      "sortOrder",
+      "opponent",
+      "venue",
+      "finalScore",
+      "goalsScored",
+      "outcome",
+    ],
     primaryKey: ["id"],
     foreignKeys: [
       {
@@ -162,6 +231,7 @@ const DATASETS = [
     fileName: "league_data_meta.ts",
     exportName: "leagueDataMeta",
     tableName: "league_data_meta",
+    fieldNames: ["id", "simulatedAtIso", "updatedAtIso"],
     primaryKey: ["id"],
     columns: {
       simulatedAtIso: { type: "timestamptz" },
@@ -172,6 +242,14 @@ const DATASETS = [
     fileName: "league_data_matchday_simulations.ts",
     exportName: "leagueDataMatchdaySimulations",
     tableName: "league_data_matchday_simulations",
+    fieldNames: [
+      "id",
+      "gameWeekId",
+      "voteResolvedAtIso",
+      "betPlacedAtIso",
+      "selectedProposalId",
+      "slipId",
+    ],
     primaryKey: ["id"],
     uniqueKeys: [["gameWeekId"]],
     foreignKeys: [
@@ -190,6 +268,7 @@ const DATASETS = [
     fileName: "league_data_votes.ts",
     exportName: "leagueDataVotes",
     tableName: "league_data_votes",
+    fieldNames: ["id", "simulationId", "gameWeekId", "userId", "proposalId"],
     primaryKey: ["id"],
     uniqueKeys: [["simulationId", "userId"]],
     foreignKeys: [
@@ -214,6 +293,7 @@ const DATASETS = [
     fileName: "league_data_bet_line_odds.ts",
     exportName: "leagueDataBetLineOdds",
     tableName: "league_data_bet_line_odds",
+    fieldNames: ["id", "simulationId", "gameWeekId", "sortOrder", "betLineLabel", "odds"],
     primaryKey: ["id"],
     foreignKeys: [
       {
@@ -236,6 +316,19 @@ const DATASETS = [
     fileName: "league_data_slips.ts",
     exportName: "leagueDataSlips",
     tableName: "league_data_slips",
+    fieldNames: [
+      "id",
+      "simulationId",
+      "gameWeekId",
+      "proposalId",
+      "timelineLabel",
+      "stake",
+      "stakePlacedAt",
+      "settledAt",
+      "settlementKind",
+      "returnAmount",
+      "status",
+    ],
     primaryKey: ["id"],
     foreignKeys: [
       {
@@ -262,6 +355,19 @@ const DATASETS = [
     fileName: "league_data_leg_results.ts",
     exportName: "leagueDataLegResults",
     tableName: "league_data_leg_results",
+    fieldNames: [
+      "id",
+      "simulationId",
+      "slipId",
+      "gameWeekId",
+      "sortOrder",
+      "betLineLabel",
+      "kickoffAt",
+      "settledAt",
+      "finalScore",
+      "status",
+      "actualStatus",
+    ],
     primaryKey: ["id"],
     foreignKeys: [
       {
@@ -292,6 +398,7 @@ const DATASETS = [
     fileName: "ledger_data.ts",
     exportName: "ledgerData",
     tableName: "ledger_data",
+    fieldNames: ["id", "title", "dateIso", "amount", "kind", "gameWeekId", "proposalId"],
     primaryKey: ["id"],
     columns: {
       dateIso: { type: "timestamptz" },
@@ -310,6 +417,18 @@ const DATASETS = [
     fileName: "matchday_seed.ts",
     exportName: "matchdaySeedGameWeeks",
     tableName: "matchday_seed",
+    fieldNames: [
+      "id",
+      "slug",
+      "name",
+      "description",
+      "windowStartIso",
+      "windowEndIso",
+      "startsIn",
+      "proposals",
+      "votesByUserId",
+      "simulatedSlip",
+    ],
     primaryKey: ["id"],
     columns: {
       windowStartIso: { type: "timestamptz" },
@@ -372,6 +491,8 @@ function renderSchemaSql(datasets) {
   for (const dataset of datasets) {
     statements.push(renderCreateTable(dataset));
     statements.push("");
+    statements.push(`alter table public.${dataset.tableName} enable row level security;`);
+    statements.push("");
   }
 
   statements.push("grant usage on schema public to authenticated;");
@@ -380,6 +501,11 @@ function renderSchemaSql(datasets) {
   for (const dataset of datasets) {
     statements.push(renderReadAccessStatements(dataset));
     statements.push("");
+
+    if (ADMIN_WRITE_TABLES.has(dataset.tableName)) {
+      statements.push(renderAdminWriteStatements(dataset));
+      statements.push("");
+    }
   }
 
   return `${statements.join("\n").trim()}\n`;
@@ -452,6 +578,10 @@ function renderSeedSql(datasets) {
 }
 
 function renderInsertStatement(dataset) {
+  if (dataset.rows.length === 0) {
+    return `-- No seed rows for public.${dataset.tableName}.`;
+  }
+
   const columns = collectColumns(dataset);
   const sqlColumns = columns.map((column) => column.columnName);
   const rows = dataset.rows.map((row) =>
@@ -472,7 +602,7 @@ function renderInsertStatement(dataset) {
 }
 
 function collectColumns(dataset) {
-  const propertyNames = [];
+  const propertyNames = [...(dataset.fieldNames ?? [])];
 
   for (const row of dataset.rows) {
     for (const key of Object.keys(row)) {
@@ -485,7 +615,12 @@ function collectColumns(dataset) {
   return propertyNames.map((propertyName) => {
     const override = dataset.columns?.[propertyName] ?? {};
     const values = dataset.rows.map((row) => row[propertyName]).filter((value) => value !== undefined);
-    const notNull = values.length === dataset.rows.length && !values.some((value) => value === null);
+    const notNull =
+      override.notNull ??
+      dataset.primaryKey?.includes(propertyName) ??
+      (dataset.rows.length > 0 &&
+        values.length === dataset.rows.length &&
+        !values.some((value) => value === null));
 
     return {
       propertyName,
@@ -497,6 +632,30 @@ function collectColumns(dataset) {
         : "",
     };
   });
+}
+
+function renderAdminWriteStatements(dataset) {
+  const adminCheckExpression =
+    "coalesce(auth.jwt() -> 'app_metadata' ->> 'role', '') = 'admin'";
+  const insertPolicyName = `Authenticated admins can insert ${dataset.tableName}`;
+  const updatePolicyName = `Authenticated admins can update ${dataset.tableName}`;
+
+  return [
+    `grant insert, update on public.${dataset.tableName} to authenticated;`,
+    `drop policy if exists "${insertPolicyName}" on public.${dataset.tableName};`,
+    `create policy "${insertPolicyName}"`,
+    `on public.${dataset.tableName}`,
+    "for insert",
+    "to authenticated",
+    `with check (${adminCheckExpression});`,
+    `drop policy if exists "${updatePolicyName}" on public.${dataset.tableName};`,
+    `create policy "${updatePolicyName}"`,
+    `on public.${dataset.tableName}`,
+    "for update",
+    "to authenticated",
+    `using (${adminCheckExpression})`,
+    `with check (${adminCheckExpression});`,
+  ].join("\n");
 }
 
 function inferSqlType(values, propertyName) {
