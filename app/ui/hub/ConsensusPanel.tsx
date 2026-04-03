@@ -24,11 +24,11 @@ export function ConsensusPanel() {
   const votesByUserId = currentGameWeek.votesByUserId;
   const currentUserVote = loggedInUserId ? votesByUserId[loggedInUserId] ?? null : null;
   const hasCurrentUserVote = loggedInUserId
-    ? Boolean(currentUserVote)
+    ? getNormalizedVoteChoice(currentUserVote) !== null
     : false;
   const isAdminUser = currentUser?.role === "admin";
   const votedMembers = members.filter(
-    (member) => typeof votesByUserId[member.id] === "string",
+    (member) => getNormalizedVoteChoice(votesByUserId[member.id]) !== null,
   );
 
   return (
@@ -81,12 +81,14 @@ export function ConsensusPanel() {
         <p>
           <strong>Consensus rule:</strong> a proposal requires more than 50%
           approval. Current leader is{" "}
-          <span
-            className={`hub-consensus-leader${
-              leadingProposal ? ` hub-consensus-leader-${leadingProposal.id}` : ""
-            }`}
-          >
-            {leadingProposal?.title.replace(" Accumulator", "") ?? "TBD"}
+            <span
+              className={`hub-consensus-leader${
+              leadingProposal
+                ? ` hub-consensus-leader-${leadingProposal.riskLevel}`
+                : ""
+              }`}
+            >
+            {formatProposalLabel(leadingProposal?.riskLevel) ?? "TBD"}
           </span>.
         </p>
       </div>
@@ -164,31 +166,27 @@ export function ConsensusPanel() {
 }
 
 function formatVoteLabel(vote: string | null) {
-  if (vote === "defensive") {
-    return "Defensive";
-  }
+  const normalizedVote = getNormalizedVoteChoice(vote);
 
-  if (vote === "neutral") {
-    return "Neutral";
-  }
-
-  if (vote === "aggressive") {
-    return "Aggressive";
+  if (normalizedVote) {
+    return formatProposalLabel(normalizedVote);
   }
 
   return "Unknown";
 }
 
 function VoteMessageIcon({ vote }: { vote: string | null }) {
-  if (vote === "defensive") {
+  const normalizedVote = getNormalizedVoteChoice(vote);
+
+  if (normalizedVote === "safe") {
     return <Shield size={16} />;
   }
 
-  if (vote === "neutral") {
+  if (normalizedVote === "balanced") {
     return <Scale size={16} />;
   }
 
-  if (vote === "aggressive") {
+  if (normalizedVote === "aggressive") {
     return <Flame size={16} />;
   }
 
@@ -196,15 +194,17 @@ function VoteMessageIcon({ vote }: { vote: string | null }) {
 }
 
 function getVoteMessageIconClassName(vote: string | null) {
-  if (vote === "defensive") {
+  const normalizedVote = getNormalizedVoteChoice(vote);
+
+  if (normalizedVote === "safe") {
     return "hub-proposal-icon-safe";
   }
 
-  if (vote === "neutral") {
+  if (normalizedVote === "balanced") {
     return "hub-proposal-icon-balanced";
   }
 
-  if (vote === "aggressive") {
+  if (normalizedVote === "aggressive") {
     return "hub-proposal-icon-aggressive";
   }
 
@@ -212,15 +212,17 @@ function getVoteMessageIconClassName(vote: string | null) {
 }
 
 function getVoteMessageTextClassName(vote: string | null) {
-  if (vote === "defensive") {
+  const normalizedVote = getNormalizedVoteChoice(vote);
+
+  if (normalizedVote === "safe") {
     return "hub-success-text";
   }
 
-  if (vote === "neutral") {
+  if (normalizedVote === "balanced") {
     return "hub-accent-text";
   }
 
-  if (vote === "aggressive") {
+  if (normalizedVote === "aggressive") {
     return "hub-warning-text";
   }
 
@@ -234,10 +236,12 @@ export function AvatarBadge({
   label: string;
   vote?: string;
 }) {
+  const normalizedVote = getNormalizedVoteChoice(vote);
+
   return (
     <div
       className={`hub-avatar-badge${
-        vote ? ` hub-avatar-badge-${vote}` : " is-empty"
+        normalizedVote ? ` hub-avatar-badge-${normalizedVote}` : " is-empty"
       }`}
     >
       <span className="hub-avatar-badge-label">{label}</span>
@@ -335,22 +339,22 @@ function getVoteBreakdownSegments(
   votesByUserId: Record<string, string>,
 ) {
   const counts = {
-    defensive: 0,
-    neutral: 0,
+    safe: 0,
+    balanced: 0,
     aggressive: 0,
     noVote: 0,
   };
 
   for (const member of members) {
-    const vote = votesByUserId[member.id];
+    const vote = getNormalizedVoteChoice(votesByUserId[member.id]);
 
-    if (vote === "defensive") {
-      counts.defensive += 1;
+    if (vote === "safe") {
+      counts.safe += 1;
       continue;
     }
 
-    if (vote === "neutral") {
-      counts.neutral += 1;
+    if (vote === "balanced") {
+      counts.balanced += 1;
       continue;
     }
 
@@ -365,8 +369,8 @@ function getVoteBreakdownSegments(
   let start = 0;
 
   return [
-    { id: "defensive", label: "Defensive", count: counts.defensive, color: "#10b981" },
-    { id: "neutral", label: "Neutral", count: counts.neutral, color: "#3b82f6" },
+    { id: "safe", label: "Defensive", count: counts.safe, color: "#10b981" },
+    { id: "balanced", label: "Balanced", count: counts.balanced, color: "#3b82f6" },
     { id: "aggressive", label: "Aggressive", count: counts.aggressive, color: "#f59e0b" },
     { id: "no-vote", label: "No vote", count: counts.noVote, color: "#52525b" },
   ].map((segment) => {
@@ -380,4 +384,53 @@ function getVoteBreakdownSegments(
     start += length;
     return nextSegment;
   });
+}
+
+function getNormalizedVoteChoice(vote: string | null | undefined) {
+  if (!vote) {
+    return null;
+  }
+
+  const normalizedVote = vote.toLowerCase().trim();
+
+  if (
+    normalizedVote === "safe" ||
+    normalizedVote === "defensive" ||
+    normalizedVote.endsWith("-proposal-safe")
+  ) {
+    return "safe";
+  }
+
+  if (
+    normalizedVote === "balanced" ||
+    normalizedVote === "neutral" ||
+    normalizedVote.endsWith("-proposal-balanced")
+  ) {
+    return "balanced";
+  }
+
+  if (
+    normalizedVote === "aggressive" ||
+    normalizedVote.endsWith("-proposal-aggressive")
+  ) {
+    return "aggressive";
+  }
+
+  return null;
+}
+
+function formatProposalLabel(riskLevel: "safe" | "balanced" | "aggressive" | null | undefined) {
+  if (riskLevel === "safe") {
+    return "Defensive";
+  }
+
+  if (riskLevel === "balanced") {
+    return "Balanced";
+  }
+
+  if (riskLevel === "aggressive") {
+    return "Aggressive";
+  }
+
+  return null;
 }

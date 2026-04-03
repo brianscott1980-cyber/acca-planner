@@ -22,7 +22,7 @@ export const matchdayProposals: MatchdayProposalRecord[] = [
     gameWeekId: "md-1",
     proposalId: "balanced",
     riskLevel: "balanced",
-    title: "Neutral Accumulator",
+    title: "Balanced Accumulator",
     summary:
       "Adds Leverkusen to the safer core to lift the price without pushing into a pure goals-chasing profile.",
     legs: 4,

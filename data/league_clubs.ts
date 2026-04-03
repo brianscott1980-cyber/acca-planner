@@ -16,6 +16,18 @@ export const leagueClubs: LeagueClubRecord[] = [
     badgeSourceUrl: "https://r2.thesportsdb.com/images/media/team/badge/jykrpv1717309891.png",
   },
   {
+    name: "Bayer Leverkusen",
+    slug: "bayer-leverkusen",
+    badgePath: "/assets/clubs/european/bayer-leverkusen.png",
+    badgeSourceUrl: "https://r2.thesportsdb.com/images/media/team/badge/3x9k851726760113.png",
+  },
+  {
+    name: "Bayern Munich",
+    slug: "bayern-munich",
+    badgePath: "/assets/clubs/european/bayern-munich.png",
+    badgeSourceUrl: "https://r2.thesportsdb.com/images/media/team/badge/01ogkh1716960412.png",
+  },
+  {
     name: "Bournemouth",
     slug: "bournemouth",
     badgePath: "/assets/clubs/premier-league/bournemouth.png",
@@ -58,10 +70,22 @@ export const leagueClubs: LeagueClubRecord[] = [
     badgeSourceUrl: "https://r2.thesportsdb.com/images/media/team/badge/eqayrf1523184794.png",
   },
   {
+    name: "Freiburg",
+    slug: "freiburg",
+    badgePath: "/assets/clubs/european/freiburg.png",
+    badgeSourceUrl: "https://r2.thesportsdb.com/images/media/team/badge/urwtup1473453288.png",
+  },
+  {
     name: "Fulham",
     slug: "fulham",
     badgePath: "/assets/clubs/premier-league/fulham.png",
     badgeSourceUrl: "https://r2.thesportsdb.com/images/media/team/badge/xwwvyt1448811086.png",
+  },
+  {
+    name: "Inter Milan",
+    slug: "inter-milan",
+    badgePath: "/assets/clubs/european/inter-milan.png",
+    badgeSourceUrl: "https://r2.thesportsdb.com/images/media/team/badge/ryhu6d1617113103.png",
   },
   {
     name: "Leeds United",
@@ -74,6 +98,12 @@ export const leagueClubs: LeagueClubRecord[] = [
     slug: "liverpool",
     badgePath: "/assets/clubs/premier-league/liverpool.png",
     badgeSourceUrl: "https://r2.thesportsdb.com/images/media/team/badge/kfaher1737969724.png",
+  },
+  {
+    name: "Mallorca",
+    slug: "mallorca",
+    badgePath: "/assets/clubs/european/mallorca.png",
+    badgeSourceUrl: "https://r2.thesportsdb.com/images/media/team/badge/ssptsx1473503730.png",
   },
   {
     name: "Manchester City",
@@ -100,6 +130,18 @@ export const leagueClubs: LeagueClubRecord[] = [
     badgeSourceUrl: "https://r2.thesportsdb.com/images/media/team/badge/bk4qjs1546440351.png",
   },
   {
+    name: "Real Madrid",
+    slug: "real-madrid",
+    badgePath: "/assets/clubs/european/real-madrid.png",
+    badgeSourceUrl: "https://r2.thesportsdb.com/images/media/team/badge/g4ev2c1522175902.png",
+  },
+  {
+    name: "Roma",
+    slug: "roma",
+    badgePath: "/assets/clubs/european/roma.png",
+    badgeSourceUrl: "https://r2.thesportsdb.com/images/media/team/badge/jwro2s1760820674.png",
+  },
+  {
     name: "Sunderland",
     slug: "sunderland",
     badgePath: "/assets/clubs/premier-league/sunderland.png",
@@ -116,6 +158,12 @@ export const leagueClubs: LeagueClubRecord[] = [
     slug: "west-ham-united",
     badgePath: "/assets/clubs/premier-league/west-ham-united.png",
     badgeSourceUrl: "https://r2.thesportsdb.com/images/media/team/badge/yutyxs1467459956.png",
+  },
+  {
+    name: "Wolfsburg",
+    slug: "wolfsburg",
+    badgePath: "/assets/clubs/european/wolfsburg.png",
+    badgeSourceUrl: "https://r2.thesportsdb.com/images/media/team/badge/07kp421599680274.png",
   },
   {
     name: "Wolverhampton Wanderers",

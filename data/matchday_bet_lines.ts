@@ -6,7 +6,7 @@ export const matchdayBetLines: MatchdayBetLineRecord[] = [
     gameWeekId: "md-1",
     proposalEntityId: "md-1-proposal-safe",
     sortOrder: 1,
-    label: "Bayern Munich to beat SC Freiburg",
+    label: "SC Freiburg v Bayern Munich: Bayern Munich to win",
     scheduleNote: "Sat 4 Apr, 13:30 BST",
     aiReasoning:
       "Ladbrokes still prices Bayern as the shortest Bundesliga away favourite in the slate, which suits the low-volatility opening leg.",
@@ -21,7 +21,7 @@ export const matchdayBetLines: MatchdayBetLineRecord[] = [
     gameWeekId: "md-1",
     proposalEntityId: "md-1-proposal-safe",
     sortOrder: 2,
-    label: "Real Madrid to beat Mallorca",
+    label: "Mallorca v Real Madrid: Real Madrid to win",
     scheduleNote: "Sat 4 Apr, 14:15 BST",
     aiReasoning:
       "Real Madrid's price stays short enough for the defensive slip while their recent scoring profile remains comfortably ahead of Mallorca's.",
@@ -36,7 +36,7 @@ export const matchdayBetLines: MatchdayBetLineRecord[] = [
     gameWeekId: "md-1",
     proposalEntityId: "md-1-proposal-safe",
     sortOrder: 3,
-    label: "Inter Milan to beat Roma",
+    label: "Inter Milan v Roma: Inter Milan to win",
     scheduleNote: "Sun 5 Apr, 18:45 BST",
     aiReasoning:
       "Inter's home win keeps the safer slip outcome-led instead of leaning on a higher-variance goals read in the final leg.",
@@ -51,7 +51,7 @@ export const matchdayBetLines: MatchdayBetLineRecord[] = [
     gameWeekId: "md-1",
     proposalEntityId: "md-1-proposal-balanced",
     sortOrder: 1,
-    label: "Bayern Munich to beat SC Freiburg",
+    label: "SC Freiburg v Bayern Munich: Bayern Munich to win",
     scheduleNote: "Sat 4 Apr, 13:30 BST",
     aiReasoning:
       "The shortest German price remains a solid stabiliser for a balanced slip that still wants early control of cashout equity.",
@@ -66,7 +66,7 @@ export const matchdayBetLines: MatchdayBetLineRecord[] = [
     gameWeekId: "md-1",
     proposalEntityId: "md-1-proposal-balanced",
     sortOrder: 2,
-    label: "Bayer Leverkusen to beat Wolfsburg",
+    label: "Bayer Leverkusen v Wolfsburg: Bayer Leverkusen to win",
     scheduleNote: "Sat 4 Apr, 13:30 BST",
     aiReasoning:
       "Leverkusen's home price is still playable in the mid-risk build because Wolfsburg arrive on the weaker trend line and the leg lifts the total without distorting sequencing.",
@@ -81,7 +81,7 @@ export const matchdayBetLines: MatchdayBetLineRecord[] = [
     gameWeekId: "md-1",
     proposalEntityId: "md-1-proposal-balanced",
     sortOrder: 3,
-    label: "Real Madrid to beat Mallorca",
+    label: "Mallorca v Real Madrid: Real Madrid to win",
     scheduleNote: "Sat 4 Apr, 14:15 BST",
     aiReasoning:
       "Madrid remain the strongest Spanish anchor in the weekend window, and their scoring output supports keeping the result market rather than stretching to a combo.",
@@ -96,7 +96,7 @@ export const matchdayBetLines: MatchdayBetLineRecord[] = [
     gameWeekId: "md-1",
     proposalEntityId: "md-1-proposal-balanced",
     sortOrder: 4,
-    label: "Inter Milan to beat Roma",
+    label: "Inter Milan v Roma: Inter Milan to win",
     scheduleNote: "Sun 5 Apr, 18:45 BST",
     aiReasoning:
       "Keeping Inter on the win line rather than BTTS stops the balanced slip from pushing too much variance into the Sunday closer.",
@@ -111,7 +111,7 @@ export const matchdayBetLines: MatchdayBetLineRecord[] = [
     gameWeekId: "md-1",
     proposalEntityId: "md-1-proposal-aggressive",
     sortOrder: 1,
-    label: "Bayern Munich to beat SC Freiburg",
+    label: "SC Freiburg v Bayern Munich: Bayern Munich to win",
     scheduleNote: "Sat 4 Apr, 13:30 BST",
     aiReasoning:
       "The aggressive slip still starts with a strong favourite so the later higher-variance leg has something to leverage.",
@@ -126,7 +126,7 @@ export const matchdayBetLines: MatchdayBetLineRecord[] = [
     gameWeekId: "md-1",
     proposalEntityId: "md-1-proposal-aggressive",
     sortOrder: 2,
-    label: "Bayer Leverkusen to beat Wolfsburg",
+    label: "Bayer Leverkusen v Wolfsburg: Bayer Leverkusen to win",
     scheduleNote: "Sat 4 Apr, 13:30 BST",
     aiReasoning:
       "Leverkusen still fit the aggressive slip because the market remains short enough to preserve room for a bigger Sunday price move.",
@@ -141,7 +141,7 @@ export const matchdayBetLines: MatchdayBetLineRecord[] = [
     gameWeekId: "md-1",
     proposalEntityId: "md-1-proposal-aggressive",
     sortOrder: 3,
-    label: "Real Madrid to beat Mallorca",
+    label: "Mallorca v Real Madrid: Real Madrid to win",
     scheduleNote: "Sat 4 Apr, 14:15 BST",
     aiReasoning:
       "Madrid stay in every build because the away win price is still efficient and helps the aggressive slip reach Sunday with live upside.",
@@ -156,7 +156,7 @@ export const matchdayBetLines: MatchdayBetLineRecord[] = [
     gameWeekId: "md-1",
     proposalEntityId: "md-1-proposal-aggressive",
     sortOrder: 4,
-    label: "Inter Milan v Roma both teams to score",
+    label: "Inter Milan v Roma: Both teams to score",
     scheduleNote: "Sun 5 Apr, 18:45 BST",
     aiReasoning:
       "This is the deliberate upside leg: Roma's recent scoring run and Inter's pair of 1-1 league draws make the BTTS price a cleaner way to chase lift than forcing an exact result.",

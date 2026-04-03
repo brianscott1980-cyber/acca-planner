@@ -431,7 +431,7 @@ function AccumulatorCard({
     card.riskLevel === "safe"
       ? "Vote Defensive"
       : card.riskLevel === "balanced"
-        ? "Vote Neutral"
+        ? "Vote Balanced"
         : "Vote Aggressive";
   const approachLabel =
     card.riskLevel === "safe"
@@ -733,7 +733,7 @@ function getCompactProposalTitle(
   }
 
   if (riskLevel === "balanced") {
-    return "Neutral";
+    return "Balanced";
   }
 
   return "Aggressive";

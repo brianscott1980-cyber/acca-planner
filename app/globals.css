@@ -2099,6 +2099,7 @@ button {
   border-color: var(--hub-border);
 }
 
+.hub-avatar-badge-safe,
 .hub-avatar-badge-defensive {
   --hub-avatar-badge-fill: linear-gradient(135deg, #10b981, #047857);
   --hub-avatar-badge-fill-opacity: 1;
@@ -2106,6 +2107,7 @@ button {
   box-shadow: 0 0 18px rgba(16, 185, 129, 0.24);
 }
 
+.hub-avatar-badge-balanced,
 .hub-avatar-badge-neutral {
   --hub-avatar-badge-fill: linear-gradient(135deg, #3b82f6, #1d4ed8);
   --hub-avatar-badge-fill-opacity: 1;
@@ -2137,10 +2139,12 @@ button {
   font-weight: 700;
 }
 
+.hub-rule-box .hub-consensus-leader-safe,
 .hub-rule-box .hub-consensus-leader-defensive {
   color: #10b981;
 }
 
+.hub-rule-box .hub-consensus-leader-balanced,
 .hub-rule-box .hub-consensus-leader-neutral {
   color: #3b82f6;
 }

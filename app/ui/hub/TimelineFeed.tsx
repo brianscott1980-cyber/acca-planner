@@ -467,7 +467,7 @@ function getTimelineTagClassName(entry: TimelineEntry) {
     return "hub-tag-safe";
   }
 
-  if (normalizedLabel.includes("neutral")) {
+  if (normalizedLabel.includes("balanced") || normalizedLabel.includes("neutral")) {
     return "hub-tag-balanced";
   }
 
@@ -508,7 +508,7 @@ function getTimelineStrategyTextClassName(entry: TimelineEntry) {
     return "hub-strategy-safe-text";
   }
 
-  if (normalizedLabel.includes("neutral")) {
+  if (normalizedLabel.includes("balanced") || normalizedLabel.includes("neutral")) {
     return "hub-strategy-balanced-text";
   }
 
