@@ -1,6 +1,8 @@
 "use client";
 
+import { useEffect, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
+import { Flag, Wallet } from "lucide-react";
 import {
   formatCurrency,
 } from "../../../services/ledger_service";
@@ -18,6 +20,7 @@ import { getCurrentLedgerTransactions } from "../../../services/ledger_service";
 import { getCustomBets } from "../../../repositories/custom_bet_repository";
 import { getTimelineEvents } from "../../../repositories/timeline_event_repository";
 import { getUserInitials } from "../../../services/user_service";
+import { GolfBallIcon, HorseHeadIcon, SoccerBallIcon } from "./SportIcons";
 
 type TimelineEntry = {
   id: string;
@@ -43,6 +46,7 @@ type TimelineEntry = {
   customBetId?: string;
   multilineStake?: boolean;
   generatedStrategies?: GeneratedStrategySummary[];
+  iconKind: "football" | "horse_racing" | "golf" | "money";
 };
 
 type GeneratedStrategySummary = {
@@ -54,116 +58,13 @@ type GeneratedStrategySummary = {
 };
 
 export function TimelineFeed() {
-  const simulatedNow = getSimulatedNow().getTime();
-  const members = getMembers();
-  const timelineEntries: TimelineEntry[] = [
-    ...getVisibleGameWeekTimelineRecords().flatMap(
-      ({ gameWeek, proposal, simulation }) => {
-        const proposalOdds = Number.parseFloat(getProposalDisplayOdds(proposal));
-        const voteCount = Object.values(simulation.votesByUserId).filter(
-          (vote) => vote === simulation.selectedProposalId,
-        ).length;
-        const votedEntry: TimelineEntry = {
-          id: `${gameWeek.id}-voted`,
-          title: `${gameWeek.name.replace(/\s+Voting Stage$/i, "")} Vote Resolved`,
-          dateRange: formatTimelineDateTime(simulation.voteResolvedAtIso),
-          status: "voted",
-          label: `${proposal.title} selected`,
-          stakeLabel: "Outcome",
-          stake: proposal.title,
-          returnLabel: "Votes",
-          returnValue: `${voteCount}/${Object.keys(simulation.votesByUserId).length}`,
-          outcomeLabel: "Voted",
-          timestampIso: simulation.voteResolvedAtIso,
-          matchdayId: gameWeek.id,
-        };
-        const entries = [votedEntry];
+  const [isHydrated, setIsHydrated] = useState(false);
 
-	        if (new Date(simulation.simulatedSlip.stakePlacedAt).getTime() <= simulatedNow) {
-          const submitter = getTimelineSubmitter(members, `${gameWeek.id}:placed`);
+  useEffect(() => {
+    setIsHydrated(true);
+  }, []);
 
-	          entries.push({
-            id: `${gameWeek.id}-placed`,
-            title: `${gameWeek.name.replace(/\s+Voting Stage$/i, "")} Bet Placed`,
-            dateRange: formatTimelineDateTime(simulation.simulatedSlip.stakePlacedAt),
-            status: "placed",
-            label: simulation.simulatedSlip.timelineLabel,
-            stakeLabel: "Stake",
-            stake: formatCurrency(simulation.simulatedSlip.stake, {
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2,
-            }),
-            odds: getProposalDisplayOdds(proposal),
-            oddsLabel: "Odds",
-	            returnLabel: "Potential",
-	            returnValue: formatCurrency(simulation.simulatedSlip.stake * proposalOdds, {
-	              minimumFractionDigits: 2,
-	              maximumFractionDigits: 2,
-	            }),
-              infoLabel: "Submitter",
-              infoAvatarLabel: getUserInitials(submitter.displayName),
-              infoAvatarTitle: submitter.displayName,
-	            outcomeLabel: "Placed",
-	            timestampIso: simulation.simulatedSlip.stakePlacedAt,
-	            matchdayId: gameWeek.id,
-          });
-        }
-
-        if (new Date(simulation.simulatedSlip.settledAt).getTime() <= simulatedNow) {
-          const returnTone =
-            simulation.simulatedSlip.settlementKind === "cashout"
-              ? getCashoutReturnTone(
-                  simulation.simulatedSlip.returnAmount,
-                  simulation.simulatedSlip.stake,
-                )
-              : undefined;
-
-          entries.push({
-            id: `${gameWeek.id}-settled`,
-            title: gameWeek.name.replace(/\s+Voting Stage$/i, ""),
-            dateRange: formatGameWeekDateRange(gameWeek),
-            status:
-              simulation.simulatedSlip.settlementKind === "cashout"
-                ? "cashout"
-                : simulation.simulatedSlip.status,
-            stake: formatCurrency(simulation.simulatedSlip.stake, {
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2,
-            }),
-            odds: getProposalDisplayOdds(proposal),
-            potentialLabel: "Potential",
-            potentialValue: formatCurrency(
-              simulation.simulatedSlip.stake * proposalOdds,
-              {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2,
-              },
-            ),
-            returnValue: formatCurrency(simulation.simulatedSlip.returnAmount, {
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2,
-            }),
-            returnTone,
-            outcomeLabel:
-              simulation.simulatedSlip.settlementKind === "cashout"
-                ? "Cashout"
-                : undefined,
-            timestampIso: simulation.simulatedSlip.settledAt,
-            matchdayId: gameWeek.id,
-          });
-        }
-
-        return entries;
-      },
-    ),
-    ...getCustomBetTimelineEntries(),
-    ...getCustomTimelineEntries(),
-    ...getInitialDepositTimelineEntries(),
-  ].sort(
-    (left, right) =>
-      new Date(right.timestampIso).getTime() -
-      new Date(left.timestampIso).getTime(),
-  );
+  const timelineEntries = isHydrated ? buildTimelineEntries() : [];
 
   return (
     <section className="hub-wide">
@@ -174,7 +75,14 @@ export function TimelineFeed() {
         </p>
       </div>
 
-      {timelineEntries.length === 0 ? (
+      {!isHydrated ? (
+        <div className="hub-panel hub-empty-state">
+          <h2 className="hub-panel-title">Loading Timeline</h2>
+          <p className="hub-subtitle">Syncing the latest timeline view.</p>
+        </div>
+      ) : null}
+
+      {isHydrated && timelineEntries.length === 0 ? (
         <div className="hub-panel hub-empty-state">
           <h2 className="hub-panel-title">The Syndicate Is Ready To Start</h2>
           <p className="hub-subtitle">
@@ -184,12 +92,126 @@ export function TimelineFeed() {
         </div>
       ) : null}
 
-      <div className="hub-timeline">
-        {timelineEntries.map((entry) => (
-          <TimelineMatchday key={entry.id} entry={entry} />
-        ))}
-      </div>
+      {isHydrated ? (
+        <div className="hub-timeline">
+          {timelineEntries.map((entry) => (
+            <TimelineMatchday key={entry.id} entry={entry} />
+          ))}
+        </div>
+      ) : null}
     </section>
+  );
+}
+
+function buildTimelineEntries(): TimelineEntry[] {
+  const simulatedNow = getSimulatedNow().getTime();
+  const members = getMembers();
+
+  return [
+    ...getVisibleGameWeekTimelineRecords().flatMap(({ gameWeek, proposal, simulation }) => {
+      const proposalOdds = Number.parseFloat(getProposalDisplayOdds(proposal));
+      const voteCount = Object.values(simulation.votesByUserId).filter(
+        (vote) => vote === simulation.selectedProposalId,
+      ).length;
+      const votedEntry: TimelineEntry = {
+        id: `${gameWeek.id}-voted`,
+        title: `${gameWeek.name.replace(/\s+Voting Stage$/i, "")} Vote Resolved`,
+        dateRange: formatTimelineDateTime(simulation.voteResolvedAtIso),
+        status: "voted",
+        label: `${proposal.title} selected`,
+        stakeLabel: "Outcome",
+        stake: proposal.title,
+        returnLabel: "Votes",
+        returnValue: `${voteCount}/${Object.keys(simulation.votesByUserId).length}`,
+        outcomeLabel: "Voted",
+        timestampIso: simulation.voteResolvedAtIso,
+        matchdayId: gameWeek.id,
+        iconKind: "football",
+      };
+      const entries = [votedEntry];
+
+      if (new Date(simulation.simulatedSlip.stakePlacedAt).getTime() <= simulatedNow) {
+        const submitter = getTimelineSubmitter(members, `${gameWeek.id}:placed`);
+
+        entries.push({
+          id: `${gameWeek.id}-placed`,
+          title: `${gameWeek.name.replace(/\s+Voting Stage$/i, "")} Bet Placed`,
+          dateRange: formatTimelineDateTime(simulation.simulatedSlip.stakePlacedAt),
+          status: "placed",
+          label: simulation.simulatedSlip.timelineLabel,
+          stakeLabel: "Stake",
+          stake: formatCurrency(simulation.simulatedSlip.stake, {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          }),
+          odds: getProposalDisplayOdds(proposal),
+          oddsLabel: "Odds",
+          returnLabel: "Potential",
+          returnValue: formatCurrency(simulation.simulatedSlip.stake * proposalOdds, {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          }),
+          infoLabel: "Submitter",
+          infoAvatarLabel: getUserInitials(submitter.displayName),
+          infoAvatarTitle: submitter.displayName,
+          outcomeLabel: "Placed",
+          timestampIso: simulation.simulatedSlip.stakePlacedAt,
+          matchdayId: gameWeek.id,
+          iconKind: "football",
+        });
+      }
+
+      if (new Date(simulation.simulatedSlip.settledAt).getTime() <= simulatedNow) {
+        const returnTone =
+          simulation.simulatedSlip.settlementKind === "cashout"
+            ? getCashoutReturnTone(
+                simulation.simulatedSlip.returnAmount,
+                simulation.simulatedSlip.stake,
+              )
+            : undefined;
+
+        entries.push({
+          id: `${gameWeek.id}-settled`,
+          title: gameWeek.name.replace(/\s+Voting Stage$/i, ""),
+          dateRange: formatGameWeekDateRange(gameWeek),
+          status:
+            simulation.simulatedSlip.settlementKind === "cashout"
+              ? "cashout"
+              : simulation.simulatedSlip.status,
+          stake: formatCurrency(simulation.simulatedSlip.stake, {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          }),
+          odds: getProposalDisplayOdds(proposal),
+          potentialLabel: "Potential",
+          potentialValue: formatCurrency(
+            simulation.simulatedSlip.stake * proposalOdds,
+            {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            },
+          ),
+          returnValue: formatCurrency(simulation.simulatedSlip.returnAmount, {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          }),
+          returnTone,
+          outcomeLabel:
+            simulation.simulatedSlip.settlementKind === "cashout" ? "Cashout" : undefined,
+          timestampIso: simulation.simulatedSlip.settledAt,
+          matchdayId: gameWeek.id,
+          iconKind: "football",
+        });
+      }
+
+      return entries;
+    }),
+    ...getCustomBetTimelineEntries(),
+    ...getCustomTimelineEntries(),
+    ...getInitialDepositTimelineEntries(),
+  ].sort(
+    (left, right) =>
+      new Date(right.timestampIso).getTime() - new Date(left.timestampIso).getTime(),
   );
 }
 
@@ -264,132 +286,130 @@ function TimelineMatchday({ entry }: { entry: TimelineEntry }) {
           navigateToEntry();
         }}
       >
-        <div className="hub-timeline-head">
-          <div className="hub-timeline-head-row">
-            <h2>{entry.title}</h2>
-            {!isFundedEntry ? (
-              <span className={`hub-outcome ${getTimelineStatusClassName(entry.status)}`}>
-                {outcomeLabel}
-              </span>
-            ) : null}
+        <div className="hub-timeline-content-row">
+          <div className={`hub-proposal-icon ${getTimelineIconClassName(entry.iconKind)}`}>
+            {renderTimelineEntryIcon(entry.iconKind)}
           </div>
-          <div className="hub-timeline-meta-row">
-            {isFundedEntry ? (
-              <span className={`hub-outcome ${getTimelineStatusClassName(entry.status)}`}>
-                {outcomeLabel}
-              </span>
-            ) : (
-              <span className="hub-timeline-meta-spacer" aria-hidden="true" />
-            )}
-            <p>{entry.dateRange}</p>
-          </div>
-        </div>
-
-        {shouldShowTimelineStrategyLabel(entry) ? (
-          <div className="hub-badge-row">
-            {shouldShowTimelineStrategyLabel(entry) ? (
-              <span className={`hub-tag ${getTimelineTagClassName(entry)}`}>
-                {entry.label}
-              </span>
-            ) : null}
-          </div>
-        ) : null}
-
-        {hasGeneratedStrategies ? (
-          <div className="hub-generated-strategy-row">
-            {entry.generatedStrategies?.map((strategy) => (
-              <div
-                key={strategy.id}
-                className={`hub-generated-strategy-card ${getGeneratedStrategyClassName(
-                  strategy.riskLevel,
-                )}`}
-              >
-                <span className="hub-generated-strategy-label">{strategy.label}</span>
-                <div className="hub-generated-strategy-odds-row">
-                  <span className="hub-generated-strategy-odds">{strategy.odds}</span>
-                  {strategy.isRecommended ? (
-                    <span className="hub-ai-tag">AI</span>
-                  ) : null}
-                </div>
+          <div className="hub-timeline-content">
+            <div className="hub-timeline-head">
+              <div className="hub-timeline-head-row">
+                <h2>{entry.title}</h2>
+                <span className={`hub-outcome ${getTimelineStatusClassName(entry.status)}`}>
+                  {outcomeLabel}
+                </span>
               </div>
-            ))}
-          </div>
-        ) : (
-          <div
-            className={`hub-stat-grid${entry.odds ? "" : " is-compact"}${
-              entry.potentialValue ? " has-potential" : ""
-            }${
-              entry.infoAvatarLabel ? " has-info" : ""
-            }`}
-          >
-            <div>
-              <span className="hub-metric-label">{entry.stakeLabel ?? "Stake"}</span>
-              <span
-                className={`hub-metric-value${
-                  entry.status === "funded"
-                    ? " hub-success-text"
-                    : entry.status === "placed"
-                      ? " hub-danger-text"
-                      : entry.status === "voted"
-                        ? ` ${getTimelineStrategyTextClassName(entry)}`
-                      : ""
-                }${entry.multilineStake ? " is-multiline" : ""}`}
-              >
-                {entry.stake}
-              </span>
+              <div className="hub-timeline-meta-row">
+                <p>{entry.dateRange}</p>
+              </div>
             </div>
-            {entry.odds ? (
-              <div>
-                <span className="hub-metric-label">{entry.oddsLabel ?? "Odds"}</span>
-                <span className="hub-metric-value hub-accent-text">{entry.odds}</span>
+
+            {shouldShowTimelineStrategyLabel(entry) ? (
+              <div className="hub-badge-row">
+                {shouldShowTimelineStrategyLabel(entry) ? (
+                  <span className={`hub-tag ${getTimelineTagClassName(entry)}`}>
+                    {entry.label}
+                  </span>
+                ) : null}
               </div>
             ) : null}
-            {entry.potentialValue ? (
-              <div>
-                <span className="hub-metric-label">
-                  {entry.potentialLabel ?? "Potential"}
-                </span>
-                <span className="hub-metric-value hub-accent-text">
-                  {entry.potentialValue}
-                </span>
+
+            {hasGeneratedStrategies ? (
+              <div className="hub-generated-strategy-row">
+                {entry.generatedStrategies?.map((strategy) => (
+                  <div
+                    key={strategy.id}
+                    className={`hub-generated-strategy-card ${getGeneratedStrategyClassName(
+                      strategy.riskLevel,
+                    )}`}
+                  >
+                    <span className="hub-generated-strategy-label">{strategy.label}</span>
+                    <div className="hub-generated-strategy-odds-row">
+                      <span className="hub-generated-strategy-odds">{strategy.odds}</span>
+                      {strategy.isRecommended ? (
+                        <span className="hub-ai-tag">AI</span>
+                      ) : null}
+                    </div>
+                  </div>
+                ))}
               </div>
-            ) : null}
-            <div>
-              <span className="hub-metric-label">{entry.returnLabel ?? "Return"}</span>
-              <span
-                className={`hub-metric-value ${
-                  entry.status === "win" || entry.status === "funded"
-                    ? "hub-success-text"
-                    : entry.returnTone === "positive"
-                      ? "hub-success-text"
-                    : entry.returnTone === "neutral"
-                      ? "hub-warning-text"
-                    : entry.returnTone === "negative"
-                      ? "hub-danger-text"
-                    : entry.status === "placed"
-                      ? "hub-accent-text"
-                    : entry.status === "voted"
-                      ? "hub-text"
-                    : ""
+            ) : (
+              <div
+                className={`hub-stat-grid${entry.odds ? "" : " is-compact"}${
+                  entry.potentialValue ? " has-potential" : ""
+                }${
+                  entry.infoAvatarLabel ? " has-info" : ""
                 }`}
               >
-                {entry.returnValue}
-              </span>
-            </div>
-            {entry.infoAvatarLabel ? (
-              <div>
-                <span className="hub-metric-label">{entry.infoLabel ?? "Info"}</span>
-                <span
-                  className="hub-timeline-submitter-avatar"
-                  title={entry.infoAvatarTitle}
-                  aria-label={entry.infoAvatarTitle}
-                >
-                  {entry.infoAvatarLabel}
-                </span>
+                <div>
+                  <span className="hub-metric-label">{entry.stakeLabel ?? "Stake"}</span>
+                  <span
+                    className={`hub-metric-value${
+                      entry.status === "funded"
+                        ? " hub-success-text"
+                        : entry.status === "placed"
+                          ? " hub-danger-text"
+                          : entry.status === "voted"
+                            ? ` ${getTimelineStrategyTextClassName(entry)}`
+                          : ""
+                    }${entry.multilineStake ? " is-multiline" : ""}`}
+                  >
+                    {entry.stake}
+                  </span>
+                </div>
+                {entry.odds ? (
+                  <div>
+                    <span className="hub-metric-label">{entry.oddsLabel ?? "Odds"}</span>
+                    <span className="hub-metric-value hub-accent-text">{entry.odds}</span>
+                  </div>
+                ) : null}
+                {entry.potentialValue ? (
+                  <div>
+                    <span className="hub-metric-label">
+                      {entry.potentialLabel ?? "Potential"}
+                    </span>
+                    <span className="hub-metric-value hub-accent-text">
+                      {entry.potentialValue}
+                    </span>
+                  </div>
+                ) : null}
+                <div>
+                  <span className="hub-metric-label">{entry.returnLabel ?? "Return"}</span>
+                  <span
+                    className={`hub-metric-value ${
+                      entry.status === "win" || entry.status === "funded"
+                        ? "hub-success-text"
+                        : entry.returnTone === "positive"
+                          ? "hub-success-text"
+                        : entry.returnTone === "neutral"
+                          ? "hub-warning-text"
+                        : entry.returnTone === "negative"
+                          ? "hub-danger-text"
+                        : entry.status === "placed"
+                          ? "hub-accent-text"
+                        : entry.status === "voted"
+                          ? "hub-text"
+                        : ""
+                    }`}
+                  >
+                    {entry.returnValue}
+                  </span>
+                </div>
+                {entry.infoAvatarLabel ? (
+                  <div>
+                    <span className="hub-metric-label">{entry.infoLabel ?? "Info"}</span>
+                    <span
+                      className="hub-timeline-submitter-avatar"
+                      title={entry.infoAvatarTitle}
+                      aria-label={entry.infoAvatarTitle}
+                    >
+                      {entry.infoAvatarLabel}
+                    </span>
+                  </div>
+                ) : null}
               </div>
-            ) : null}
+            )}
           </div>
-        )}
+        </div>
       </div>
     </article>
   );
@@ -423,6 +443,7 @@ function getCustomBetTimelineEntries(): TimelineEntry[] {
     outcomeLabel: customBet.state === "staked" ? "Staked" : "Custom Bet",
     timestampIso: customBet.placedAtIso ?? customBet.generatedAtIso,
     customBetId: customBet.id,
+    iconKind: customBet.sport,
   }));
 }
 
@@ -485,6 +506,7 @@ function getInitialDepositTimelineEntries(): TimelineEntry[] {
       }),
       outcomeLabel: "Funded",
       timestampIso: openingDeposits[0].dateIso,
+      iconKind: "money",
     },
   ];
 }
@@ -516,6 +538,7 @@ function getCustomTimelineEntries(): TimelineEntry[] {
         matchdayId: gameWeek?.id,
         multilineStake: true,
         generatedStrategies,
+        iconKind: "football",
       };
 
       return timelineEntry;
@@ -525,6 +548,40 @@ function getCustomTimelineEntries(): TimelineEntry[] {
         new Date(right.timestampIso).getTime() -
         new Date(left.timestampIso).getTime(),
     );
+}
+
+function renderTimelineEntryIcon(
+  iconKind: TimelineEntry["iconKind"],
+): ReactNode {
+  if (iconKind === "money") {
+    return <Wallet size={18} />;
+  }
+
+  if (iconKind === "football") {
+    return <SoccerBallIcon size={18} />;
+  }
+
+  if (iconKind === "golf") {
+    return <GolfBallIcon size={18} />;
+  }
+
+  return <HorseHeadIcon size={18} />;
+}
+
+function getTimelineIconClassName(iconKind: TimelineEntry["iconKind"]) {
+  if (iconKind === "money") {
+    return "hub-proposal-icon-safe";
+  }
+
+  if (iconKind === "football") {
+    return "hub-proposal-icon-balanced";
+  }
+
+  if (iconKind === "golf") {
+    return "hub-proposal-icon-safe";
+  }
+
+  return "hub-proposal-icon-aggressive";
 }
 
 function getGeneratedStrategyLabel(riskLevel: "safe" | "balanced" | "aggressive") {

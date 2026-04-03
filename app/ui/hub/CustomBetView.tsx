@@ -1,13 +1,16 @@
 "use client";
 
-import { useMemo, useState, type FormEvent } from "react";
+import { useMemo, useState, type FormEvent, type ReactNode } from "react";
+import Image from "next/image";
 import { useSearchParams } from "next/navigation";
-import { Flame, Flag, Trophy } from "lucide-react";
+import { ChevronRight, Flag, Flame, Trophy } from "lucide-react";
+import { withBasePath } from "../../../lib/site";
 import { getCustomBet } from "../../../services/custom_bet_service";
 import { markCustomBetAsStaked } from "../../../services/custom_bet_admin_service";
 import type { CustomBetRecord } from "../../../types/custom_bet_type";
 import { useAuth } from "../auth/AuthProvider";
 import { formatCurrency } from "../../../services/ledger_service";
+import { GolfBallIcon, HorseHeadIcon, SoccerBallIcon } from "./SportIcons";
 
 export function CustomBetViewWithSearchParams() {
   const searchParams = useSearchParams();
@@ -48,10 +51,39 @@ function CustomBetView({ customBet }: { customBet: CustomBetRecord }) {
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [expandedBetRank, setExpandedBetRank] = useState<number | null>(null);
   const eventWindowLabel = useMemo(
     () => formatEventWindow(currentCustomBet.eventStartIso, currentCustomBet.eventEndIso),
     [currentCustomBet.eventEndIso, currentCustomBet.eventStartIso],
   );
+  const horseRacingDetails =
+    currentCustomBet.sport === "horse_racing" ? currentCustomBet.horseRacing : undefined;
+  const proposedBets =
+    (currentCustomBet.proposedBets ?? []).length > 0
+      ? currentCustomBet.proposedBets
+      : [
+          {
+            rank: 1 as const,
+            market: currentCustomBet.recommendedMarket,
+            selection: currentCustomBet.recommendedSelection,
+            decimalOdds: currentCustomBet.decimalOdds,
+            summary: currentCustomBet.summary,
+            horseRacing:
+              currentCustomBet.sport === "horse_racing" && currentCustomBet.horseRacing
+                ? {
+                    trainer: currentCustomBet.horseRacing.trainer,
+                    jockey: currentCustomBet.horseRacing.jockey,
+                    silksImagePath: currentCustomBet.horseRacing.silksImagePath,
+                    silksSourceUrl: currentCustomBet.horseRacing.silksSourceUrl,
+                    age: currentCustomBet.horseRacing.age,
+                    weight: currentCustomBet.horseRacing.weight,
+                    officialRating: currentCustomBet.horseRacing.officialRating,
+                    recentForm: currentCustomBet.horseRacing.recentForm,
+                    owner: currentCustomBet.horseRacing.owner,
+                  }
+                : undefined,
+          },
+        ];
 
   const handleMarkPlaced = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -96,238 +128,338 @@ function CustomBetView({ customBet }: { customBet: CustomBetRecord }) {
 
   return (
     <section className="hub-wide">
-      <div className="hub-page-copy">
-        <h1 className="hub-title">{currentCustomBet.title}</h1>
-        <p className="hub-subtitle">{currentCustomBet.summary}</p>
-      </div>
-
-      <div className="hub-panel">
-        <div className="hub-panel-title-row">
-          <Trophy size={18} />
-          <h2 className="hub-panel-title">Recommended Bet</h2>
-        </div>
-        <p className="hub-subtitle">
-          {currentCustomBet.competitionName} · {formatCustomBetSport(currentCustomBet.sport)} · {currentCustomBet.bookmaker}
-        </p>
-        <div className="hub-metrics-grid">
-          <div className="hub-metric-card">
-            <span className="hub-metric-label">Requested Format</span>
-            <span className="hub-metric-value">{currentCustomBet.bettingFormatRequested}</span>
-          </div>
-          <div className="hub-metric-card">
-            <span className="hub-metric-label">Market</span>
-            <span className="hub-metric-value">{currentCustomBet.recommendedMarket}</span>
-          </div>
-          <div className="hub-metric-card">
-            <span className="hub-metric-label">Selection</span>
-            <span className="hub-metric-value">{currentCustomBet.recommendedSelection}</span>
-          </div>
-          <div className="hub-metric-card">
-            <span className="hub-metric-label">Odds</span>
-            <span className="hub-metric-value">{currentCustomBet.decimalOdds.toFixed(2)}</span>
-          </div>
-          <div className="hub-metric-card">
-            <span className="hub-metric-label">State</span>
-            <span className="hub-metric-value">{formatCustomBetState(currentCustomBet.state)}</span>
-          </div>
-          <div className="hub-metric-card">
-            <span className="hub-metric-label">Event Window</span>
-            <span className="hub-metric-value">{eventWindowLabel}</span>
+      <article className="hub-proposal-card hub-custom-bet-card">
+        <div className="hub-proposal-top">
+          <div className="hub-proposal-overview">
+            <div className="hub-proposal-title-wrap">
+              <div className={`hub-proposal-icon ${getCustomBetSportIconClassName(currentCustomBet)}`}>
+                {renderCustomBetSportIcon(currentCustomBet.sport)}
+              </div>
+              <div>
+                <div className="hub-proposal-heading-row">
+                  <h1 className="hub-proposal-title">{currentCustomBet.title}</h1>
+                </div>
+                <p className="hub-proposal-summary">{currentCustomBet.summary}</p>
+                <div className="hub-proposal-meta-row">
+                  <span className={`hub-tag ${getCustomBetSportTagClassName(currentCustomBet.sport)}`}>
+                    {formatCustomBetSport(currentCustomBet.sport)}
+                  </span>
+                  <span className="hub-ai-tag">AI Custom Bet</span>
+                  <span className="hub-tag hub-tag-muted">
+                    {formatCustomBetState(currentCustomBet.state)}
+                  </span>
+                  {currentCustomBet.suggestedStakeAmount !== undefined ? (
+                    <span className="hub-tag hub-tag-primary">
+                      Suggested Stake{" "}
+                      {formatCurrency(currentCustomBet.suggestedStakeAmount, {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                      })}
+                    </span>
+                  ) : null}
+                </div>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
 
-      {currentCustomBet.state === "staked" ? (
-        <div className="hub-panel">
-          <div className="hub-panel-title-row">
-            <Flag size={18} />
-            <h2 className="hub-panel-title">Staked Detail</h2>
+        <div className="hub-proposal-detail-layout">
+          <div className="hub-proposal-detail-main">
+            <div className="hub-custom-bet-selection-card">
+              <div className="hub-panel-title-row">
+                <Trophy size={18} />
+                <h2 className="hub-panel-title">Proposed Bets</h2>
+              </div>
+              {proposedBets.map((proposedBet) => {
+                const horseProfile = proposedBet.horseRacing;
+                const hasExpandableHorseProfile = Boolean(
+                  horseProfile &&
+                    (horseProfile.officialRating ||
+                      horseProfile.weight ||
+                      horseProfile.age ||
+                      horseProfile.recentForm),
+                );
+                const isExpanded = expandedBetRank === proposedBet.rank;
+
+                return (
+                  <div
+                    key={`${currentCustomBet.id}-bet-${proposedBet.rank}`}
+                    className={`hub-bet-line${isExpanded ? " is-expanded" : ""}`}
+                  >
+                    <button
+                      className="hub-bet-line-toggle"
+                      type="button"
+                      onClick={() => {
+                        if (!hasExpandableHorseProfile) {
+                          return;
+                        }
+
+                        setExpandedBetRank((currentValue) =>
+                          currentValue === proposedBet.rank ? null : proposedBet.rank,
+                        );
+                      }}
+                      aria-expanded={hasExpandableHorseProfile ? isExpanded : undefined}
+                    >
+                      <div className="hub-bet-line-copy">
+                        <span className="hub-bet-line-title">
+                          <ChevronRight
+                            size={15}
+                            className={`hub-bet-line-chevron${
+                              isExpanded ? " is-expanded" : ""
+                            }${hasExpandableHorseProfile ? "" : " is-hidden"}`}
+                          />
+                          <span className="hub-custom-bet-selection-title-row">
+                            {horseProfile?.silksImagePath ? (
+                              <span className="hub-custom-bet-selection-silks">
+                                <Image
+                                  src={withBasePath(horseProfile.silksImagePath)}
+                                  alt={`${proposedBet.selection} silks`}
+                                  width={28}
+                                  height={28}
+                                />
+                              </span>
+                            ) : null}
+                            <span className="hub-custom-bet-selection-title">
+                              {proposedBet.rank}. {proposedBet.selection}
+                            </span>
+                          </span>
+                        </span>
+                        <span className="hub-bet-line-note">
+                          {proposedBet.market} · {currentCustomBet.bettingFormatRequested}
+                        </span>
+                        <span className="hub-bet-line-note">{proposedBet.summary}</span>
+                      </div>
+                      <span className="hub-bet-line-pill-wrap">
+                        <span className="hub-metric-pill">{proposedBet.decimalOdds.toFixed(2)}</span>
+                      </span>
+                    </button>
+
+                    {hasExpandableHorseProfile && isExpanded ? (
+                      <div className="hub-bet-line-detail hub-custom-bet-line-detail">
+                        {horseProfile?.officialRating ? (
+                          <p className="hub-bet-line-detail-row">
+                            <strong className="hub-bet-line-detail-label">OR:</strong>
+                            <span className="hub-bet-line-detail-value">
+                              {horseProfile.officialRating}
+                            </span>
+                          </p>
+                        ) : null}
+                        {horseProfile?.weight ? (
+                          <p className="hub-bet-line-detail-row">
+                            <strong className="hub-bet-line-detail-label">Weight:</strong>
+                            <span className="hub-bet-line-detail-value">{horseProfile.weight}</span>
+                          </p>
+                        ) : null}
+                        {horseProfile?.age ? (
+                          <p className="hub-bet-line-detail-row">
+                            <strong className="hub-bet-line-detail-label">Age:</strong>
+                            <span className="hub-bet-line-detail-value">{horseProfile.age}</span>
+                          </p>
+                        ) : null}
+                        {horseProfile?.recentForm ? (
+                          <p className="hub-bet-line-detail-row">
+                            <strong className="hub-bet-line-detail-label">Form:</strong>
+                            <span className="hub-bet-line-detail-value">
+                              {horseProfile.recentForm}
+                            </span>
+                          </p>
+                        ) : null}
+                      </div>
+                    ) : null}
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className="hub-custom-bet-panel hub-custom-bet-analysis-panel">
+              <div className="hub-panel-title-row">
+                <Flame size={18} />
+                <h2 className="hub-panel-title">AI Analysis</h2>
+              </div>
+              <p className="hub-subtitle">{currentCustomBet.analysisSummary}</p>
+              <p className="hub-subtitle">{currentCustomBet.mediaSummary}</p>
+            </div>
           </div>
-          <div className="hub-metrics-grid">
-            <div className="hub-metric-card">
-              <span className="hub-metric-label">Stake</span>
-              <span className="hub-metric-value">
-                {currentCustomBet.stakeAmount !== undefined
-                  ? formatCurrency(currentCustomBet.stakeAmount, {
+
+          <aside className="hub-proposal-detail-side">
+            <div className="hub-custom-bet-panel">
+              <h2 className="hub-panel-title">Event Information</h2>
+              <div className="hub-proposal-metrics hub-proposal-metrics-stacked">
+                <div>
+                  <span className="hub-metric-label">Event</span>
+                  <span className="hub-metric-value">{currentCustomBet.eventName}</span>
+                </div>
+                <div>
+                  <span className="hub-metric-label">Window</span>
+                  <span className="hub-metric-value">{eventWindowLabel}</span>
+                </div>
+                <div>
+                  <span className="hub-metric-label">Competition</span>
+                  <span className="hub-metric-value">{currentCustomBet.competitionName}</span>
+                </div>
+                <div>
+                  <span className="hub-metric-label">Bookmaker</span>
+                  <span className="hub-metric-value">{currentCustomBet.bookmaker}</span>
+                </div>
+                {currentCustomBet.sport === "horse_racing" && currentCustomBet.horseRacing?.distance ? (
+                  <div>
+                    <span className="hub-metric-label">Distance</span>
+                    <span className="hub-metric-value">{currentCustomBet.horseRacing.distance}</span>
+                  </div>
+                ) : null}
+                {currentCustomBet.sport === "horse_racing" && currentCustomBet.horseRacing?.fieldSize ? (
+                  <div>
+                    <span className="hub-metric-label">Field Size</span>
+                    <span className="hub-metric-value">{currentCustomBet.horseRacing.fieldSize}</span>
+                  </div>
+                ) : null}
+              </div>
+              {currentCustomBet.sport === "football" && currentCustomBet.football ? (
+                <FootballDetail customBet={currentCustomBet} />
+              ) : null}
+              {currentCustomBet.sport === "golf" && currentCustomBet.golf ? (
+                <GolfDetail customBet={currentCustomBet} />
+              ) : null}
+            </div>
+
+            <div className="hub-proposal-metrics hub-proposal-metrics-stacked">
+              <div className="hub-approach-metric hub-approach-metric-locked">
+                <span className="hub-metric-label">Format</span>
+                <span className={`hub-tag ${getCustomBetSportTagClassName(currentCustomBet.sport)}`}>
+                  {currentCustomBet.bettingFormatRequested}
+                </span>
+              </div>
+              <div>
+                <span className="hub-metric-label">Top Market</span>
+                <span className="hub-metric-value">{currentCustomBet.recommendedMarket}</span>
+              </div>
+              <div>
+                <span className="hub-metric-label">Top Selection</span>
+                <span className="hub-metric-value">{currentCustomBet.recommendedSelection}</span>
+              </div>
+              {currentCustomBet.suggestedStakeAmount !== undefined ? (
+                <div>
+                  <span className="hub-metric-label">Suggested Stake</span>
+                  <span className="hub-metric-value">
+                    {formatCurrency(currentCustomBet.suggestedStakeAmount, {
                       minimumFractionDigits: 2,
                       maximumFractionDigits: 2,
-                    })
-                  : "N/A"}
-              </span>
+                    })}
+                  </span>
+                </div>
+              ) : null}
+              <div>
+                <span className="hub-metric-label">Options</span>
+                <span className="hub-metric-value">{proposedBets.length}</span>
+              </div>
+              <div>
+                <span className="hub-metric-label">Sport</span>
+                <span className="hub-metric-value">{formatCustomBetSport(currentCustomBet.sport)}</span>
+              </div>
             </div>
-            <div className="hub-metric-card">
-              <span className="hub-metric-label">Placed Odds</span>
-              <span className="hub-metric-value">
-                {currentCustomBet.placedDecimalOdds?.toFixed(2) ?? "N/A"}
-              </span>
-            </div>
-            <div className="hub-metric-card">
-              <span className="hub-metric-label">Placed At</span>
-              <span className="hub-metric-value">
-                {currentCustomBet.placedAtIso
-                  ? formatPlacedAt(currentCustomBet.placedAtIso)
-                  : "N/A"}
-              </span>
-            </div>
-          </div>
-        </div>
-      ) : null}
 
-      {isAdminUser && currentCustomBet.state === "pending" ? (
-        <div className="hub-panel">
-          <div className="hub-panel-title-row">
-            <Flag size={18} />
-            <h2 className="hub-panel-title">Admin Placement</h2>
-          </div>
-          <p className="hub-subtitle">
-            This custom bet is pending. Record the actual stake, placed odds, and placement time to move it into the staked state.
-          </p>
-          <form className="auth-form" onSubmit={handleMarkPlaced}>
-            <label className="auth-field">
-              <span className="hub-label">Actual Stake</span>
-              <input
-                className="auth-input"
-                type="number"
-                min="0.01"
-                step="0.01"
-                value={stakeAmount}
-                onChange={(event) => setStakeAmount(event.target.value)}
-                required
-              />
-            </label>
-            <label className="auth-field">
-              <span className="hub-label">Placed Odds</span>
-              <input
-                className="auth-input"
-                type="number"
-                min="1.01"
-                step="0.01"
-                value={placedDecimalOdds}
-                onChange={(event) => setPlacedDecimalOdds(event.target.value)}
-                required
-              />
-            </label>
-            <label className="auth-field">
-              <span className="hub-label">Placed At</span>
-              <input
-                className="auth-input"
-                type="datetime-local"
-                value={placedAt}
-                onChange={(event) => setPlacedAt(event.target.value)}
-                required
-              />
-            </label>
-            <button className="hub-primary-button" type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "Saving..." : "Mark Bet Placed"}
-            </button>
-          </form>
-          {statusMessage ? <p className="auth-status auth-status-success">{statusMessage}</p> : null}
-          {errorMessage ? <p className="auth-status auth-status-error">{errorMessage}</p> : null}
-        </div>
-      ) : null}
+            {currentCustomBet.state === "staked" ? (
+              <div className="hub-custom-bet-panel">
+                <div className="hub-panel-title-row">
+                  <Flag size={18} />
+                  <h2 className="hub-panel-title">Staked Detail</h2>
+                </div>
+                <div className="hub-proposal-metrics hub-proposal-metrics-stacked">
+                  <div>
+                    <span className="hub-metric-label">Stake</span>
+                    <span className="hub-metric-value">
+                      {currentCustomBet.stakeAmount !== undefined
+                        ? formatCurrency(currentCustomBet.stakeAmount, {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2,
+                          })
+                        : "N/A"}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="hub-metric-label">Placed Odds</span>
+                    <span className="hub-metric-value">
+                      {currentCustomBet.placedDecimalOdds?.toFixed(2) ?? "N/A"}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="hub-metric-label">Placed At</span>
+                    <span className="hub-metric-value">
+                      {currentCustomBet.placedAtIso
+                        ? formatPlacedAt(currentCustomBet.placedAtIso)
+                        : "N/A"}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            ) : null}
 
-      <div className="hub-panel">
-        <div className="hub-panel-title-row">
-          <Flame size={18} />
-          <h2 className="hub-panel-title">AI Analysis</h2>
+            {isAdminUser && currentCustomBet.state === "pending" ? (
+              <div className="hub-custom-bet-panel">
+                <div className="hub-panel-title-row">
+                  <Flag size={18} />
+                  <h2 className="hub-panel-title">Admin Placement</h2>
+                </div>
+                <p className="hub-subtitle">
+                  Record the actual stake, placed odds, and placement time to move this recommendation into the staked state.
+                </p>
+                <form className="auth-form" onSubmit={handleMarkPlaced}>
+                  <label className="auth-field">
+                    <span className="hub-label">Actual Stake</span>
+                    <input
+                      className="auth-input"
+                      type="number"
+                      min="0.01"
+                      step="0.01"
+                      value={stakeAmount}
+                      onChange={(event) => setStakeAmount(event.target.value)}
+                      required
+                    />
+                  </label>
+                  <label className="auth-field">
+                    <span className="hub-label">Placed Odds</span>
+                    <input
+                      className="auth-input"
+                      type="number"
+                      min="1.01"
+                      step="0.01"
+                      value={placedDecimalOdds}
+                      onChange={(event) => setPlacedDecimalOdds(event.target.value)}
+                      required
+                    />
+                  </label>
+                  <label className="auth-field">
+                    <span className="hub-label">Placed At</span>
+                    <input
+                      className="auth-input"
+                      type="datetime-local"
+                      value={placedAt}
+                      onChange={(event) => setPlacedAt(event.target.value)}
+                      required
+                    />
+                  </label>
+                  <button
+                    className={`hub-primary-button ${getCustomBetPrimaryButtonClassName(
+                      currentCustomBet.sport,
+                    )}`}
+                    type="submit"
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting ? "Saving..." : "Mark Bet Placed"}
+                  </button>
+                </form>
+                {statusMessage ? (
+                  <p className="auth-status auth-status-success">{statusMessage}</p>
+                ) : null}
+                {errorMessage ? (
+                  <p className="auth-status auth-status-error">{errorMessage}</p>
+                ) : null}
+              </div>
+            ) : null}
+          </aside>
         </div>
-        <p className="hub-subtitle">{currentCustomBet.analysisSummary}</p>
-        <p className="hub-subtitle">{currentCustomBet.mediaSummary}</p>
-      </div>
-
-      <div className="hub-panel">
-        <div className="hub-panel-title-row">
-          <Flag size={18} />
-          <h2 className="hub-panel-title">Cashout Strategy</h2>
-        </div>
-        <div className="hub-metrics-grid">
-          <div className="hub-metric-card">
-            <span className="hub-metric-label">Lower</span>
-            <span className="hub-metric-value">{currentCustomBet.cashoutLowerTarget}</span>
-          </div>
-          <div className="hub-metric-card">
-            <span className="hub-metric-label">Upper</span>
-            <span className="hub-metric-value">{currentCustomBet.cashoutUpperTarget}</span>
-          </div>
-          <div className="hub-metric-card">
-            <span className="hub-metric-label">No Cashout</span>
-            <span className="hub-metric-value">{currentCustomBet.noCashoutValue}</span>
-          </div>
-        </div>
-        <ul className="hub-detail-list">
-          {currentCustomBet.cashoutAdvice.map((advice) => (
-            <li key={advice} className="hub-subtitle">
-              {advice}
-            </li>
-          ))}
-        </ul>
-        <h3 className="hub-panel-title">What To Watch</h3>
-        <ul className="hub-detail-list">
-          {currentCustomBet.watchPoints.map((watchPoint) => (
-            <li key={watchPoint} className="hub-subtitle">
-              {watchPoint}
-            </li>
-          ))}
-        </ul>
-        <h3 className="hub-panel-title">Main Risks</h3>
-        <ul className="hub-detail-list">
-          {currentCustomBet.riskFactors.map((riskFactor) => (
-            <li key={riskFactor} className="hub-subtitle">
-              {riskFactor}
-            </li>
-          ))}
-        </ul>
-      </div>
-
-      <div className="hub-panel">
-        <h2 className="hub-panel-title">Event Detail</h2>
-        {currentCustomBet.sport === "horse_racing" && currentCustomBet.horseRacing ? (
-          <HorseRacingDetail customBet={currentCustomBet} />
-        ) : null}
-        {currentCustomBet.sport === "football" && currentCustomBet.football ? (
-          <FootballDetail customBet={currentCustomBet} />
-        ) : null}
-        {currentCustomBet.sport === "golf" && currentCustomBet.golf ? (
-          <GolfDetail customBet={currentCustomBet} />
-        ) : null}
-      </div>
+      </article>
     </section>
-  );
-}
-
-function HorseRacingDetail({ customBet }: { customBet: CustomBetRecord }) {
-  const details = customBet.horseRacing;
-
-  if (!details) {
-    return null;
-  }
-
-  return (
-    <>
-      <p className="hub-subtitle">
-        {details.racecourse} · {details.raceTimeNote}
-      </p>
-      <ul className="hub-detail-list">
-        <li className="hub-subtitle">Horse: {details.horseName}</li>
-        <li className="hub-subtitle">Trainer: {details.trainer}</li>
-        <li className="hub-subtitle">Jockey: {details.jockey}</li>
-        {details.going ? <li className="hub-subtitle">Going: {details.going}</li> : null}
-        {details.distance ? <li className="hub-subtitle">Distance: {details.distance}</li> : null}
-        {details.fieldSize ? <li className="hub-subtitle">Field size: {details.fieldSize}</li> : null}
-      </ul>
-      {details.notableRivals.length > 0 ? (
-        <>
-          <h3 className="hub-panel-title">Main Rivals</h3>
-          <ul className="hub-detail-list">
-            {details.notableRivals.map((rival) => (
-              <li key={rival} className="hub-subtitle">
-                {rival}
-              </li>
-            ))}
-          </ul>
-        </>
-      ) : null}
-    </>
   );
 }
 
@@ -410,6 +542,54 @@ function formatCustomBetSport(sport: CustomBetRecord["sport"]) {
   }
 
   return "Golf";
+}
+
+function renderCustomBetSportIcon(sport: CustomBetRecord["sport"]): ReactNode {
+  if (sport === "horse_racing") {
+    return <HorseHeadIcon size={20} />;
+  }
+
+  if (sport === "football") {
+    return <SoccerBallIcon size={20} />;
+  }
+
+  return <GolfBallIcon size={20} />;
+}
+
+function getCustomBetSportIconClassName(customBet: CustomBetRecord) {
+  if (customBet.sport === "horse_racing") {
+    return "hub-proposal-icon-aggressive";
+  }
+
+  if (customBet.sport === "football") {
+    return "hub-proposal-icon-balanced";
+  }
+
+  return "hub-proposal-icon-safe";
+}
+
+function getCustomBetSportTagClassName(sport: CustomBetRecord["sport"]) {
+  if (sport === "horse_racing") {
+    return "hub-tag-aggressive";
+  }
+
+  if (sport === "football") {
+    return "hub-tag-balanced";
+  }
+
+  return "hub-tag-safe";
+}
+
+function getCustomBetPrimaryButtonClassName(sport: CustomBetRecord["sport"]) {
+  if (sport === "horse_racing") {
+    return "hub-primary-button-aggressive";
+  }
+
+  if (sport === "football") {
+    return "hub-primary-button-balanced";
+  }
+
+  return "hub-primary-button-safe";
 }
 
 function formatCustomBetState(state: CustomBetRecord["state"]) {

@@ -99,6 +99,18 @@ button {
   object-fit: cover;
 }
 
+.hub-sport-icon-image {
+  display: inline-block;
+  flex: none;
+  background: currentColor;
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+}
+
 .hub-brand-title,
 .hub-profile-name {
   margin: 0;
@@ -1065,7 +1077,7 @@ button {
 .hub-proposal-title,
 .hub-panel-title,
 .hub-timeline-head h2 {
-  margin: 0;
+  margin: 0 0 0.45rem;
   font-size: 1.15rem;
   font-weight: 700;
 }
@@ -1168,6 +1180,12 @@ button {
   border: 1px solid var(--hub-border);
   background: var(--hub-surface-hover);
   color: var(--hub-muted);
+}
+
+.hub-tag-primary {
+  border: 1px solid rgba(178, 102, 255, 0.32);
+  background: rgba(138, 44, 226, 0.16);
+  color: var(--hub-primary-glow);
 }
 
 .hub-ai-tag {
@@ -1287,6 +1305,7 @@ button {
 }
 
 .hub-metric-pill {
+  align-self: flex-start;
   background: var(--hub-primary);
   color: #fff;
 }
@@ -1437,10 +1456,10 @@ button {
 }
 
 .hub-bet-line-note {
-  margin-top: 0.08rem;
+  margin-top: 0.24rem;
   padding-left: calc(1.05rem + 3px);
   color: var(--hub-muted);
-  font-size: 0.66rem;
+  font-size: 0.72rem;
   line-height: 1.35;
 }
 
@@ -1461,7 +1480,8 @@ button {
 
 .hub-bet-line-pill-wrap {
   display: inline-flex;
-  align-items: center;
+  align-items: flex-start;
+  align-self: flex-start;
   gap: 0.45rem;
   flex-wrap: wrap;
   justify-content: flex-end;
@@ -1646,6 +1666,126 @@ button {
 .hub-rule-box-live {
   border-color: rgba(59, 130, 246, 0.24);
   background: rgba(59, 130, 246, 0.08);
+}
+
+.hub-custom-bet-card {
+  overflow: hidden;
+}
+
+.hub-custom-bet-card .hub-proposal-top {
+  grid-template-columns: 1fr;
+}
+
+.hub-custom-bet-card .hub-proposal-overview {
+  width: 100%;
+}
+
+.hub-custom-bet-panel,
+.hub-custom-bet-selection-card {
+  border: 1px solid rgba(39, 39, 42, 0.65);
+  border-radius: 1rem;
+  background: rgba(20, 20, 23, 0.72);
+  padding: 1rem;
+}
+
+.hub-custom-bet-meta-note {
+  padding: 0 0.2rem;
+}
+
+.hub-custom-bet-analysis-panel {
+  margin-top: 1.1rem;
+}
+
+.hub-custom-bet-line-detail {
+  padding-left: calc(1.05rem + 3px + 0.95rem);
+}
+
+.hub-custom-bet-selection-row {
+  margin-top: 0.8rem;
+}
+
+.hub-custom-bet-selection-copy {
+  min-width: 0;
+}
+
+.hub-custom-bet-selection-title-row {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+}
+
+.hub-custom-bet-selection-title {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.hub-custom-bet-selection-silks {
+  position: relative;
+  isolation: isolate;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.18rem;
+  width: 1.9rem;
+  height: 1.9rem;
+  flex: none;
+  border: 1px solid rgba(178, 102, 255, 0.45);
+  border-radius: 0.55rem;
+  background: linear-gradient(135deg, rgba(138, 44, 226, 0.18), rgba(76, 29, 149, 0.22));
+  overflow: hidden;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.06),
+    0 0 0 1px rgba(138, 44, 226, 0.2);
+}
+
+.hub-custom-bet-selection-silks img {
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+}
+
+.hub-custom-bet-selection-silks::after {
+  content: "";
+  position: absolute;
+  inset: -3px;
+  border: 1px solid rgba(178, 102, 255, 0.45);
+  border-radius: 0.7rem;
+  opacity: 0.7;
+  pointer-events: none;
+  animation: hub-silks-outline-pulse 1.9s ease-in-out infinite;
+}
+
+@keyframes hub-silks-outline-pulse {
+  0%,
+  100% {
+    opacity: 0.45;
+    box-shadow: 0 0 0 0 rgba(178, 102, 255, 0.18);
+  }
+
+  50% {
+    opacity: 1;
+    box-shadow: 0 0 0 4px rgba(178, 102, 255, 0.14);
+  }
+}
+
+.hub-cashout-watch-static {
+  border-top: 0;
+}
+
+.hub-detail-list {
+  margin: 0.7rem 0 0;
+  padding-left: 1rem;
+  color: var(--hub-muted);
+  font-size: 0.84rem;
+  line-height: 1.55;
+}
+
+.hub-detail-list li + li {
+  margin-top: 0.35rem;
 }
 
 .hub-vote-note {
@@ -2031,10 +2171,17 @@ button {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0.95rem;
+  margin-bottom: 0.45rem;
 }
 
 .hub-proposal-metrics-stacked > div {
   min-width: 0;
+  align-self: start;
+}
+
+.hub-proposal-metrics-stacked .hub-metric-value {
+  font-size: 0.88rem;
+  font-weight: 500;
 }
 
 .hub-approach-metric-locked {
@@ -2263,10 +2410,23 @@ button {
   opacity: 0.86;
 }
 
+.hub-timeline-content-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.hub-timeline-content {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
 .hub-timeline-head {
   display: flex;
   flex-direction: column;
   gap: 0.35rem;
+  align-items: flex-start;
+  text-align: left;
 }
 
 .hub-timeline-head-row,
@@ -2277,8 +2437,17 @@ button {
   gap: 0.75rem;
 }
 
+.hub-timeline-head-row h2 {
+  flex: 1 1 auto;
+  text-align: left;
+}
+
 .hub-timeline-meta-spacer {
   flex: 1 1 auto;
+}
+
+.hub-timeline-meta-row {
+  justify-content: flex-start;
 }
 
 .hub-timeline-head h2 {
@@ -2296,6 +2465,14 @@ button {
 .hub-leg-title span {
   color: var(--hub-muted);
   font-size: 0.9rem;
+}
+
+.hub-timeline-meta-row p {
+  text-align: left;
+}
+
+.hub-timeline .hub-badge-row {
+  justify-content: flex-end;
 }
 
 .hub-outcome.is-win {
@@ -3352,6 +3529,10 @@ button {
 
   .hub-generated-strategy-row {
     grid-template-columns: 1fr;
+  }
+
+  .hub-timeline-content-row {
+    gap: 0.8rem;
   }
 
   .hub-mobile-user-avatar {

@@ -30,6 +30,7 @@ import {
   subscribeToMatchdayVotes,
 } from "../../../repositories/matchday_vote_repository";
 import { supabase } from "../../../lib/supabase/client";
+import { withBasePath } from "../../../lib/site";
 import { getMembers } from "../../../repositories/user_repository";
 import { useAuth } from "../auth/AuthProvider";
 import { shouldUseRemoteAppData } from "../../../services/app_data_service";
@@ -525,7 +526,10 @@ async function syncRemoteMatchdayStage({
       stage: "pending",
     });
 
-    if (window.location.pathname === "/matchday" && window.location.search === new URL(nextHref, window.location.origin).search) {
+    if (
+      window.location.pathname === withBasePath("/matchday") &&
+      window.location.search === new URL(nextHref, window.location.origin).search
+    ) {
       window.location.reload();
       return;
     }

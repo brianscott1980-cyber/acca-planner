@@ -2,16 +2,51 @@ export type CustomBetSport = "horse_racing" | "football" | "golf";
 export type CustomBetBookmaker = "Ladbrokes";
 export type CustomBetState = "pending" | "staked";
 
+export type CustomBetRecommendation = {
+  rank: 1 | 2 | 3;
+  market: string;
+  selection: string;
+  decimalOdds: number;
+  summary: string;
+  horseRacing?: {
+    trainer?: string;
+    jockey?: string;
+    silksImagePath?: string;
+    silksSourceUrl?: string;
+    age?: number;
+    weight?: string;
+    officialRating?: number;
+    recentForm?: string;
+    owner?: string;
+  };
+};
+
+export type HorseRacingRival = {
+  name: string;
+  silksImagePath?: string;
+  silksSourceUrl?: string;
+  age?: number;
+  weight?: string;
+  recentForm?: string;
+};
+
 export type HorseRacingCustomBetDetails = {
   racecourse: string;
   raceTimeNote: string;
   horseName: string;
   trainer: string;
   jockey: string;
+  silksImagePath?: string;
+  silksSourceUrl?: string;
+  age?: number;
+  weight?: string;
+  officialRating?: number;
+  recentForm?: string;
+  owner?: string;
   going?: string;
   distance?: string;
   fieldSize?: number;
-  notableRivals: string[];
+  notableRivals: HorseRacingRival[];
 };
 
 export type FootballCustomBetDetails = {
@@ -43,6 +78,7 @@ export type CustomBetRecord = {
   eventName: string;
   competitionName: string;
   bettingFormatRequested: string;
+  proposedBets: CustomBetRecommendation[];
   recommendedMarket: string;
   recommendedSelection: string;
   decimalOdds: number;
@@ -54,6 +90,7 @@ export type CustomBetRecord = {
   generatedAtIso: string;
   eventStartIso: string;
   eventEndIso?: string;
+  suggestedStakeAmount?: number;
   stakeAmount?: number;
   placedDecimalOdds?: number;
   placedAtIso?: string;
