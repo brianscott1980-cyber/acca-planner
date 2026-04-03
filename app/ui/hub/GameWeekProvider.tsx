@@ -525,7 +525,7 @@ async function syncRemoteMatchdayStage({
       stage: "pending",
     });
 
-    if (window.location.pathname === "/matchday/pending/" && window.location.search === new URL(nextHref, window.location.origin).search) {
+    if (window.location.pathname === "/matchday" && window.location.search === new URL(nextHref, window.location.origin).search) {
       window.location.reload();
       return;
     }

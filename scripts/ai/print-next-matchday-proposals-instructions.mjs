@@ -190,6 +190,7 @@ Interpretation rules:
 - Use Ladbrokes odds information only.
 - Exclude leagues, fixtures, and markets outside that scope.
 - Do not write to Supabase, do not run remote sync scripts, and do not update remote tables.
+- When evaluating possible legs, do not rely on prices and recent scores alone. Also check the latest credible context that could positively or negatively affect likely team performance, including team news, club news, manager news, injuries, suspensions, expected absences, rotation risk, tactical changes, fixture congestion, and any other material signal around the team.
 
 Files you may update:
 ${filesBlock}
@@ -212,6 +213,7 @@ Required repo contract:
 - Update market_analysis_snapshots.ts with one Ladbrokes snapshot row for the next matchday.
 - Update market_analysis_selections.ts with the Ladbrokes market rows referenced by the generated bet lines.
 - Update matchday_proposals.ts with exactly three proposals: safe, balanced, aggressive.
+- Each proposal row should include match-specific cashout watch items when credible, so the UI can show exact in-play warnings instead of generic fallback advice.
 - Update matchday_bet_lines.ts so every proposal references ordered bet lines for its chosen markets.
 - Update matchday_forms.ts and matchday_form_matches.ts only if you have enough concrete recent-form evidence to populate them credibly; otherwise leave form rows absent and rely on formNote text instead.
 - When form rows are provided, they must support the UI's visual five-circle row: one circle per recent match, circle background driven by win/draw/loss, and the text inside each circle set to that team's goals scored in that match.
@@ -232,9 +234,10 @@ Proposal construction rules:
 - Exactly one proposal may be marked aiRecommended: true.
 - Choose the recommendation from both market fit and bankroll situation:
   - if recent results are strong and the pot is healthy or growing, the recommendation may lean more aggressive when the odds structure justifies it
-  - if recent results are mixed or the pot is roughly stable, the recommendation should usually stay balanced unless the slate strongly points elsewhere
-  - if the pot is dwindling or recent betting results have been poor, the recommendation should become more protective and prefer the safer profile unless there is a compelling reason not to
+- if recent results are mixed or the pot is roughly stable, the recommendation should usually stay balanced unless the slate strongly points elsewhere
+- if the pot is dwindling or recent betting results have been poor, the recommendation should become more protective and prefer the safer profile unless there is a compelling reason not to
 - Do not recommend a proposal blindly from odds alone. Explain why the selected recommendation fits both the current match slate and the recent bankroll trend.
+- Leg choice and recommendation logic should also reflect whether current team news, club news, manager news, tactical changes, or availability concerns materially increase or reduce confidence in those selections.
 - Status labels must be concise and readable in the UI.
 - Titles must align with the app language, for example "Defensive Accumulator", "Balanced Accumulator", and "Aggressive Accumulator".
 
@@ -260,16 +263,23 @@ Risk and sequencing rules:
 Cashout guidance rules:
 - Every proposal must include cashout guidance that is genuinely specific to that proposal's legs and sequence.
 - Cashout guidance must not be generic boilerplate reused across all three proposals.
-- For each proposal, check the latest credible team news for any clubs used in its legs, including injuries, suspensions, likely absences, rotation risk, and major availability changes.
+- For each proposal, check the latest credible team and club context for any clubs used in its legs, including team news, club news, manager news, injuries, suspensions, likely absences, rotation risk, tactical changes, and major availability changes.
 - Use that team-news context to shape the "what to watch" advice and explain what matters most for that exact strategy during live play.
 - The "what to watch" advice should mention the main in-play patterns that affect cashout relevance for that proposal, such as:
   - whether an early goal improves or weakens the intended slip path
   - whether a slow opening period should make the user more cautious
   - whether missing attackers or defenders materially changes the expected match script
   - whether the proposal depends more on control, clean-sheet security, or open-game goal volume
+- The "what to watch" advice should also include concrete match-level triggers that could change the cashout decision quickly, such as:
+  - an upset brewing in one of the shorter-priced legs
+  - a key player in a proposed leg being substituted, injured, or unexpectedly benched
+  - a tactical shift that weakens the original market angle
+  - visible loss of territory, shots, or control from the side the bet depends on
+  - an in-play pattern that especially hurts a goals leg, such as a defensive lockdown after an early lead
 - Defensive proposals should usually have more protective and earlier-warning cashout advice.
 - Balanced proposals should explain the trade-off between protecting a decent return and letting the strategy's remaining edge play out.
 - Aggressive proposals should still prioritise upside, but they must identify the key negative team-news or in-play signals that would justify taking a cashout instead of letting the full variance ride.
+- Persist the proposal-level cashout watch items directly in matchday_proposals.ts when the repo shape supports it.
 
 Selection quality rules:
 - Consider goals-based Ladbrokes markets and match-outcome markets equally when building proposed legs.
@@ -277,6 +287,7 @@ Selection quality rules:
 - Do not use exact-score, correct-score, winning-margin, or other highly specific result markets.
 - Avoid obviously contradictory combinations across the three proposals.
 - Do not stuff every proposal with the same legs unless the price structure makes that unavoidable.
+- Treat meaningful team, club, and manager developments as part of the selection screen. If credible news materially weakens confidence in a leg, prefer a different market or fixture rather than ignoring it.
 - Summaries and aiReasoning text should explain why the market fits the slip profile, not just restate the selection.
 - Keep proposal summaries concise but specific about price, sequencing, and weekend context.
 - For the single aiRecommended proposal, the summary or aiReasoning should also make clear why that option suits the current pot level and the recent betting trend.

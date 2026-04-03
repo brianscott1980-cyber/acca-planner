@@ -127,7 +127,7 @@ export function getMatchdayHref({
   const encodedMatchday = encodeURIComponent(
     matchdayNumber ? String(matchdayNumber) : gameWeekId,
   );
-  const basePathname = stage === "pending" ? "/matchday/pending/" : "/matchday/";
+  const basePathname = "/matchday/";
 
   return `${basePathname}?matchday=${encodedMatchday}`;
 }
@@ -383,7 +383,7 @@ export function getCashoutStrategy(
       lowerTarget: formatWholeCurrency(projectedReturn * 0.42),
       upperTarget: formatWholeCurrency(projectedReturn * 0.68),
       noCashoutValue: formatWholeCurrency(projectedReturn),
-      watchList: [
+      watchList: proposal.cashoutWatchList ?? [
         "Protect the slip if the first two shorter-price legs land and late team news weakens the final leg.",
         "Watch for heavy rotation, especially around televised kick-offs and squads coming off midweek matches.",
         "An early red card in any favourite-heavy leg is the main reason to take a sensible cashout sooner.",
@@ -396,7 +396,7 @@ export function getCashoutStrategy(
       lowerTarget: formatWholeCurrency(projectedReturn * 0.3),
       upperTarget: formatWholeCurrency(projectedReturn * 0.54),
       noCashoutValue: formatWholeCurrency(projectedReturn),
-      watchList: [
+      watchList: proposal.cashoutWatchList ?? [
         "Reassess after the first two legs; this profile is strongest when you bank value before the bigger leg swings begin.",
         "Keep an eye on in-play xG and dominance rather than just scorelines when deciding whether the cashout is fair.",
         "If the highest-priced leg drifts badly before kick-off, the safer move is often to lock in a mid-range return.",
@@ -408,7 +408,7 @@ export function getCashoutStrategy(
     lowerTarget: formatWholeCurrency(projectedReturn * 0.18),
     upperTarget: formatWholeCurrency(projectedReturn * 0.4),
     noCashoutValue: formatWholeCurrency(projectedReturn),
-    watchList: [
+    watchList: proposal.cashoutWatchList ?? [
       "This slip is return-led, so avoid cashing too early unless one of the high-price legs becomes materially weaker in-play.",
       "Look out for favourites losing control of territory or shots volume; that is usually the best signal to trim risk.",
       "If the cashout jumps sharply after an early aggressive leg lands, only take it when the remaining upside no longer justifies the swing.",

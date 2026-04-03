@@ -59,6 +59,7 @@ export type GameWeekProposalRecord = {
   legs: number;
   betLines: ProposalBetLineRecord[];
   statusLabel: string;
+  cashoutWatchList?: string[];
   aiRecommended?: boolean;
 };
 
@@ -117,6 +118,7 @@ export type MatchdayProposalRecord = {
   summary: string;
   legs: number;
   statusLabel: string;
+  cashoutWatchList?: string[];
   aiRecommended?: boolean;
   betLineIds: string[];
 };

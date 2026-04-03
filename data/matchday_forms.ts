@@ -2,27 +2,27 @@ import type { MatchdayFormRecord } from "../types/matchday_type";
 
 export const matchdayForms: MatchdayFormRecord[] = [
   {
-    id: "md-1-form-bayern-freiburg",
+    id: "form-md-1-freiburg-bayern",
     gameWeekId: "md-1",
-    proposalId: "md-1-proposal-safe",
-    betLineId: "md-1-safe-line-1",
+    proposalId: "proposal-md-1-safe",
+    betLineId: "betline-md-1-safe-bayern-win",
   },
   {
-    id: "md-1-form-mallorca-real-madrid",
+    id: "form-md-1-leverkusen-wolfsburg",
     gameWeekId: "md-1",
-    proposalId: "md-1-proposal-safe",
-    betLineId: "md-1-safe-line-2",
+    proposalId: "proposal-md-1-safe",
+    betLineId: "betline-md-1-safe-leverkusen-win",
   },
   {
-    id: "md-1-form-inter-roma",
+    id: "form-md-1-mallorca-real",
     gameWeekId: "md-1",
-    proposalId: "md-1-proposal-safe",
-    betLineId: "md-1-safe-line-3",
+    proposalId: "proposal-md-1-balanced",
+    betLineId: "betline-md-1-balanced-real-win",
   },
   {
-    id: "md-1-form-leverkusen-wolfsburg",
+    id: "form-md-1-inter-roma",
     gameWeekId: "md-1",
-    proposalId: "md-1-proposal-balanced",
-    betLineId: "md-1-balanced-line-2",
+    proposalId: "proposal-md-1-safe",
+    betLineId: "betline-md-1-safe-inter-win",
   },
 ];

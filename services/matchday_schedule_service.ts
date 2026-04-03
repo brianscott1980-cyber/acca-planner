@@ -53,6 +53,7 @@ function composeProposalRecord(
     summary: proposal.summary,
     legs: proposal.legs,
     statusLabel: proposal.statusLabel,
+    cashoutWatchList: proposal.cashoutWatchList,
     aiRecommended: proposal.aiRecommended,
     betLines: proposalBetLines.map((betLine) => composeBetLineRecord(betLine)),
   };
