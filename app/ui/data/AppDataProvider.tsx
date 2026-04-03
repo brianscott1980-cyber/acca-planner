@@ -83,15 +83,18 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
   if (isLoading) {
     return (
       <section className="auth-shell">
-        <div className="auth-card hub-panel">
-          <div style={{ display: "flex", justifyContent: "center", marginBottom: "1.25rem" }}>
-            <Image
-              src={withBasePath("/assets/app_logos/logo_512px.png")}
-              alt="Caddyshack logo"
-              width={300}
-              height={300}
-              priority
-            />
+        <div className="auth-card hub-panel hub-loading-card">
+          <div className="hub-loading-logo-wrap">
+            <div className="hub-loading-logo-frame">
+              <Image
+                className="hub-loading-logo-image"
+                src={withBasePath("/assets/app_logos/logo_512px.png")}
+                alt="Caddyshack logo"
+                width={512}
+                height={512}
+                priority
+              />
+            </div>
           </div>
           <h1 className="hub-title">Loading syndicate data</h1>
           <p className="hub-subtitle">Loading the latest syndicate data.</p>

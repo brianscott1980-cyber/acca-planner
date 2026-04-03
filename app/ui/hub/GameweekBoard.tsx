@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import {
   ChevronLeft,
   ChevronRight,
   Clock3,
   Crown,
+  Flag,
   Flame,
   Receipt,
   Scale,
@@ -47,6 +48,7 @@ import {
 import { useAuth } from "../auth/AuthProvider";
 import { useCurrentGameWeek } from "./GameWeekProvider";
 import { MatchBetSummaryRow } from "./MatchBetSummaryRow";
+import { markMatchdayBetAsPlaced } from "../../../services/matchday_admin_service";
 
 type GameweekBoardProps = {
   decidedProposal?: GameWeekProposalRecord | null;
@@ -412,6 +414,9 @@ function AccumulatorCard({
   const [expandedSectionId, setExpandedSectionId] = useState<string | null>(
     null,
   );
+  const { member: currentUser } = useAuth();
+  const { refreshCurrentGameWeek } = useCurrentGameWeek();
+  const isAdminUser = currentUser?.role === "admin";
   const orderedBetLines = getOrderedBetLines(card);
   const cashoutStrategy = getCashoutStrategy(gameWeek, card);
   const members = getMembers();
@@ -421,6 +426,24 @@ function AccumulatorCard({
     votingLocked && simulation?.simulatedSlip.proposalId === card.id
       ? simulation.simulatedSlip.stake
       : getRecommendedStake(gameWeek, card);
+  const currentPlacedDecimalOdds =
+    votingLocked && simulation?.simulatedSlip.proposalId === card.id
+      ? simulation.simulatedSlip.placedDecimalOdds
+      : undefined;
+  const isAwaitingAdminPlacement =
+    viewState === "locked" &&
+    simulation?.selectedProposalId === card.id &&
+    isAdminUser;
+  const [stakeAmount, setStakeAmount] = useState(() => actualStake.toFixed(2));
+  const [placedDecimalOdds, setPlacedDecimalOdds] = useState(() =>
+    Number.parseFloat(getProposalDisplayOdds(card)).toFixed(2),
+  );
+  const [placedAt, setPlacedAt] = useState(() =>
+    toDateTimeLocalValue(new Date().toISOString()),
+  );
+  const [placementStatusMessage, setPlacementStatusMessage] = useState<string | null>(null);
+  const [placementErrorMessage, setPlacementErrorMessage] = useState<string | null>(null);
+  const [isSubmittingPlacement, setIsSubmittingPlacement] = useState(false);
   const Icon =
     card.riskLevel === "safe"
       ? Shield
@@ -542,6 +565,46 @@ function AccumulatorCard({
       ) : null}
     </div>
   );
+  const handleMarkPlaced = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    const nextStakeAmount = Number.parseFloat(stakeAmount);
+    const nextPlacedDecimalOdds = Number.parseFloat(placedDecimalOdds);
+    const nextPlacedAtIso = fromDateTimeLocalValue(placedAt);
+
+    if (
+      !Number.isFinite(nextStakeAmount) ||
+      nextStakeAmount <= 0 ||
+      !Number.isFinite(nextPlacedDecimalOdds) ||
+      nextPlacedDecimalOdds <= 1 ||
+      !nextPlacedAtIso
+    ) {
+      setPlacementErrorMessage("Enter a valid stake, odds, and placement date/time.");
+      return;
+    }
+
+    setIsSubmittingPlacement(true);
+    setPlacementStatusMessage(null);
+    setPlacementErrorMessage(null);
+
+    try {
+      await markMatchdayBetAsPlaced({
+        gameWeekId: gameWeek.id,
+        stakeAmount: nextStakeAmount,
+        placedDecimalOdds: nextPlacedDecimalOdds,
+        placedAtIso: nextPlacedAtIso,
+      });
+
+      setPlacementStatusMessage("Matchday bet marked as placed.");
+      refreshCurrentGameWeek();
+    } catch (error) {
+      setPlacementErrorMessage(
+        error instanceof Error ? error.message : "Failed to update the matchday bet.",
+      );
+    } finally {
+      setIsSubmittingPlacement(false);
+    }
+  };
 
   return (
     <article className={`hub-proposal-card${selected ? " is-selected" : ""}`}>
@@ -705,6 +768,20 @@ function AccumulatorCard({
                   {getProposalDisplayOdds(card)}
                 </span>
               </div>
+              {currentPlacedDecimalOdds !== undefined ? (
+                <div>
+                  <span className="hub-metric-label">Placed Odds</span>
+                  <span className="hub-metric-value">{currentPlacedDecimalOdds.toFixed(2)}</span>
+                </div>
+              ) : null}
+              {currentPlacedDecimalOdds !== undefined ? (
+                <div>
+                  <span className="hub-metric-label">Placed At</span>
+                  <span className="hub-metric-value">
+                    {formatPlacedAt(simulation?.simulatedSlip.stakePlacedAt ?? "")}
+                  </span>
+                </div>
+              ) : null}
             </div>
 
             <div className="hub-consensus-inline-panel">
@@ -713,6 +790,67 @@ function AccumulatorCard({
                 votesByUserId={consensusVotesByUserId}
               />
             </div>
+
+            {isAwaitingAdminPlacement ? (
+              <div className="hub-consensus-inline-panel">
+                <div className="hub-panel-title-row">
+                  <Flag size={18} />
+                  <h2 className="hub-panel-title">Admin Placement</h2>
+                </div>
+                <p className="hub-subtitle">
+                  Record the actual stake, placed odds, and placement time to move this matchday into the placed state.
+                </p>
+                <form className="auth-form" onSubmit={handleMarkPlaced}>
+                  <label className="auth-field">
+                    <span className="hub-label">Actual Stake</span>
+                    <input
+                      className="auth-input"
+                      type="number"
+                      min="0.01"
+                      step="0.01"
+                      value={stakeAmount}
+                      onChange={(event) => setStakeAmount(event.target.value)}
+                      required
+                    />
+                  </label>
+                  <label className="auth-field">
+                    <span className="hub-label">Placed Odds</span>
+                    <input
+                      className="auth-input"
+                      type="number"
+                      min="1.01"
+                      step="0.01"
+                      value={placedDecimalOdds}
+                      onChange={(event) => setPlacedDecimalOdds(event.target.value)}
+                      required
+                    />
+                  </label>
+                  <label className="auth-field">
+                    <span className="hub-label">Placed At</span>
+                    <input
+                      className="auth-input"
+                      type="datetime-local"
+                      value={placedAt}
+                      onChange={(event) => setPlacedAt(event.target.value)}
+                      required
+                    />
+                  </label>
+                  <button
+                    className={`hub-primary-button hub-primary-button-${card.riskLevel}`}
+                    type="submit"
+                    disabled={isSubmittingPlacement}
+                  >
+                    {isSubmittingPlacement ? "Saving..." : "Mark Bet Placed"}
+                  </button>
+                </form>
+                {placementStatusMessage ? (
+                  <p className="auth-status auth-status-success">{placementStatusMessage}</p>
+                ) : null}
+                {placementErrorMessage ? (
+                  <p className="auth-status auth-status-error">{placementErrorMessage}</p>
+                ) : null}
+              </div>
+            ) : null}
           </aside>
         </div>
       ) : (
@@ -845,7 +983,9 @@ function getMatchdayBannerCopy({
   }
 
   if (viewState === "placed") {
-    return `Stake committed: £${simulatedSlip?.stake.toFixed(2) ?? "0.00"}. The open legs now determine whether this matchday reaches a full result or an earlier cashout.`;
+    return `Stake committed: £${simulatedSlip?.stake.toFixed(2) ?? "0.00"}${
+      simulatedSlip?.placedDecimalOdds ? ` at ${simulatedSlip.placedDecimalOdds.toFixed(2)}` : ""
+    }. The open legs now determine whether this matchday reaches a full result or an earlier cashout.`;
   }
 
   if (!simulatedSlip) {
@@ -1003,6 +1143,50 @@ function getDisplayedBetLineState({
     status: "ended",
     label: "Ended",
   };
+}
+
+function toDateTimeLocalValue(isoValue: string) {
+  const date = new Date(isoValue);
+
+  if (Number.isNaN(date.getTime())) {
+    return "";
+  }
+
+  const offsetMs = date.getTimezoneOffset() * 60 * 1000;
+  return new Date(date.getTime() - offsetMs).toISOString().slice(0, 16);
+}
+
+function fromDateTimeLocalValue(value: string) {
+  if (!value) {
+    return "";
+  }
+
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return "";
+  }
+
+  return date.toISOString();
+}
+
+function formatPlacedAt(isoValue: string) {
+  const date = new Date(isoValue);
+
+  if (Number.isNaN(date.getTime())) {
+    return "N/A";
+  }
+
+  return new Intl.DateTimeFormat("en-GB", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+    timeZone: "Europe/London",
+    timeZoneName: "short",
+  }).format(date);
 }
 
 function getDisplayedVotesByUserId({

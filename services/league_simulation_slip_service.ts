@@ -25,6 +25,7 @@ export function getSimulationSlipRecord(slipId: string): LeagueSimulationSlipRec
     proposalId: slipRow.proposalId,
     timelineLabel: slipRow.timelineLabel,
     stake: slipRow.stake,
+    placedDecimalOdds: slipRow.placedDecimalOdds,
     stakePlacedAt: slipRow.stakePlacedAt,
     settledAt: slipRow.settledAt,
     settlementKind: slipRow.settlementKind,

@@ -234,6 +234,7 @@ create table if not exists public.league_data_slips (
   proposal_id text,
   timeline_label text,
   stake numeric(12, 2),
+  placed_decimal_odds numeric(10, 2),
   stake_placed_at timestamptz,
   settled_at timestamptz,
   settlement_kind text check (settlement_kind in ('settled', 'cashout')),

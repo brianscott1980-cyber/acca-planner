@@ -389,6 +389,7 @@ const DATASETS = [
       "proposalId",
       "timelineLabel",
       "stake",
+      "placedDecimalOdds",
       "stakePlacedAt",
       "settledAt",
       "settlementKind",
@@ -410,6 +411,7 @@ const DATASETS = [
     ],
     columns: {
       stake: { type: "numeric(12, 2)" },
+      placedDecimalOdds: { type: "numeric(10, 2)" },
       stakePlacedAt: { type: "timestamptz" },
       settledAt: { type: "timestamptz" },
       settlementKind: { type: "text", check: ["settled", "cashout"] },

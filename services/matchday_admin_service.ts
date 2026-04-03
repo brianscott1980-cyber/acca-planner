@@ -1,4 +1,7 @@
-import { persistEndedMatchdayVotingRemote } from "../repositories/matchday_admin_repository";
+import {
+  persistEndedMatchdayVotingRemote,
+  persistPlacedMatchdayBetRemote,
+} from "../repositories/matchday_admin_repository";
 import {
   getCurrentAppDataSnapshot,
   setCurrentAppDataSnapshot,
@@ -106,6 +109,83 @@ export async function endMatchdayVoting(gameWeek: GameWeekRecord) {
   };
 }
 
+export async function markMatchdayBetAsPlaced({
+  gameWeekId,
+  stakeAmount,
+  placedDecimalOdds,
+  placedAtIso,
+}: {
+  gameWeekId: string;
+  stakeAmount: number;
+  placedDecimalOdds: number;
+  placedAtIso: string;
+}) {
+  const currentSnapshot = getCurrentAppDataSnapshot();
+  const existingSimulationRow =
+    currentSnapshot.leagueDataMatchdaySimulations.find(
+      (simulationRow) => simulationRow.gameWeekId === gameWeekId,
+    ) ?? null;
+  const existingSlipRow =
+    currentSnapshot.leagueDataSlips.find((slipRow) => slipRow.gameWeekId === gameWeekId) ??
+    null;
+
+  if (!existingSimulationRow || !existingSlipRow) {
+    throw new Error("No locked matchday slip is available to mark as placed.");
+  }
+
+  const placedAtMs = new Date(placedAtIso).getTime();
+
+  if (!Number.isFinite(placedAtMs)) {
+    throw new Error("A valid placement date/time is required.");
+  }
+
+  const nowIso = new Date().toISOString();
+  const metaBase = currentSnapshot.leagueDataMeta[0];
+  const metaRow: LeagueDataMetaRecord = {
+    id: metaBase?.id ?? "primary",
+    simulatedAtIso: metaBase?.simulatedAtIso ?? nowIso,
+    updatedAtIso: nowIso,
+  };
+  const simulationRow: LeagueMatchdaySimulationRow = {
+    ...existingSimulationRow,
+    betPlacedAtIso: placedAtIso,
+  };
+  const slipSettlementMs = new Date(existingSlipRow.settledAt).getTime();
+  const nextSettledAtIso =
+    Number.isFinite(slipSettlementMs) && slipSettlementMs > placedAtMs
+      ? existingSlipRow.settledAt
+      : new Date(placedAtMs + LOCKED_STAGE_BUFFER_MS).toISOString();
+  const slipRow: LeagueSimulationSlipRow = {
+    ...existingSlipRow,
+    stake: stakeAmount,
+    placedDecimalOdds,
+    stakePlacedAt: placedAtIso,
+    settledAt: nextSettledAtIso,
+  };
+
+  if (shouldUseRemoteAppData()) {
+    await persistPlacedMatchdayBetRemote({
+      metaRow,
+      simulationRow,
+      slipRow,
+    });
+  }
+
+  const nextSnapshot = applyPlacedBetToSnapshot({
+    snapshot: currentSnapshot,
+    metaRow,
+    simulationRow,
+    slipRow,
+  });
+
+  setCurrentAppDataSnapshot(nextSnapshot);
+
+  return {
+    simulationRow,
+    slipRow,
+  };
+}
+
 function getSelectedProposalForEndedVoting(gameWeek: GameWeekRecord) {
   const voteCounts = new Map<string, number>();
 
@@ -173,6 +253,28 @@ function applyEndedVotingToSnapshot({
       ),
       ...voteRows,
     ],
+  };
+}
+
+function applyPlacedBetToSnapshot({
+  snapshot,
+  metaRow,
+  simulationRow,
+  slipRow,
+}: {
+  snapshot: AppDataSnapshot;
+  metaRow: LeagueDataMetaRecord;
+  simulationRow: LeagueMatchdaySimulationRow;
+  slipRow: LeagueSimulationSlipRow;
+}) {
+  return {
+    ...snapshot,
+    leagueDataMeta: upsertById(snapshot.leagueDataMeta, metaRow),
+    leagueDataMatchdaySimulations: upsertById(
+      snapshot.leagueDataMatchdaySimulations,
+      simulationRow,
+    ),
+    leagueDataSlips: upsertById(snapshot.leagueDataSlips, slipRow),
   };
 }
 

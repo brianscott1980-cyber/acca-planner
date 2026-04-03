@@ -247,10 +247,11 @@ function applySimulationToGameWeek(gameWeek: GameWeekRecord) {
     })),
     votesByUserId: voteResolved ? simulation.votesByUserId : {},
     simulatedSlip: stakePlaced
-      ? {
+        ? {
           proposalId: simulation.simulatedSlip.proposalId,
           timelineLabel: simulation.simulatedSlip.timelineLabel,
           stake: simulation.simulatedSlip.stake,
+          placedDecimalOdds: simulation.simulatedSlip.placedDecimalOdds,
           stakePlacedAt: simulation.simulatedSlip.stakePlacedAt,
           settledAt: simulation.simulatedSlip.settledAt,
           settlementKind: simulation.simulatedSlip.settlementKind,

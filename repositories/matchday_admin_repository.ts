@@ -76,6 +76,48 @@ export async function persistEndedMatchdayVotingRemote({
   }
 }
 
+export async function persistPlacedMatchdayBetRemote({
+  metaRow,
+  simulationRow,
+  slipRow,
+}: {
+  metaRow: LeagueDataMetaRecord;
+  simulationRow: LeagueMatchdaySimulationRow;
+  slipRow: LeagueSimulationSlipRow;
+}) {
+  if (!supabase) {
+    throw new Error("Supabase is not configured.");
+  }
+
+  const { error: metaError } = await supabase
+    .from("league_data_meta")
+    .upsert(mapKeysToSnakeCase(metaRow), { onConflict: "id" });
+
+  if (metaError) {
+    throw new Error(`Failed to update league data meta: ${metaError.message}`);
+  }
+
+  const { error: simulationError } = await supabase
+    .from("league_data_matchday_simulations")
+    .upsert(mapKeysToSnakeCase(simulationRow), { onConflict: "id" });
+
+  if (simulationError) {
+    throw new Error(
+      `Failed to update matchday simulation for ${simulationRow.gameWeekId}: ${simulationError.message}`,
+    );
+  }
+
+  const { error: slipError } = await supabase
+    .from("league_data_slips")
+    .upsert(mapKeysToSnakeCase(slipRow), { onConflict: "id" });
+
+  if (slipError) {
+    throw new Error(
+      `Failed to update matchday slip for ${simulationRow.gameWeekId}: ${slipError.message}`,
+    );
+  }
+}
+
 function mapKeysToSnakeCase<TValue>(value: TValue): TValue {
   if (Array.isArray(value)) {
     return value.map((entry) => mapKeysToSnakeCase(entry)) as TValue;

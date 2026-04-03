@@ -51,6 +51,7 @@ type GameWeekContextValue = {
   castVote: (proposalId: string) => void;
   clearVote: () => void;
   endVoting: () => Promise<void>;
+  refreshCurrentGameWeek: () => void;
   isEndingVote: boolean;
   voteSimulationStatus: VoteSimulationStatus;
   voteSimulationResult: VoteSimulationResult | null;
@@ -398,6 +399,9 @@ export function GameWeekProvider({
         } finally {
           setIsEndingVote(false);
         }
+      },
+      refreshCurrentGameWeek() {
+        setCurrentGameWeek(getInitialGameWeekState(loggedInUserId, currentGameWeek.id));
       },
       isEndingVote,
       voteSimulationStatus,

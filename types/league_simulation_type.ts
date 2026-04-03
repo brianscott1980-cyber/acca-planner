@@ -41,6 +41,7 @@ export type LeagueSimulationSlipRow = {
   proposalId: string;
   timelineLabel: string;
   stake: number;
+  placedDecimalOdds?: number;
   stakePlacedAt: string;
   settledAt: string;
   settlementKind: "settled" | "cashout";
@@ -75,6 +76,7 @@ export type LeagueSimulationSlipRecord = {
   proposalId: string;
   timelineLabel: string;
   stake: number;
+  placedDecimalOdds?: number;
   stakePlacedAt: string;
   settledAt: string;
   settlementKind: "settled" | "cashout";

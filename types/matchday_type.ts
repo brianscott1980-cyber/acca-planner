@@ -33,6 +33,7 @@ export type SimulatedSlipRecord = {
   proposalId: string;
   timelineLabel: string;
   stake: number;
+  placedDecimalOdds?: number;
   stakePlacedAt: string;
   settledAt: string;
   settlementKind: "settled" | "cashout";
