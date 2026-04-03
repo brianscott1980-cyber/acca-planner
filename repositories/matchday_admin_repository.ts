@@ -7,6 +7,7 @@ import type {
   LeagueMatchdayVoteRow,
   LeagueSimulationSlipRow,
 } from "../types/league_simulation_type";
+import type { LedgerTransactionRecord } from "../types/ledger_type";
 
 export async function persistEndedMatchdayVotingRemote({
   gameWeekId,
@@ -80,10 +81,12 @@ export async function persistPlacedMatchdayBetRemote({
   metaRow,
   simulationRow,
   slipRow,
+  ledgerTransactionRow,
 }: {
   metaRow: LeagueDataMetaRecord;
   simulationRow: LeagueMatchdaySimulationRow;
   slipRow: LeagueSimulationSlipRow;
+  ledgerTransactionRow: LedgerTransactionRecord;
 }) {
   if (!supabase) {
     throw new Error("Supabase is not configured.");
@@ -114,6 +117,16 @@ export async function persistPlacedMatchdayBetRemote({
   if (slipError) {
     throw new Error(
       `Failed to update matchday slip for ${simulationRow.gameWeekId}: ${slipError.message}`,
+    );
+  }
+
+  const { error: ledgerError } = await supabase
+    .from("ledger_transactions")
+    .upsert(mapKeysToSnakeCase(ledgerTransactionRow), { onConflict: "id" });
+
+  if (ledgerError) {
+    console.error(
+      `Failed to upsert ledger transaction for ${simulationRow.gameWeekId}: ${ledgerError.message}`,
     );
   }
 }

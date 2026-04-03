@@ -19,6 +19,10 @@ export function setCurrentLedgerTransactions(
   transactions: LedgerTransactionRecord[],
 ) {
   currentLedgerTransactions = transactions;
+
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new Event("ledger-transactions-updated"));
+  }
 }
 
 export function getLedgerSummary() {

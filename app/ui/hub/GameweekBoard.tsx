@@ -598,6 +598,7 @@ function AccumulatorCard({
         stakeAmount: nextStakeAmount,
         placedDecimalOdds: nextPlacedDecimalOdds,
         placedAtIso: nextPlacedAtIso,
+        placedByDisplayName: currentUser?.displayName,
       });
 
       setPlacementStatusMessage("Matchday bet marked as placed.");
@@ -759,7 +760,7 @@ function AccumulatorCard({
                 onClick={() => setIsPlacementDialogOpen(true)}
               >
                 <Flag size={16} />
-                Market Bet Placed
+                Mark Bet Placed
               </button>
             ) : null}
 
@@ -835,7 +836,7 @@ function AccumulatorCard({
             <div className="hub-modal-header hub-transactions-modal-header">
               <div>
                 <h2 id={`matchday-placement-title-${card.id}`} className="hub-panel-title">
-                  Market Bet Placed
+                  Mark Bet Placed
                 </h2>
                 <p className="hub-subtitle">
                   Record the actual stake, placed odds, and placement time to move this
@@ -846,7 +847,7 @@ function AccumulatorCard({
               <button
                 className="hub-icon-button hub-transactions-modal-close"
                 type="button"
-                aria-label="Close Market Bet Placed dialog"
+                aria-label="Close Mark Bet Placed dialog"
                 onClick={() => setIsPlacementDialogOpen(false)}
               >
                 <X size={18} />
@@ -893,7 +894,7 @@ function AccumulatorCard({
                 type="submit"
                 disabled={isSubmittingPlacement}
               >
-                {isSubmittingPlacement ? "Saving..." : "Market Bet Placed"}
+                {isSubmittingPlacement ? "Saving..." : "Mark Bet Placed"}
               </button>
             </form>
             {placementStatusMessage ? (

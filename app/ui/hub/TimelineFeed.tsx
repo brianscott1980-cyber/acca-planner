@@ -109,7 +109,6 @@ function buildTimelineEntries(): TimelineEntry[] {
 
   return [
     ...getVisibleGameWeekTimelineRecords().flatMap(({ gameWeek, proposal, simulation }) => {
-      const proposalOdds = Number.parseFloat(getProposalDisplayOdds(proposal));
       const voteCount = Object.values(simulation.votesByUserId).filter(
         (vote) => vote === simulation.selectedProposalId,
       ).length;
@@ -131,7 +130,18 @@ function buildTimelineEntries(): TimelineEntry[] {
       const entries = [votedEntry];
 
       if (new Date(simulation.simulatedSlip.stakePlacedAt).getTime() <= simulatedNow) {
-        const submitter = getTimelineSubmitter(members, `${gameWeek.id}:placed`);
+        const placedDecimalOdds = simulation.simulatedSlip.placedDecimalOdds;
+        const hasPlacedDecimalOdds =
+          typeof placedDecimalOdds === "number" && Number.isFinite(placedDecimalOdds);
+        const displayOdds = hasPlacedDecimalOdds
+          ? placedDecimalOdds.toFixed(2)
+          : getProposalDisplayOdds(proposal);
+        const effectiveOdds = hasPlacedDecimalOdds
+          ? placedDecimalOdds
+          : Number.parseFloat(getProposalDisplayOdds(proposal));
+        const submitterName =
+          getStakeSubmitterNameForMatchday(gameWeek.id) ??
+          getTimelineSubmitter(members, `${gameWeek.id}:placed`).displayName;
 
         entries.push({
           id: `${gameWeek.id}-placed`,
@@ -144,16 +154,16 @@ function buildTimelineEntries(): TimelineEntry[] {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2,
           }),
-          odds: getProposalDisplayOdds(proposal),
+          odds: displayOdds,
           oddsLabel: "Odds",
           returnLabel: "Potential",
-          returnValue: formatCurrency(simulation.simulatedSlip.stake * proposalOdds, {
+          returnValue: formatCurrency(simulation.simulatedSlip.stake * effectiveOdds, {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2,
           }),
           infoLabel: "Submitter",
-          infoAvatarLabel: getUserInitials(submitter.displayName),
-          infoAvatarTitle: submitter.displayName,
+          infoAvatarLabel: getUserInitials(submitterName),
+          infoAvatarTitle: submitterName,
           outcomeLabel: "Placed",
           timestampIso: simulation.simulatedSlip.stakePlacedAt,
           matchdayId: gameWeek.id,
@@ -162,6 +172,15 @@ function buildTimelineEntries(): TimelineEntry[] {
       }
 
       if (new Date(simulation.simulatedSlip.settledAt).getTime() <= simulatedNow) {
+        const placedDecimalOdds = simulation.simulatedSlip.placedDecimalOdds;
+        const hasPlacedDecimalOdds =
+          typeof placedDecimalOdds === "number" && Number.isFinite(placedDecimalOdds);
+        const displayOdds = hasPlacedDecimalOdds
+          ? placedDecimalOdds.toFixed(2)
+          : getProposalDisplayOdds(proposal);
+        const effectiveOdds = hasPlacedDecimalOdds
+          ? placedDecimalOdds
+          : Number.parseFloat(getProposalDisplayOdds(proposal));
         const returnTone =
           simulation.simulatedSlip.settlementKind === "cashout"
             ? getCashoutReturnTone(
@@ -182,10 +201,10 @@ function buildTimelineEntries(): TimelineEntry[] {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2,
           }),
-          odds: getProposalDisplayOdds(proposal),
+          odds: displayOdds,
           potentialLabel: "Potential",
           potentialValue: formatCurrency(
-            simulation.simulatedSlip.stake * proposalOdds,
+            simulation.simulatedSlip.stake * effectiveOdds,
             {
               minimumFractionDigits: 2,
               maximumFractionDigits: 2,
@@ -717,6 +736,22 @@ function getTimelineSubmitter(
 ) {
   const memberIndex = getTimelineSeedHash(seedInput) % Math.max(members.length, 1);
   return members[memberIndex] ?? members[0];
+}
+
+function getStakeSubmitterNameForMatchday(gameWeekId: string) {
+  const latestStake = [...getCurrentLedgerTransactions()]
+    .filter((entry) => entry.kind === "stake" && entry.gameWeekId === gameWeekId)
+    .sort(
+      (left, right) =>
+        new Date(right.dateIso).getTime() - new Date(left.dateIso).getTime(),
+    )[0];
+
+  if (!latestStake) {
+    return null;
+  }
+
+  const matchedName = latestStake.title.match(/^(.*)\s+Market Bet Placed$/i)?.[1]?.trim();
+  return matchedName && matchedName.length > 0 ? matchedName : null;
 }
 
 function getTimelineSeedHash(value: string) {

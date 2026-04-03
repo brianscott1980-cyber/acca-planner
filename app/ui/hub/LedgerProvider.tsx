@@ -66,10 +66,15 @@ export function LedgerProvider({ children }: { children: ReactNode }) {
 
     void syncTransactions();
     const unsubscribe = subscribeToLedgerTransactions(syncTransactions);
+    const handleLocalLedgerUpdate = () => {
+      setTransactions(getCurrentLedgerTransactions());
+    };
+    window.addEventListener("ledger-transactions-updated", handleLocalLedgerUpdate);
 
     return () => {
       isActive = false;
       unsubscribe();
+      window.removeEventListener("ledger-transactions-updated", handleLocalLedgerUpdate);
     };
   }, [authUser, isConfigured, isRemoteData]);
 

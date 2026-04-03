@@ -291,7 +291,7 @@ function CustomBetView({ customBet }: { customBet: CustomBetRecord }) {
                 onClick={() => setIsPlacementDialogOpen(true)}
               >
                 <Flag size={16} />
-                Market Bet Placed
+                Mark Bet Placed
               </button>
             ) : null}
 
@@ -433,7 +433,7 @@ function CustomBetView({ customBet }: { customBet: CustomBetRecord }) {
                   id={`custom-bet-placement-title-${currentCustomBet.id}`}
                   className="hub-panel-title"
                 >
-                  Market Bet Placed
+                  Mark Bet Placed
                 </h2>
                 <p className="hub-subtitle">
                   Record the actual stake, placed odds, and placement time to move this
@@ -444,7 +444,7 @@ function CustomBetView({ customBet }: { customBet: CustomBetRecord }) {
               <button
                 className="hub-icon-button hub-transactions-modal-close"
                 type="button"
-                aria-label="Close Market Bet Placed dialog"
+                aria-label="Close Mark Bet Placed dialog"
                 onClick={() => setIsPlacementDialogOpen(false)}
               >
                 <X size={18} />
@@ -491,7 +491,7 @@ function CustomBetView({ customBet }: { customBet: CustomBetRecord }) {
                 type="submit"
                 disabled={isSubmitting}
               >
-                {isSubmitting ? "Saving..." : "Market Bet Placed"}
+                {isSubmitting ? "Saving..." : "Mark Bet Placed"}
               </button>
             </form>
             {statusMessage ? (

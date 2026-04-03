@@ -8,6 +8,7 @@ import {
   shouldUseRemoteAppData,
 } from "./app_data_service";
 import { getRecommendedStake } from "./game_week_service";
+import { setCurrentLedgerTransactions } from "./ledger_service";
 import type { AppDataSnapshot } from "../types/app_data_type";
 import type {
   LeagueDataMetaRecord,
@@ -16,6 +17,7 @@ import type {
   LeagueSimulationSlipRow,
 } from "../types/league_simulation_type";
 import type { GameWeekProposalRecord, GameWeekRecord } from "../types/matchday_type";
+import type { LedgerTransactionRecord } from "../types/ledger_type";
 
 const LOCKED_STAGE_BUFFER_MS = 1000 * 60 * 60 * 24 * 7;
 const LOCKED_SETTLEMENT_BUFFER_MS = LOCKED_STAGE_BUFFER_MS * 2;
@@ -114,11 +116,13 @@ export async function markMatchdayBetAsPlaced({
   stakeAmount,
   placedDecimalOdds,
   placedAtIso,
+  placedByDisplayName,
 }: {
   gameWeekId: string;
   stakeAmount: number;
   placedDecimalOdds: number;
   placedAtIso: string;
+  placedByDisplayName?: string;
 }) {
   const currentSnapshot = getCurrentAppDataSnapshot();
   const existingSimulationRow =
@@ -162,12 +166,28 @@ export async function markMatchdayBetAsPlaced({
     stakePlacedAt: placedAtIso,
     settledAt: nextSettledAtIso,
   };
+  const existingStakeLedgerRow =
+    currentSnapshot.ledgerData.find(
+      (entry) => entry.kind === "stake" && entry.gameWeekId === gameWeekId,
+    ) ?? null;
+  const ledgerTransactionRow: LedgerTransactionRecord = {
+    id: existingStakeLedgerRow?.id ?? `stake-${gameWeekId}`,
+    title: placedByDisplayName
+      ? `${placedByDisplayName} Market Bet Placed`
+      : "Market Bet Placed",
+    dateIso: placedAtIso,
+    amount: -Math.abs(stakeAmount),
+    kind: "stake",
+    gameWeekId,
+    proposalId: slipRow.proposalId,
+  };
 
   if (shouldUseRemoteAppData()) {
     await persistPlacedMatchdayBetRemote({
       metaRow,
       simulationRow,
       slipRow,
+      ledgerTransactionRow,
     });
   }
 
@@ -176,13 +196,16 @@ export async function markMatchdayBetAsPlaced({
     metaRow,
     simulationRow,
     slipRow,
+    ledgerTransactionRow,
   });
 
   setCurrentAppDataSnapshot(nextSnapshot);
+  setCurrentLedgerTransactions(nextSnapshot.ledgerData);
 
   return {
     simulationRow,
     slipRow,
+    ledgerTransactionRow,
   };
 }
 
@@ -261,11 +284,13 @@ function applyPlacedBetToSnapshot({
   metaRow,
   simulationRow,
   slipRow,
+  ledgerTransactionRow,
 }: {
   snapshot: AppDataSnapshot;
   metaRow: LeagueDataMetaRecord;
   simulationRow: LeagueMatchdaySimulationRow;
   slipRow: LeagueSimulationSlipRow;
+  ledgerTransactionRow: LedgerTransactionRecord;
 }) {
   return {
     ...snapshot,
@@ -275,6 +300,7 @@ function applyPlacedBetToSnapshot({
       simulationRow,
     ),
     leagueDataSlips: upsertById(snapshot.leagueDataSlips, slipRow),
+    ledgerData: upsertById(snapshot.ledgerData, ledgerTransactionRow),
   };
 }
 
