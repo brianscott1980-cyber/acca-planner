@@ -22,26 +22,37 @@ export function LedgerActivityPanel({
       <section className="hub-panel hub-activity-panel">
         <h2 className="hub-panel-title">Recent Activity</h2>
 
-        <div className="hub-activity-list">
-          <LedgerTable
-            items={latestEntries}
-            highlightedTransactionIds={highlightedTransactionIds}
-            onHighlightTransactions={onHighlightTransactions}
-          />
-        </div>
+        {latestEntries.length === 0 ? (
+          <div className="hub-empty-state hub-empty-state-compact">
+            <p className="hub-subtitle">
+              No ledger activity yet. Deposits, bets, and returns will appear here as
+              the syndicate gets going.
+            </p>
+          </div>
+        ) : (
+          <div className="hub-activity-list">
+            <LedgerTable
+              items={latestEntries}
+              highlightedTransactionIds={highlightedTransactionIds}
+              onHighlightTransactions={onHighlightTransactions}
+            />
+          </div>
+        )}
 
-        <button
-          className="hub-link-button"
-          type="button"
-          onClick={() => {
-            trackEvent("open_transactions_modal", {
-              surface: "ledger_activity_panel",
-            });
-            setShowAllTransactions(true);
-          }}
-        >
-          View All Transactions
-        </button>
+        {allEntries.length > 0 ? (
+          <button
+            className="hub-link-button"
+            type="button"
+            onClick={() => {
+              trackEvent("open_transactions_modal", {
+                surface: "ledger_activity_panel",
+              });
+              setShowAllTransactions(true);
+            }}
+          >
+            View All Transactions
+          </button>
+        ) : null}
       </section>
 
       {showAllTransactions ? (

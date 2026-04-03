@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "data:reset-local": "node scripts/data/reset-local-data.mjs",
     "generate:pl-clubs": "node scripts/premier-league/generate-club-data.mjs",
     "supabase:generate-db-sql": "node scripts/supabase/database/generate-database-sql.mjs",
     "supabase:sync-users": "node scripts/supabase/identity/sync-auth-users.mjs",

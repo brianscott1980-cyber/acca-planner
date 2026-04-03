@@ -157,6 +157,16 @@ export function TimelineFeed() {
         </p>
       </div>
 
+      {timelineEntries.length === 0 ? (
+        <div className="hub-panel hub-empty-state">
+          <h2 className="hub-panel-title">The Syndicate Is Ready To Start</h2>
+          <p className="hub-subtitle">
+            No syndicate activity has been recorded yet. Once the first matchday vote
+            is in, your shared timeline will begin to build here.
+          </p>
+        </div>
+      ) : null}
+
       <div className="hub-timeline">
         {timelineEntries.map((entry) => (
           <TimelineMatchday key={entry.id} entry={entry} />

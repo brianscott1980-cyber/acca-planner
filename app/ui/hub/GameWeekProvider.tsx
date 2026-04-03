@@ -52,6 +52,18 @@ type GameWeekContextValue = {
 
 const GameWeekContext = createContext<GameWeekContextValue | null>(null);
 
+const EMPTY_GAME_WEEK: GameWeekRecord = {
+  id: "empty-matchday",
+  slug: "empty-matchday",
+  name: "No Matchdays Available",
+  description: "No local matchday data is currently loaded.",
+  windowStartIso: new Date(0).toISOString(),
+  windowEndIso: new Date(0).toISOString(),
+  startsIn: "No schedule loaded",
+  proposals: [],
+  votesByUserId: {},
+};
+
 type GameWeekProviderProps = {
   children: ReactNode;
   gameWeekId?: string | null;
@@ -336,7 +348,8 @@ function getInitialGameWeekState(
   const currentGameWeek =
     getAccessibleGameWeekById(gameWeekId) ??
     getGameWeekById(gameWeekId) ??
-    getCurrentGameWeek();
+    getCurrentGameWeek() ??
+    EMPTY_GAME_WEEK;
 
   if (!loggedInUserId || isGameWeekVoteLocked(currentGameWeek)) {
     return currentGameWeek;

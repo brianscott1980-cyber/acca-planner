@@ -42,7 +42,21 @@ export function DashboardView({
   const hasUserVote = hasHydrated && loggedInUserId
     ? Boolean(getUserVoteForGameWeek(currentGameWeek, loggedInUserId))
     : false;
+  const hasMatchdayData = currentGameWeek.proposals.length > 0;
   const isDecisionView = effectiveViewState !== "voting" && Boolean(decidedProposal);
+
+  if (!hasMatchdayData) {
+    return (
+      <section className="hub-panel hub-wide">
+        <div className="hub-page-copy">
+          <h1 className="hub-title">No Matchdays Loaded</h1>
+          <p className="hub-subtitle">
+            Local data has been reset. Add or regenerate matchday data to continue.
+          </p>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <div

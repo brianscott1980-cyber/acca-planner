@@ -2835,6 +2835,16 @@ button {
   padding: 2rem;
 }
 
+.hub-empty-state-compact {
+  min-height: 0;
+  gap: 0.5rem;
+  padding: 1.25rem;
+}
+
+.hub-activity-panel .hub-empty-state {
+  margin-top: 0.75rem;
+}
+
 .hub-pwa-debug {
   position: fixed;
   right: 1rem;
