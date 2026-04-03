@@ -681,6 +681,10 @@ button {
     var(--hub-panel);
 }
 
+.hub-mobile-admin-controls {
+  display: none;
+}
+
 .hub-admin-controls-main {
   display: flex;
   min-width: 0;
@@ -3198,7 +3202,7 @@ button {
   }
 
   .hub-mobile-admin-controls {
-    display: none;
+    display: flex;
   }
 
   .hub-admin-controls .hub-primary-button {
