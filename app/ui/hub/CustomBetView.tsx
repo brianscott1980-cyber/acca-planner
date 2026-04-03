@@ -322,39 +322,42 @@ function CustomBetView({ customBet }: { customBet: CustomBetRecord }) {
               ) : null}
             </div>
 
-            <div className="hub-proposal-metrics hub-proposal-metrics-stacked">
-              <div className="hub-approach-metric hub-approach-metric-locked">
-                <span className="hub-metric-label">Format</span>
-                <span className={`hub-tag ${getCustomBetSportTagClassName(currentCustomBet.sport)}`}>
-                  {currentCustomBet.bettingFormatRequested}
-                </span>
-              </div>
-              <div>
-                <span className="hub-metric-label">Top Market</span>
-                <span className="hub-metric-value">{currentCustomBet.recommendedMarket}</span>
-              </div>
-              <div>
-                <span className="hub-metric-label">Top Selection</span>
-                <span className="hub-metric-value">{currentCustomBet.recommendedSelection}</span>
-              </div>
-              {currentCustomBet.suggestedStakeAmount !== undefined ? (
-                <div>
-                  <span className="hub-metric-label">Suggested Stake</span>
-                  <span className="hub-metric-value">
-                    {formatCurrency(currentCustomBet.suggestedStakeAmount, {
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 2,
-                    })}
+            <div className="hub-custom-bet-panel">
+              <h2 className="hub-panel-title">Bet Details</h2>
+              <div className="hub-proposal-metrics hub-proposal-metrics-stacked">
+                <div className="hub-approach-metric hub-approach-metric-locked">
+                  <span className="hub-metric-label">Format</span>
+                  <span className={`hub-tag ${getCustomBetSportTagClassName(currentCustomBet.sport)}`}>
+                    {currentCustomBet.bettingFormatRequested}
                   </span>
                 </div>
-              ) : null}
-              <div>
-                <span className="hub-metric-label">Options</span>
-                <span className="hub-metric-value">{proposedBets.length}</span>
-              </div>
-              <div>
-                <span className="hub-metric-label">Sport</span>
-                <span className="hub-metric-value">{formatCustomBetSport(currentCustomBet.sport)}</span>
+                <div>
+                  <span className="hub-metric-label">Top Market</span>
+                  <span className="hub-metric-value">{currentCustomBet.recommendedMarket}</span>
+                </div>
+                <div>
+                  <span className="hub-metric-label">Top Selection</span>
+                  <span className="hub-metric-value">{currentCustomBet.recommendedSelection}</span>
+                </div>
+                {currentCustomBet.suggestedStakeAmount !== undefined ? (
+                  <div>
+                    <span className="hub-metric-label">Suggested Stake</span>
+                    <span className="hub-metric-value">
+                      {formatCurrency(currentCustomBet.suggestedStakeAmount, {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                      })}
+                    </span>
+                  </div>
+                ) : null}
+                <div>
+                  <span className="hub-metric-label">Options</span>
+                  <span className="hub-metric-value">{proposedBets.length}</span>
+                </div>
+                <div>
+                  <span className="hub-metric-label">Sport</span>
+                  <span className="hub-metric-value">{formatCustomBetSport(currentCustomBet.sport)}</span>
+                </div>
               </div>
             </div>
 
