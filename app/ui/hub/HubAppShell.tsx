@@ -25,6 +25,7 @@ import { getSimulatedNow } from "../../../services/league_simulation_service";
 import { getUserInitials } from "../../../services/user_service";
 import { trackEvent } from "../../../lib/analytics";
 import { withBasePath } from "../../../lib/site";
+import { shouldUseLocalAppData } from "../../../services/app_data_service";
 import { useAuth } from "../auth/AuthProvider";
 
 type HubAppShellProps = {
@@ -80,6 +81,7 @@ export function HubAppShell({ children }: HubAppShellProps) {
   const initialSimulatedNowRef = useRef<Date | null>(null);
   const mountedAtRef = useRef<number | null>(null);
   const currentMatchdayNumber = getCurrentMatchdayNumber();
+  const usesLocalAppData = shouldUseLocalAppData();
   const roiToneClass =
     ledgerSummary.roiPercentage < 0 ? "is-negative" : "is-positive";
   const canInstallApp = Boolean(installPromptEvent);
@@ -453,8 +455,17 @@ export function HubAppShell({ children }: HubAppShellProps) {
             ) : null}
           </div>
 
-          <div className="hub-header-datetime" aria-label="Current simulated date and time">
-            <p className="hub-label">Current Time</p>
+          <div
+            className="hub-header-datetime"
+            aria-label={
+              usesLocalAppData
+                ? "Current simulated date and time"
+                : "Current date and time"
+            }
+          >
+            <p className="hub-label">
+              {usesLocalAppData ? "Simulated Time" : "Current Time"}
+            </p>
             <p className="hub-header-datetime-value">
               {formatHeaderDateTime(simulatedNow)}
             </p>
