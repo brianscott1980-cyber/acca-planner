@@ -1,7 +1,7 @@
-import { leagueDataBetLineOdds } from "../data/league_data_bet_line_odds";
+import { getCurrentAppDataSnapshot } from "../services/app_data_service";
 
 export function getLeagueSimulationBetLineOddsRows(simulationId: string) {
-  return leagueDataBetLineOdds
+  return getCurrentAppDataSnapshot().leagueDataBetLineOdds
     .filter((oddsRow) => oddsRow.simulationId === simulationId)
     .sort((left, right) => left.sortOrder - right.sortOrder);
 }

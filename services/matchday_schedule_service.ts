@@ -14,9 +14,9 @@ import type {
   MatchdayProposalRecord,
 } from "../types/matchday_type";
 
-export const matchdaySchedule: GameWeekRecord[] = getMatchdayGameWeekRows().map((gameWeek) =>
-  composeGameWeekRecord(gameWeek),
-);
+export function getMatchdaySchedule() {
+  return getMatchdayGameWeekRows().map((gameWeek) => composeGameWeekRecord(gameWeek));
+}
 
 function composeGameWeekRecord(gameWeek: MatchdayGameWeekRecord): GameWeekRecord {
   return {

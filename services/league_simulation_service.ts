@@ -1,4 +1,4 @@
-import { matchdaySchedule } from "./matchday_schedule_service";
+import { getMatchdaySchedule } from "./matchday_schedule_service";
 import { getLeagueSimulatedAtIso, getLeagueUpdatedAtIso } from "../repositories/league_meta_repository";
 import { getLeagueMatchdaySimulationRows, getLeagueMatchdaySimulationRowByGameWeekId } from "../repositories/league_simulation_repository";
 import { getLeagueSimulationBetLineOddsRows } from "../repositories/league_simulation_odds_repository";
@@ -42,8 +42,8 @@ export function getSortedGameWeeks() {
   );
   const visibleGameWeeks =
     availableGameWeekIds.size > 0
-      ? matchdaySchedule.filter((gameWeek) => availableGameWeekIds.has(gameWeek.id))
-      : matchdaySchedule;
+      ? getMatchdaySchedule().filter((gameWeek) => availableGameWeekIds.has(gameWeek.id))
+      : getMatchdaySchedule();
 
   return [...visibleGameWeeks]
     .sort(

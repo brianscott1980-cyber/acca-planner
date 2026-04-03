@@ -1,12 +1,12 @@
-import { leagueDataMatchdaySimulations } from "../data/league_data_matchday_simulations";
+import { getCurrentAppDataSnapshot } from "../services/app_data_service";
 
 export function getLeagueMatchdaySimulationRows() {
-  return leagueDataMatchdaySimulations;
+  return getCurrentAppDataSnapshot().leagueDataMatchdaySimulations;
 }
 
 export function getLeagueMatchdaySimulationRowByGameWeekId(gameWeekId: string) {
   return (
-    leagueDataMatchdaySimulations.find(
+    getLeagueMatchdaySimulationRows().find(
       (simulation) => simulation.gameWeekId === gameWeekId,
     ) ?? null
   );

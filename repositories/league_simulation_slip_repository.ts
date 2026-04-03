@@ -1,12 +1,11 @@
-import { leagueDataLegResults } from "../data/league_data_leg_results";
-import { leagueDataSlips } from "../data/league_data_slips";
+import { getCurrentAppDataSnapshot } from "../services/app_data_service";
 
 export function getLeagueSimulationSlipRowById(slipId: string) {
-  return leagueDataSlips.find((slip) => slip.id === slipId) ?? null;
+  return getCurrentAppDataSnapshot().leagueDataSlips.find((slip) => slip.id === slipId) ?? null;
 }
 
 export function getLeagueSimulationLegResultRowsBySlipId(slipId: string) {
-  return leagueDataLegResults
+  return getCurrentAppDataSnapshot().leagueDataLegResults
     .filter((legRow) => legRow.slipId === slipId)
     .sort((left, right) => left.sortOrder - right.sortOrder);
 }

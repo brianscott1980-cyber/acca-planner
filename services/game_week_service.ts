@@ -1,4 +1,4 @@
-import { matchdaySchedule } from "./matchday_schedule_service";
+import { getMatchdaySchedule } from "./matchday_schedule_service";
 import type {
   GameWeekRecord,
   GameWeekProposalRecord,
@@ -86,8 +86,8 @@ export function getCurrentMatchdayNumber() {
 
 export function getMatchdayNumberFromGameWeekId(gameWeekId: string) {
   const gameWeek =
-    matchdaySchedule.find((entry) => entry.id === gameWeekId) ??
-    matchdaySchedule.find((entry) => entry.slug === gameWeekId);
+    getMatchdaySchedule().find((entry) => entry.id === gameWeekId) ??
+    getMatchdaySchedule().find((entry) => entry.slug === gameWeekId);
   const match =
     gameWeek?.id.match(/\d+/) ??
     gameWeek?.slug.match(/\d+/) ??
@@ -109,7 +109,7 @@ export function getGameWeekIdFromMatchdayNumber(
     return null;
   }
 
-  const gameWeek = matchdaySchedule.find(
+  const gameWeek = getMatchdaySchedule().find(
     (entry) => getMatchdayNumberFromGameWeekId(entry.id) === Number.parseInt(normalizedNumber, 10),
   );
 
@@ -129,7 +129,7 @@ export function getMatchdayHref({
 }
 
 export function getStaticMatchdayNumberParams() {
-  return matchdaySchedule
+  return getMatchdaySchedule()
     .map((gameWeek) => getMatchdayNumberFromGameWeekId(gameWeek.id))
     .filter((matchdayNumber): matchdayNumber is number => matchdayNumber !== null)
     .map((matchdayNumber) => ({

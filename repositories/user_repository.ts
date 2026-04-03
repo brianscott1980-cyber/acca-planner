@@ -1,7 +1,7 @@
-import { users } from "../data/users";
+import { getCurrentAppDataSnapshot } from "../services/app_data_service";
 
 export function getMembers() {
-  return users;
+  return getCurrentAppDataSnapshot().users;
 }
 
 export function getMemberById(userId: string | null | undefined) {
@@ -9,7 +9,7 @@ export function getMemberById(userId: string | null | undefined) {
     return null;
   }
 
-  return users.find((user) => user.id === userId) ?? null;
+  return getMembers().find((user) => user.id === userId) ?? null;
 }
 
 export function getMemberByEmail(email: string | null | undefined) {
@@ -20,11 +20,11 @@ export function getMemberByEmail(email: string | null | undefined) {
   const normalizedEmail = email.trim().toLowerCase();
 
   return (
-    users.find((user) => user.email?.trim().toLowerCase() === normalizedEmail) ??
+    getMembers().find((user) => user.email?.trim().toLowerCase() === normalizedEmail) ??
     null
   );
 }
 
 export function getMemberCount() {
-  return users.length;
+  return getMembers().length;
 }

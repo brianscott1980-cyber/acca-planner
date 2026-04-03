@@ -1,4 +1,4 @@
-import { ledgerData } from "../data/ledger_data";
+import { getDefaultAppDataSnapshot } from "./app_data_service";
 import { getMemberCount } from "../repositories/user_repository";
 import { getSimulatedNow } from "./league_simulation_service";
 import type {
@@ -8,7 +8,8 @@ import type {
   PotTimelinePoint,
 } from "../types/ledger_type";
 
-let currentLedgerTransactions: LedgerTransactionRecord[] = ledgerData;
+let currentLedgerTransactions: LedgerTransactionRecord[] =
+  getDefaultAppDataSnapshot().ledgerData;
 
 export function getCurrentLedgerTransactions() {
   return currentLedgerTransactions;

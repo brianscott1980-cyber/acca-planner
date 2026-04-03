@@ -1,9 +1,12 @@
 "use client";
 
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
-import { ledgerData } from "../../../data/ledger_data";
 import { listLedgerTransactions, subscribeToLedgerTransactions } from "../../../repositories/ledger_repository";
-import { getCurrentLedgerTransactions, setCurrentLedgerTransactions } from "../../../services/ledger_service";
+import {
+  getCurrentLedgerTransactions,
+  setCurrentLedgerTransactions,
+} from "../../../services/ledger_service";
+import { shouldUseRemoteAppData, getCurrentAppDataSnapshot } from "../../../services/app_data_service";
 import type { LedgerTransactionRecord } from "../../../types/ledger_type";
 import { useAuth } from "../auth/AuthProvider";
 
@@ -16,15 +19,18 @@ const LedgerContext = createContext<LedgerContextValue | null>(null);
 
 export function LedgerProvider({ children }: { children: ReactNode }) {
   const { authUser, isConfigured } = useAuth();
+  const isRemoteData = shouldUseRemoteAppData();
   const [transactions, setTransactions] = useState<LedgerTransactionRecord[]>(
     getCurrentLedgerTransactions(),
   );
   const [isLoading, setIsLoading] = useState(Boolean(isConfigured));
 
   useEffect(() => {
-    if (!isConfigured || !authUser) {
-      setCurrentLedgerTransactions(ledgerData);
-      setTransactions(ledgerData);
+    const fallbackTransactions = getCurrentAppDataSnapshot().ledgerData;
+
+    if (!isRemoteData || !isConfigured || !authUser) {
+      setCurrentLedgerTransactions(fallbackTransactions);
+      setTransactions(fallbackTransactions);
       setIsLoading(false);
       return;
     }
@@ -39,7 +45,8 @@ export function LedgerProvider({ children }: { children: ReactNode }) {
           return;
         }
 
-        const resolvedTransactions = nextTransactions.length > 0 ? nextTransactions : ledgerData;
+        const resolvedTransactions =
+          nextTransactions.length > 0 ? nextTransactions : fallbackTransactions;
         setCurrentLedgerTransactions(resolvedTransactions);
         setTransactions(resolvedTransactions);
       } catch (error) {
@@ -48,8 +55,8 @@ export function LedgerProvider({ children }: { children: ReactNode }) {
           return;
         }
 
-        setCurrentLedgerTransactions(ledgerData);
-        setTransactions(ledgerData);
+        setCurrentLedgerTransactions(fallbackTransactions);
+        setTransactions(fallbackTransactions);
       } finally {
         if (isActive) {
           setIsLoading(false);
@@ -64,7 +71,7 @@ export function LedgerProvider({ children }: { children: ReactNode }) {
       isActive = false;
       unsubscribe();
     };
-  }, [authUser, isConfigured]);
+  }, [authUser, isConfigured, isRemoteData]);
 
   const value = useMemo(
     () => ({

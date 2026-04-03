@@ -1,7 +1,7 @@
-import { leagueDataMeta } from "../data/league_data_meta";
+import { getCurrentAppDataSnapshot } from "../services/app_data_service";
 
 export function getPrimaryLeagueDataMeta() {
-  return leagueDataMeta[0] ?? null;
+  return getCurrentAppDataSnapshot().leagueDataMeta[0] ?? null;
 }
 
 export function getLeagueSimulatedAtIso() {

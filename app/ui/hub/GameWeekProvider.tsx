@@ -29,6 +29,7 @@ import {
 } from "../../../repositories/matchday_vote_repository";
 import { getMembers } from "../../../repositories/user_repository";
 import { useAuth } from "../auth/AuthProvider";
+import { shouldUseRemoteAppData } from "../../../services/app_data_service";
 
 type VoteSimulationStatus = "idle" | "running" | "closed";
 
@@ -61,6 +62,7 @@ export function GameWeekProvider({
   gameWeekId = null,
 }: GameWeekProviderProps) {
   const { authUser, isConfigured, member: loggedInUser } = useAuth();
+  const isRemoteData = shouldUseRemoteAppData();
   const members = getMembers();
   const authUserId = authUser?.id ?? null;
   const loggedInUserId = loggedInUser?.id ?? null;
@@ -91,7 +93,13 @@ export function GameWeekProvider({
   }, [gameWeekId, loggedInUserId]);
 
   useEffect(() => {
-    if (!authUserId || !loggedInUserId || !isConfigured || isCurrentGameWeekLocked) {
+    if (
+      !isRemoteData ||
+      !authUserId ||
+      !loggedInUserId ||
+      !isConfigured ||
+      isCurrentGameWeekLocked
+    ) {
       return;
     }
 
@@ -141,7 +149,14 @@ export function GameWeekProvider({
       document.removeEventListener("visibilitychange", syncVotesIfVisible);
       unsubscribe();
     };
-  }, [authUserId, currentGameWeek.id, isConfigured, isCurrentGameWeekLocked, loggedInUserId]);
+  }, [
+    authUserId,
+    currentGameWeek.id,
+    isConfigured,
+    isCurrentGameWeekLocked,
+    isRemoteData,
+    loggedInUserId,
+  ]);
 
   const value = useMemo<GameWeekContextValue>(
     () => ({
@@ -166,7 +181,7 @@ export function GameWeekProvider({
           proposalId,
         );
 
-        if (authUserId && isConfigured) {
+        if (isRemoteData && authUserId && isConfigured) {
           const previousVotesByUserId = currentGameWeek.votesByUserId;
 
           setCurrentGameWeek(nextGameWeek);
@@ -215,7 +230,7 @@ export function GameWeekProvider({
           return;
         }
 
-        if (authUserId && isConfigured) {
+        if (isRemoteData && authUserId && isConfigured) {
           const previousVotesByUserId = currentGameWeek.votesByUserId;
 
           setCurrentGameWeek((previous) => {
@@ -274,6 +289,7 @@ export function GameWeekProvider({
       currentGameWeek,
       authUserId,
       isConfigured,
+      isRemoteData,
       loggedInUser,
       loggedInUserId,
       members,
