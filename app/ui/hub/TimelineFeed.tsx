@@ -6,6 +6,7 @@ import {
 } from "../../../services/ledger_service";
 import { getSimulatedNow } from "../../../services/league_simulation_service";
 import {
+  getGameWeekById,
   getMatchdayHref,
   getProposalDisplayOdds,
   getVisibleGameWeekTimelineRecords,
@@ -13,13 +14,14 @@ import {
 import { formatGameWeekDateRange } from "../../../services/league_simulation_service";
 import { getMembers } from "../../../repositories/user_repository";
 import { getCurrentLedgerTransactions } from "../../../services/ledger_service";
+import { getTimelineEvents } from "../../../repositories/timeline_event_repository";
 import { getUserInitials } from "../../../services/user_service";
 
 type TimelineEntry = {
   id: string;
   title: string;
   dateRange: string;
-  status: "win" | "loss" | "cashout" | "funded" | "placed" | "voted";
+  status: "win" | "loss" | "cashout" | "funded" | "placed" | "voted" | "generated";
   label?: string;
   stake: string;
   stakeLabel?: string;
@@ -141,6 +143,7 @@ export function TimelineFeed() {
         return entries;
       },
     ),
+    ...getCustomTimelineEntries(),
     ...getInitialDepositTimelineEntries(),
   ].sort(
     (left, right) =>
@@ -178,7 +181,7 @@ export function TimelineFeed() {
 
 function TimelineMatchday({ entry }: { entry: TimelineEntry }) {
   const router = useRouter();
-  const isNavigable = Boolean(entry.matchdayId);
+  const isNavigable = Boolean(entry.matchdayId && getGameWeekById(entry.matchdayId));
   const isWin = entry.status === "win";
   const isFundedEntry = entry.status === "funded";
   const outcomeLabel =
@@ -191,8 +194,10 @@ function TimelineMatchday({ entry }: { entry: TimelineEntry }) {
           ? "Cashout"
         : entry.status === "placed"
           ? "Placed"
-          : entry.status === "voted"
-            ? "Voted"
+        : entry.status === "voted"
+          ? "Voted"
+        : entry.status === "generated"
+          ? "Generated"
           : "Funded");
 
   const navigateToMatchday = () => {
@@ -398,6 +403,35 @@ function getInitialDepositTimelineEntries(): TimelineEntry[] {
   ];
 }
 
+function getCustomTimelineEntries(): TimelineEntry[] {
+  return getTimelineEvents()
+    .map((event) => {
+      const gameWeek = event.matchdayId ? getGameWeekById(event.matchdayId) : null;
+
+      const timelineEntry: TimelineEntry = {
+        id: event.id,
+        title: event.title,
+        dateRange: formatTimelineDateTime(event.timestampIso),
+        status: "generated",
+        label: gameWeek?.name ?? undefined,
+        stakeLabel: "Event",
+        stake: event.description ?? "Local proposal slate updated",
+        returnLabel: "Matchday",
+        returnValue: gameWeek?.name ?? event.matchdayId ?? "Timeline",
+        outcomeLabel: "Generated",
+        timestampIso: event.timestampIso,
+        matchdayId: gameWeek?.id,
+      };
+
+      return timelineEntry;
+    })
+    .sort(
+      (left, right) =>
+        new Date(right.timestampIso).getTime() -
+        new Date(left.timestampIso).getTime(),
+    );
+}
+
 function getTimelineStatusClassName(status: TimelineEntry["status"]) {
   if (status === "win") {
     return "is-win";
@@ -417,6 +451,10 @@ function getTimelineStatusClassName(status: TimelineEntry["status"]) {
 
   if (status === "voted") {
     return "is-voted";
+  }
+
+  if (status === "generated") {
+    return "is-funded";
   }
 
   return "is-funded";
@@ -445,12 +483,17 @@ function getTimelineTagClassName(entry: TimelineEntry) {
     return "hub-tag-muted";
   }
 
+  if (entry.status === "generated") {
+    return "hub-tag-balanced";
+  }
+
   return "hub-tag-safe";
 }
 
 function shouldShowTimelineStrategyLabel(entry: TimelineEntry) {
   return (
     Boolean(entry.label) &&
+    entry.status !== "generated" &&
     entry.status !== "voted" &&
     entry.status !== "placed" &&
     entry.status !== "win" &&

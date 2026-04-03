@@ -813,7 +813,7 @@ function getMatchdayBannerTitle(
   gameWeek: ReturnType<typeof useCurrentGameWeek>["currentGameWeek"],
 ) {
   if (viewState === "locked") {
-    return "Group Reached Consensus";
+    return "Voting has closed";
   }
 
   if (viewState === "placed") {

@@ -36,15 +36,54 @@ values
   ('Wolverhampton Wanderers', 'wolverhampton-wanderers', '/assets/clubs/premier-league/wolverhampton-wanderers.png', 'https://r2.thesportsdb.com/images/media/team/badge/u9qr031621593327.png')
 on conflict (slug) do nothing;
 
--- No seed rows for public.matchday_game_weeks.
+insert into public.matchday_game_weeks (id, slug, name, description, window_start_iso, window_end_iso, starts_in, proposal_ids, votes_by_user_id, simulated_slip)
+values
+  ('md-1', 'matchday-1-voting-stage', 'Matchday 1 Voting Stage', 'Ladbrokes weekend slate for 4 April 2026 to 6 April 2026. No Premier League fixtures were listed inside this window, so the build leans on SPFL, La Liga, Bundesliga, and Serie A markets only.', '2026-04-04T08:00:00.000Z', '2026-04-06T22:00:00.000Z', 'Weekend ahead', '["md-1:proposal:safe","md-1:proposal:balanced","md-1:proposal:aggressive"]'::jsonb, '{}'::jsonb, null)
+on conflict (id) do nothing;
 
--- No seed rows for public.market_analysis_snapshots.
+insert into public.market_analysis_snapshots (id, bookmaker, snapshot_date, matchday_id)
+values
+  ('md-1:ladbrokes:2026-04-04', 'Ladbrokes', '2026-04-04', 'md-1')
+on conflict (id) do nothing;
 
--- No seed rows for public.market_analysis_selections.
+insert into public.market_analysis_selections (id, snapshot_id, fixture, market, selection, decimal_odds)
+values
+  ('md-1:market:real-sociedad-win', 'md-1:ladbrokes:2026-04-04', 'Real Sociedad vs Levante UD', 'Match Result', 'Real Sociedad', 1.65),
+  ('md-1:market:bayern-win', 'md-1:ladbrokes:2026-04-04', 'SC Freiburg vs Bayern Munich', 'Match Result', 'Bayern Munich', 1.4),
+  ('md-1:market:rangers-win', 'md-1:ladbrokes:2026-04-04', 'Rangers FC vs Dundee United', 'Match Result', 'Rangers FC', 1.22),
+  ('md-1:market:atalanta-win', 'md-1:ladbrokes:2026-04-04', 'US Lecce vs Atalanta BC', 'Match Result', 'Atalanta BC', 1.7),
+  ('md-1:market:leverkusen-win', 'md-1:ladbrokes:2026-04-04', 'Bayer Leverkusen vs VfL Wolfsburg', 'Match Result', 'Bayer Leverkusen', 1.4),
+  ('md-1:market:betis-win', 'md-1:ladbrokes:2026-04-04', 'Real Betis vs Espanyol Barcelona', 'Match Result', 'Real Betis', 1.8),
+  ('md-1:market:lazio-win', 'md-1:ladbrokes:2026-04-04', 'SS Lazio vs Parma Calcio', 'Match Result', 'SS Lazio', 1.8),
+  ('md-1:market:hearts-win', 'md-1:ladbrokes:2026-04-04', 'Livingston vs Hearts', 'Match Result', 'Hearts', 1.55),
+  ('md-1:market:sassuolo-win', 'md-1:ladbrokes:2026-04-04', 'US Sassuolo Calcio vs Cagliari', 'Match Result', 'US Sassuolo Calcio', 2),
+  ('md-1:market:fiorentina-win', 'md-1:ladbrokes:2026-04-04', 'Hellas Verona vs ACF Fiorentina', 'Match Result', 'ACF Fiorentina', 1.91),
+  ('md-1:market:barcelona-win', 'md-1:ladbrokes:2026-04-04', 'Atletico Madrid vs FC Barcelona', 'Match Result', 'FC Barcelona', 2.15),
+  ('md-1:market:bologna-win', 'md-1:ladbrokes:2026-04-04', 'US Cremonese vs Bologna FC', 'Match Result', 'Bologna FC', 2.05)
+on conflict (id) do nothing;
 
--- No seed rows for public.matchday_proposals.
+insert into public.matchday_proposals (id, game_week_id, proposal_id, risk_level, title, summary, legs, status_label, bet_line_ids, ai_recommended)
+values
+  ('md-1:proposal:safe', 'md-1', 'safe', 'safe', 'Defensive Accumulator', 'A shorter-price fourfold that leans on the strongest favourites in Spain, Germany, Scotland, and Italy, keeping the final swing for Monday rather than front-loading volatility.', 4, 'Lower Variance', '["md-1:betline:safe:1","md-1:betline:safe:2","md-1:betline:safe:3","md-1:betline:safe:4"]'::jsonb, false),
+  ('md-1:proposal:balanced', 'md-1', 'balanced', 'balanced', 'Neutral Accumulator', 'The best blend of price and survivability this weekend, using firm home favourites before handing the final outcome to a Sunday away leg with enough edge to keep the payout meaningful.', 4, 'Balanced Build', '["md-1:betline:balanced:1","md-1:betline:balanced:2","md-1:betline:balanced:3","md-1:betline:balanced:4"]'::jsonb, true),
+  ('md-1:proposal:aggressive', 'md-1', 'aggressive', 'aggressive', 'Aggressive Accumulator', 'A higher-volatility fourfold that waits for narrower edge spots and bigger away prices, with Barcelona and Bologna carrying the sharpest late cashout swing.', 4, 'High Upside', '["md-1:betline:aggressive:1","md-1:betline:aggressive:2","md-1:betline:aggressive:3","md-1:betline:aggressive:4"]'::jsonb, false)
+on conflict (id) do nothing;
 
--- No seed rows for public.matchday_bet_lines.
+insert into public.matchday_bet_lines (id, game_week_id, proposal_entity_id, sort_order, label, schedule_note, ai_reasoning, form_id, form_note, market_id, odds)
+values
+  ('md-1:betline:safe:1', 'md-1', 'md-1:proposal:safe', 1, 'Real Sociedad to beat Levante UD', 'Sat 4 Apr, 12:00 BST', 'Ladbrokes make Real Sociedad the clearest Saturday lunchtime anchor in La Liga, so this leg opens the slip with a firm home favourite rather than an early price swing.', null, 'Ladbrokes list Real Sociedad at 13/20 with Levante UD 19/5 and the draw 3/1 for the 12:00 BST kickoff.', 'md-1:market:real-sociedad-win', '1.65'),
+  ('md-1:betline:safe:2', 'md-1', 'md-1:proposal:safe', 2, 'Bayern Munich to beat SC Freiburg', 'Sat 4 Apr, 13:30 BST', 'Bayern are the shortest Bundesliga road price on the card, which fits the defensive brief of stacking dependable favourites before the more exposed later windows.', null, 'Ladbrokes quote Bayern Munich at 2/5 away to SC Freiburg, with Freiburg 11/2 and the draw 17/4.', 'md-1:market:bayern-win', '1.40'),
+  ('md-1:betline:safe:3', 'md-1', 'md-1:proposal:safe', 3, 'Rangers FC to beat Dundee United', 'Sat 4 Apr, 14:00 BST', 'Rangers are the most controlled SPFL match-result price in the window, so this keeps the slip on short-odds rails before the final Italian closer.', null, 'Ladbrokes list Rangers FC at 2/9 against Dundee United, while the Scottish Premiership table shows Rangers second and Dundee United outside the top five.', 'md-1:market:rangers-win', '1.22'),
+  ('md-1:betline:safe:4', 'md-1', 'md-1:proposal:safe', 4, 'Atalanta BC to beat US Lecce', 'Mon 6 Apr, 13:00 BST', 'Atalanta provide the final payout leg without turning the whole build into a longshot, preserving a sensible Monday cashout decision point.', null, 'Ladbrokes price Atalanta BC at 7/10 away to US Lecce, with Lecce 19/5 and the draw 11/4.', 'md-1:market:atalanta-win', '1.70'),
+  ('md-1:betline:balanced:1', 'md-1', 'md-1:proposal:balanced', 1, 'Bayer Leverkusen to beat VfL Wolfsburg', 'Sat 4 Apr, 13:30 BST', 'Leverkusen are still a strong home favourite, giving the balanced slip a stable opener before the more price-sensitive legs later in the sequence.', null, 'Ladbrokes have Bayer Leverkusen at 2/5 against VfL Wolfsburg, with Wolfsburg 11/2 and the draw 4/1.', 'md-1:market:leverkusen-win', '1.40'),
+  ('md-1:betline:balanced:2', 'md-1', 'md-1:proposal:balanced', 2, 'Real Betis to beat Espanyol Barcelona', 'Sat 4 Apr, 16:30 BST', 'Betis add a clear price step-up from the opener without abandoning favourite status, which is exactly where the balanced profile should start taking on more payout weight.', null, 'Ladbrokes quote Real Betis at 4/5 against Espanyol Barcelona, with Espanyol 16/5 and the draw 27/10.', 'md-1:market:betis-win', '1.80'),
+  ('md-1:betline:balanced:3', 'md-1', 'md-1:proposal:balanced', 3, 'SS Lazio to beat Parma Calcio', 'Sat 4 Apr, 18:45 BST', 'Lazio keep the Saturday night leg aggressive enough to lift the return, but the market still respects them as the stronger side rather than a coin flip.', null, 'Ladbrokes list SS Lazio at 4/5 to beat Parma Calcio, while Lazio arrived off a 2-0 win over Bologna in the latest Serie A results shown on the competition page.', 'md-1:market:lazio-win', '1.80'),
+  ('md-1:betline:balanced:4', 'md-1', 'md-1:proposal:balanced', 4, 'Hearts to beat Livingston', 'Sun 5 Apr, 13:00 BST', 'Hearts are the right kind of Sunday closer for the balanced build: strong enough to justify the final leg, but not so short that the live cashout upside disappears.', null, 'Ladbrokes price Hearts at 11/20 away to Livingston, and the Scottish Premiership table on the competition page has Hearts top with 66 points.', 'md-1:market:hearts-win', '1.55'),
+  ('md-1:betline:aggressive:1', 'md-1', 'md-1:proposal:aggressive', 1, 'US Sassuolo Calcio to beat Cagliari', 'Sat 4 Apr, 13:00 BST', 'An even-money home price is the right starting point for the aggressive card, immediately creating separation from the safer builds without moving into implausible underdog territory.', null, 'Ladbrokes list US Sassuolo Calcio at 1/1 versus Cagliari, with the draw 21/10 and Cagliari 3/1.', 'md-1:market:sassuolo-win', '2.00'),
+  ('md-1:betline:aggressive:2', 'md-1', 'md-1:proposal:aggressive', 2, 'ACF Fiorentina to beat Hellas Verona', 'Sat 4 Apr, 16:00 BST', 'Fiorentina are a narrower away favourite, which adds meaningful upside while still sitting in a price band that the slip can reasonably carry into the night session.', null, 'Ladbrokes have ACF Fiorentina at 10/11 away to Hellas Verona, with Verona 3/1 and the draw 12/5.', 'md-1:market:fiorentina-win', '1.91'),
+  ('md-1:betline:aggressive:3', 'md-1', 'md-1:proposal:aggressive', 3, 'FC Barcelona to beat Atletico Madrid', 'Sat 4 Apr, 19:00 BST', 'Barcelona are the biggest Saturday night swing in the whole build, giving the aggressive profile the kind of high-leverage leg that can radically reshape the cashout curve.', null, 'Ladbrokes quote FC Barcelona at 23/20 away to Atletico Madrid, with Atletico 2/1 and the draw 27/10.', 'md-1:market:barcelona-win', '2.15'),
+  ('md-1:betline:aggressive:4', 'md-1', 'md-1:proposal:aggressive', 4, 'Bologna FC to beat US Cremonese', 'Sun 5 Apr, 13:00 BST', 'Bologna finish the slip with another fine-margin away price, keeping the total odds high and ensuring the last live decision still carries a meaningful payout swing.', null, 'Ladbrokes list Bologna FC at 21/20 away to US Cremonese, with Cremonese 13/5 and the draw 23/10.', 'md-1:market:bologna-win', '2.05')
+on conflict (id) do nothing;
 
 -- No seed rows for public.matchday_forms.
 
@@ -65,6 +104,20 @@ on conflict (id) do nothing;
 
 -- No seed rows for public.league_data_leg_results.
 
--- No seed rows for public.ledger_data.
+insert into public.ledger_data (id, title, date_iso, amount, kind, game_week_id, proposal_id)
+values
+  ('deposit-brian-scott', 'Brian Scott Deposit', '2026-03-23T09:00:00.000Z', 10, 'deposit', null, null),
+  ('deposit-tony-mclean', 'Tony McLean Deposit', '2026-03-23T09:00:00.000Z', 10, 'deposit', null, null),
+  ('deposit-john-colreavey', 'John Colreavey Deposit', '2026-03-23T09:00:00.000Z', 10, 'deposit', null, null),
+  ('deposit-paul-melville', 'Paul Melville Deposit', '2026-03-23T09:00:00.000Z', 10, 'deposit', null, null),
+  ('deposit-alasdair-head', 'Alasdair Head Deposit', '2026-03-23T09:00:00.000Z', 10, 'deposit', null, null),
+  ('deposit-paul-devine', 'Paul Devine Deposit', '2026-03-23T09:00:00.000Z', 10, 'deposit', null, null),
+  ('deposit-derek-mcmillan', 'Derek McMillan Deposit', '2026-03-23T09:00:00.000Z', 10, 'deposit', null, null)
+on conflict (id) do nothing;
+
+insert into public.timeline_events (id, title, description, timestamp_iso, kind, matchday_id)
+values
+  ('timeline-md-1-proposal-generated', 'Next Matchday Proposal Generated', 'Local Ladbrokes proposal slate created for the upcoming weekend window.', '2026-04-03T10:49:00.000Z', 'matchday_proposal_generated', 'md-1')
+on conflict (id) do nothing;
 
 -- No seed rows for public.matchday_seed.

@@ -414,6 +414,24 @@ const DATASETS = [
     ],
   },
   {
+    fileName: "timeline_events.ts",
+    exportName: "timelineEvents",
+    tableName: "timeline_events",
+    fieldNames: ["id", "title", "description", "timestampIso", "kind", "matchdayId"],
+    primaryKey: ["id"],
+    columns: {
+      timestampIso: { type: "timestamptz" },
+      kind: { type: "text", check: ["matchday_proposal_generated"] },
+    },
+    foreignKeys: [
+      {
+        columns: ["matchdayId"],
+        referenceTable: "matchday_game_weeks",
+        referenceColumns: ["id"],
+      },
+    ],
+  },
+  {
     fileName: "matchday_seed.ts",
     exportName: "matchdaySeedGameWeeks",
     tableName: "matchday_seed",

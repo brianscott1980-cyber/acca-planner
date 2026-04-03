@@ -5,6 +5,7 @@ import type { AppDataSnapshot } from "../types/app_data_type";
 type TableLoader = {
   tableName: string;
   snapshotKey: keyof AppDataSnapshot;
+  optional?: boolean;
 };
 
 const TABLE_LOADERS: TableLoader[] = [
@@ -39,6 +40,11 @@ const TABLE_LOADERS: TableLoader[] = [
     snapshotKey: "leagueDataLegResults",
   },
   { tableName: "ledger_data", snapshotKey: "ledgerData" },
+  {
+    tableName: "timeline_events",
+    snapshotKey: "timelineEvents",
+    optional: true,
+  },
 ];
 
 export async function loadRemoteAppDataSnapshot(): Promise<AppDataSnapshot> {
@@ -50,10 +56,14 @@ export async function loadRemoteAppDataSnapshot(): Promise<AppDataSnapshot> {
   const fallbackSnapshot = getDefaultAppDataSnapshot();
 
   const loadedEntries = await Promise.all(
-    TABLE_LOADERS.map(async ({ tableName, snapshotKey }) => {
+    TABLE_LOADERS.map(async ({ tableName, snapshotKey, optional }) => {
       const { data, error } = await supabaseClient.from(tableName).select("*");
 
       if (error) {
+        if (optional && isMissingRelationError(error)) {
+          return [snapshotKey, fallbackSnapshot[snapshotKey]] as const;
+        }
+
         throw new Error(`Failed to load ${tableName}: ${error.message}`);
       }
 
@@ -76,4 +86,11 @@ function mapRemoteRowToAppShape(row: Record<string, unknown>) {
 
 function toCamelCase(value: string) {
   return value.replace(/_([a-z])/g, (_, character: string) => character.toUpperCase());
+}
+
+function isMissingRelationError(error: { code?: string; message?: string }) {
+  return (
+    error.code === "42P01" ||
+    String(error.message ?? "").toLowerCase().includes("does not exist")
+  );
 }

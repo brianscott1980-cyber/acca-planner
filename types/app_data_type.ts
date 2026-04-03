@@ -12,6 +12,7 @@ import type {
   MarketAnalysisSelectionRow,
   MarketAnalysisSnapshotRow,
 } from "./market_analysis_type";
+import type { TimelineEventRecord } from "./timeline_type";
 import type {
   MatchdayBetLineRecord,
   MatchdayFormMatchRecord,
@@ -38,4 +39,5 @@ export type AppDataSnapshot = {
   leagueDataSlips: LeagueSimulationSlipRow[];
   leagueDataLegResults: LeagueSimulationLegResultRow[];
   ledgerData: LedgerTransactionRecord[];
+  timelineEvents: TimelineEventRecord[];
 };

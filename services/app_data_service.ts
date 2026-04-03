@@ -13,6 +13,7 @@ import { matchdayFormMatches } from "../data/matchday_form_matches";
 import { matchdayForms } from "../data/matchday_forms";
 import { matchdayGameWeeks } from "../data/matchday_game_weeks";
 import { matchdayProposals } from "../data/matchday_proposals";
+import { timelineEvents } from "../data/timeline_events";
 import { users } from "../data/users";
 import type { AppDataSnapshot } from "../types/app_data_type";
 
@@ -34,6 +35,7 @@ export function getDefaultAppDataSnapshot(): AppDataSnapshot {
     leagueDataSlips,
     leagueDataLegResults,
     ledgerData,
+    timelineEvents,
   };
 }
 
