@@ -46,11 +46,12 @@ export async function loadRemoteAppDataSnapshot(): Promise<AppDataSnapshot> {
     throw new Error("Supabase is not configured.");
   }
 
+  const supabaseClient = supabase;
   const fallbackSnapshot = getDefaultAppDataSnapshot();
 
   const loadedEntries = await Promise.all(
     TABLE_LOADERS.map(async ({ tableName, snapshotKey }) => {
-      const { data, error } = await supabase.from(tableName).select("*");
+      const { data, error } = await supabaseClient.from(tableName).select("*");
 
       if (error) {
         throw new Error(`Failed to load ${tableName}: ${error.message}`);

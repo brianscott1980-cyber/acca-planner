@@ -1,4 +1,5 @@
 import { getMatchdaySchedule } from "./matchday_schedule_service";
+import { shouldUseRemoteAppData } from "./app_data_service";
 import { getLeagueSimulatedAtIso, getLeagueUpdatedAtIso } from "../repositories/league_meta_repository";
 import { getLeagueMatchdaySimulationRows, getLeagueMatchdaySimulationRowByGameWeekId } from "../repositories/league_simulation_repository";
 import { getLeagueSimulationBetLineOddsRows } from "../repositories/league_simulation_odds_repository";
@@ -24,6 +25,10 @@ export function getLeagueData(): LeagueDataRecord {
 }
 
 export function getSimulatedNow() {
+  if (shouldUseRemoteAppData()) {
+    return new Date();
+  }
+
   return new Date(getLeagueSimulatedAtIso());
 }
 

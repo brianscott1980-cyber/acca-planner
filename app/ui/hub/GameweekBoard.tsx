@@ -19,6 +19,7 @@ import type {
   GameWeekProposalRecord,
   SimulatedSlipLegStatus,
 } from "../../../types/matchday_type";
+import type { GameWeekViewState } from "../../../types/game_week_type";
 import {
   getBetLineDisplayOdds,
   getBetLineInsight,
@@ -27,7 +28,6 @@ import {
   getGameWeeks,
   getGameWeekTimingStatusLabel,
   getMatchdayHref,
-  type GameWeekViewState,
   getOrderedBetLines,
   getProposalDisplayOdds,
   getRecommendedStake,
