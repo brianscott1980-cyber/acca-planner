@@ -1936,6 +1936,17 @@ button {
   background: #fbbf24;
 }
 
+.hub-admin-placement-button {
+  width: 100%;
+  justify-content: center;
+  background: #f59e0b;
+  box-shadow: 0 0 18px rgba(245, 158, 11, 0.28);
+}
+
+.hub-admin-placement-button:hover {
+  background: #fbbf24;
+}
+
 .hub-secondary-button {
   border-color: var(--hub-border);
   background: var(--hub-surface);
@@ -2964,6 +2975,11 @@ button {
   background: var(--hub-panel);
   box-shadow: var(--hub-shadow);
   padding: 1.5rem;
+}
+
+.hub-admin-placement-modal {
+  width: min(34rem, 100%);
+  max-height: min(85vh, 44rem);
 }
 
 .hub-vote-closed-modal {

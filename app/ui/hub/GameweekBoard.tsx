@@ -15,6 +15,7 @@ import {
   Sparkles,
   Target,
   Vote,
+  X,
 } from "lucide-react";
 import type {
   GameWeekProposalRecord,
@@ -447,6 +448,7 @@ function AccumulatorCard({
   const [placementStatusMessage, setPlacementStatusMessage] = useState<string | null>(null);
   const [placementErrorMessage, setPlacementErrorMessage] = useState<string | null>(null);
   const [isSubmittingPlacement, setIsSubmittingPlacement] = useState(false);
+  const [isPlacementDialogOpen, setIsPlacementDialogOpen] = useState(false);
   const Icon =
     card.riskLevel === "safe"
       ? Shield
@@ -599,6 +601,7 @@ function AccumulatorCard({
       });
 
       setPlacementStatusMessage("Matchday bet marked as placed.");
+      setIsPlacementDialogOpen(false);
       refreshCurrentGameWeek();
     } catch (error) {
       setPlacementErrorMessage(
@@ -610,7 +613,8 @@ function AccumulatorCard({
   };
 
   return (
-    <article className={`hub-proposal-card${selected ? " is-selected" : ""}`}>
+    <>
+      <article className={`hub-proposal-card${selected ? " is-selected" : ""}`}>
       <div className={`hub-proposal-top${votingLocked ? " hub-proposal-top-locked" : ""}`}>
         <div className="hub-proposal-overview">
           <div className="hub-proposal-title-wrap">
@@ -748,6 +752,17 @@ function AccumulatorCard({
             {cashoutPanel}
           </div>
           <aside className="hub-proposal-detail-side">
+            {isAwaitingAdminPlacement ? (
+              <button
+                className="hub-primary-button hub-admin-placement-button"
+                type="button"
+                onClick={() => setIsPlacementDialogOpen(true)}
+              >
+                <Flag size={16} />
+                Market Bet Placed
+              </button>
+            ) : null}
+
             <div className="hub-proposal-metrics hub-proposal-metrics-stacked">
               <div className="hub-approach-metric hub-approach-metric-locked">
                 <span className="hub-metric-label">Approach</span>
@@ -794,66 +809,6 @@ function AccumulatorCard({
               />
             </div>
 
-            {isAwaitingAdminPlacement ? (
-              <div className="hub-consensus-inline-panel">
-                <div className="hub-panel-title-row">
-                  <Flag size={18} />
-                  <h2 className="hub-panel-title">Admin Placement</h2>
-                </div>
-                <p className="hub-subtitle">
-                  Record the actual stake, placed odds, and placement time to move this matchday into the placed state.
-                </p>
-                <form className="auth-form" onSubmit={handleMarkPlaced}>
-                  <label className="auth-field">
-                    <span className="hub-label">Actual Stake</span>
-                    <input
-                      className="auth-input"
-                      type="number"
-                      min="0.01"
-                      step="0.01"
-                      value={stakeAmount}
-                      onChange={(event) => setStakeAmount(event.target.value)}
-                      required
-                    />
-                  </label>
-                  <label className="auth-field">
-                    <span className="hub-label">Placed Odds</span>
-                    <input
-                      className="auth-input"
-                      type="number"
-                      min="1.01"
-                      step="0.01"
-                      value={placedDecimalOdds}
-                      onChange={(event) => setPlacedDecimalOdds(event.target.value)}
-                      required
-                    />
-                  </label>
-                  <label className="auth-field">
-                    <span className="hub-label">Placed At</span>
-                    <input
-                      className="auth-input"
-                      type="datetime-local"
-                      value={placedAt}
-                      onChange={(event) => setPlacedAt(event.target.value)}
-                      required
-                    />
-                  </label>
-                  <button
-                    className={`hub-primary-button hub-primary-button-${card.riskLevel}`}
-                    type="submit"
-                    disabled={isSubmittingPlacement}
-                  >
-                    {isSubmittingPlacement ? "Saving..." : "Mark Bet Placed"}
-                  </button>
-                </form>
-                {placementStatusMessage ? (
-                  <p className="auth-status auth-status-success">{placementStatusMessage}</p>
-                ) : null}
-                {placementErrorMessage ? (
-                  <p className="auth-status auth-status-error">{placementErrorMessage}</p>
-                ) : null}
-              </div>
-            ) : null}
           </aside>
         </div>
       ) : (
@@ -862,7 +817,95 @@ function AccumulatorCard({
           {cashoutPanel}
         </>
       )}
-    </article>
+      </article>
+
+      {isAwaitingAdminPlacement && isPlacementDialogOpen ? (
+        <div
+          className="hub-modal-backdrop"
+          role="presentation"
+          onClick={() => setIsPlacementDialogOpen(false)}
+        >
+          <div
+            className="hub-modal hub-admin-placement-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby={`matchday-placement-title-${card.id}`}
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="hub-modal-header hub-transactions-modal-header">
+              <div>
+                <h2 id={`matchday-placement-title-${card.id}`} className="hub-panel-title">
+                  Market Bet Placed
+                </h2>
+                <p className="hub-subtitle">
+                  Record the actual stake, placed odds, and placement time to move this
+                  matchday into the placed state.
+                </p>
+              </div>
+
+              <button
+                className="hub-icon-button hub-transactions-modal-close"
+                type="button"
+                aria-label="Close Market Bet Placed dialog"
+                onClick={() => setIsPlacementDialogOpen(false)}
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <form className="auth-form" onSubmit={handleMarkPlaced}>
+              <label className="auth-field">
+                <span className="hub-label">Actual Stake</span>
+                <input
+                  className="auth-input"
+                  type="number"
+                  min="0.01"
+                  step="0.01"
+                  value={stakeAmount}
+                  onChange={(event) => setStakeAmount(event.target.value)}
+                  required
+                />
+              </label>
+              <label className="auth-field">
+                <span className="hub-label">Placed Odds</span>
+                <input
+                  className="auth-input"
+                  type="number"
+                  min="1.01"
+                  step="0.01"
+                  value={placedDecimalOdds}
+                  onChange={(event) => setPlacedDecimalOdds(event.target.value)}
+                  required
+                />
+              </label>
+              <label className="auth-field">
+                <span className="hub-label">Placed At</span>
+                <input
+                  className="auth-input"
+                  type="datetime-local"
+                  value={placedAt}
+                  onChange={(event) => setPlacedAt(event.target.value)}
+                  required
+                />
+              </label>
+              <button
+                className="hub-primary-button hub-admin-placement-button"
+                type="submit"
+                disabled={isSubmittingPlacement}
+              >
+                {isSubmittingPlacement ? "Saving..." : "Market Bet Placed"}
+              </button>
+            </form>
+            {placementStatusMessage ? (
+              <p className="auth-status auth-status-success">{placementStatusMessage}</p>
+            ) : null}
+            {placementErrorMessage ? (
+              <p className="auth-status auth-status-error">{placementErrorMessage}</p>
+            ) : null}
+          </div>
+        </div>
+      ) : null}
+    </>
   );
 }
 

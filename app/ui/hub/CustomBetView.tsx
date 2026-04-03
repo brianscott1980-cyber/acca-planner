@@ -3,7 +3,7 @@
 import { useMemo, useState, type FormEvent, type ReactNode } from "react";
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
-import { ChevronRight, Flag, Flame, Trophy } from "lucide-react";
+import { ChevronRight, Flag, Flame, Trophy, X } from "lucide-react";
 import { withBasePath } from "../../../lib/site";
 import { getCustomBet } from "../../../services/custom_bet_service";
 import { markCustomBetAsStaked } from "../../../services/custom_bet_admin_service";
@@ -51,6 +51,7 @@ function CustomBetView({ customBet }: { customBet: CustomBetRecord }) {
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isPlacementDialogOpen, setIsPlacementDialogOpen] = useState(false);
   const [expandedBetRank, setExpandedBetRank] = useState<number | null>(null);
   const eventWindowLabel = useMemo(
     () => formatEventWindow(currentCustomBet.eventStartIso, currentCustomBet.eventEndIso),
@@ -117,6 +118,7 @@ function CustomBetView({ customBet }: { customBet: CustomBetRecord }) {
 
       setCurrentCustomBet(nextCustomBet);
       setStatusMessage("Custom bet marked as staked.");
+      setIsPlacementDialogOpen(false);
     } catch (error) {
       setErrorMessage(
         error instanceof Error ? error.message : "Failed to update the custom bet.",
@@ -282,6 +284,17 @@ function CustomBetView({ customBet }: { customBet: CustomBetRecord }) {
           </div>
 
           <aside className="hub-proposal-detail-side">
+            {isAdminUser && currentCustomBet.state === "pending" ? (
+              <button
+                className="hub-primary-button hub-admin-placement-button"
+                type="button"
+                onClick={() => setIsPlacementDialogOpen(true)}
+              >
+                <Flag size={16} />
+                Market Bet Placed
+              </button>
+            ) : null}
+
             <div className="hub-custom-bet-panel">
               <h2 className="hub-panel-title">Event Information</h2>
               <div className="hub-proposal-metrics hub-proposal-metrics-stacked">
@@ -397,71 +410,99 @@ function CustomBetView({ customBet }: { customBet: CustomBetRecord }) {
               </div>
             ) : null}
 
-            {isAdminUser && currentCustomBet.state === "pending" ? (
-              <div className="hub-custom-bet-panel">
-                <div className="hub-panel-title-row">
-                  <Flag size={18} />
-                  <h2 className="hub-panel-title">Admin Placement</h2>
-                </div>
-                <p className="hub-subtitle">
-                  Record the actual stake, placed odds, and placement time to move this recommendation into the staked state.
-                </p>
-                <form className="auth-form" onSubmit={handleMarkPlaced}>
-                  <label className="auth-field">
-                    <span className="hub-label">Actual Stake</span>
-                    <input
-                      className="auth-input"
-                      type="number"
-                      min="0.01"
-                      step="0.01"
-                      value={stakeAmount}
-                      onChange={(event) => setStakeAmount(event.target.value)}
-                      required
-                    />
-                  </label>
-                  <label className="auth-field">
-                    <span className="hub-label">Placed Odds</span>
-                    <input
-                      className="auth-input"
-                      type="number"
-                      min="1.01"
-                      step="0.01"
-                      value={placedDecimalOdds}
-                      onChange={(event) => setPlacedDecimalOdds(event.target.value)}
-                      required
-                    />
-                  </label>
-                  <label className="auth-field">
-                    <span className="hub-label">Placed At</span>
-                    <input
-                      className="auth-input"
-                      type="datetime-local"
-                      value={placedAt}
-                      onChange={(event) => setPlacedAt(event.target.value)}
-                      required
-                    />
-                  </label>
-                  <button
-                    className={`hub-primary-button ${getCustomBetPrimaryButtonClassName(
-                      currentCustomBet.sport,
-                    )}`}
-                    type="submit"
-                    disabled={isSubmitting}
-                  >
-                    {isSubmitting ? "Saving..." : "Mark Bet Placed"}
-                  </button>
-                </form>
-                {statusMessage ? (
-                  <p className="auth-status auth-status-success">{statusMessage}</p>
-                ) : null}
-                {errorMessage ? (
-                  <p className="auth-status auth-status-error">{errorMessage}</p>
-                ) : null}
-              </div>
-            ) : null}
           </aside>
         </div>
       </article>
+
+      {isAdminUser && currentCustomBet.state === "pending" && isPlacementDialogOpen ? (
+        <div
+          className="hub-modal-backdrop"
+          role="presentation"
+          onClick={() => setIsPlacementDialogOpen(false)}
+        >
+          <div
+            className="hub-modal hub-admin-placement-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby={`custom-bet-placement-title-${currentCustomBet.id}`}
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="hub-modal-header hub-transactions-modal-header">
+              <div>
+                <h2
+                  id={`custom-bet-placement-title-${currentCustomBet.id}`}
+                  className="hub-panel-title"
+                >
+                  Market Bet Placed
+                </h2>
+                <p className="hub-subtitle">
+                  Record the actual stake, placed odds, and placement time to move this
+                  recommendation into the staked state.
+                </p>
+              </div>
+
+              <button
+                className="hub-icon-button hub-transactions-modal-close"
+                type="button"
+                aria-label="Close Market Bet Placed dialog"
+                onClick={() => setIsPlacementDialogOpen(false)}
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <form className="auth-form" onSubmit={handleMarkPlaced}>
+              <label className="auth-field">
+                <span className="hub-label">Actual Stake</span>
+                <input
+                  className="auth-input"
+                  type="number"
+                  min="0.01"
+                  step="0.01"
+                  value={stakeAmount}
+                  onChange={(event) => setStakeAmount(event.target.value)}
+                  required
+                />
+              </label>
+              <label className="auth-field">
+                <span className="hub-label">Placed Odds</span>
+                <input
+                  className="auth-input"
+                  type="number"
+                  min="1.01"
+                  step="0.01"
+                  value={placedDecimalOdds}
+                  onChange={(event) => setPlacedDecimalOdds(event.target.value)}
+                  required
+                />
+              </label>
+              <label className="auth-field">
+                <span className="hub-label">Placed At</span>
+                <input
+                  className="auth-input"
+                  type="datetime-local"
+                  value={placedAt}
+                  onChange={(event) => setPlacedAt(event.target.value)}
+                  required
+                />
+              </label>
+              <button
+                className="hub-primary-button hub-admin-placement-button"
+                type="submit"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? "Saving..." : "Market Bet Placed"}
+              </button>
+            </form>
+            {statusMessage ? (
+              <p className="auth-status auth-status-success">{statusMessage}</p>
+            ) : null}
+            {errorMessage ? (
+              <p className="auth-status auth-status-error">{errorMessage}</p>
+            ) : null}
+          </div>
+        </div>
+      ) : null}
     </section>
   );
 }
@@ -581,18 +622,6 @@ function getCustomBetSportTagClassName(sport: CustomBetRecord["sport"]) {
   }
 
   return "hub-tag-safe";
-}
-
-function getCustomBetPrimaryButtonClassName(sport: CustomBetRecord["sport"]) {
-  if (sport === "horse_racing") {
-    return "hub-primary-button-aggressive";
-  }
-
-  if (sport === "football") {
-    return "hub-primary-button-balanced";
-  }
-
-  return "hub-primary-button-safe";
 }
 
 function formatCustomBetState(state: CustomBetRecord["state"]) {
