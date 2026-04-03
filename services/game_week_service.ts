@@ -81,7 +81,7 @@ export function canNavigateToGameWeek(gameWeekId: string) {
 
 export function getCurrentMatchdayNumber() {
   const currentGameWeek = getCurrentGameWeek();
-  return getMatchdayNumberFromGameWeekId(currentGameWeek.id);
+  return currentGameWeek ? getMatchdayNumberFromGameWeekId(currentGameWeek.id) : null;
 }
 
 export function getMatchdayNumberFromGameWeekId(gameWeekId: string) {

@@ -1,4 +1,5 @@
 import { supabase } from "../lib/supabase/client";
+import { getDefaultAppDataSnapshot } from "../services/app_data_service";
 import type { AppDataSnapshot } from "../types/app_data_type";
 
 type TableLoader = {
@@ -45,6 +46,8 @@ export async function loadRemoteAppDataSnapshot(): Promise<AppDataSnapshot> {
     throw new Error("Supabase is not configured.");
   }
 
+  const fallbackSnapshot = getDefaultAppDataSnapshot();
+
   const loadedEntries = await Promise.all(
     TABLE_LOADERS.map(async ({ tableName, snapshotKey }) => {
       const { data, error } = await supabase.from(tableName).select("*");
@@ -53,7 +56,11 @@ export async function loadRemoteAppDataSnapshot(): Promise<AppDataSnapshot> {
         throw new Error(`Failed to load ${tableName}: ${error.message}`);
       }
 
-      return [snapshotKey, (data ?? []).map(mapRemoteRowToAppShape)] as const;
+      const mappedRows = (data ?? []).map(mapRemoteRowToAppShape);
+      return [
+        snapshotKey,
+        mappedRows.length > 0 ? mappedRows : fallbackSnapshot[snapshotKey],
+      ] as const;
     }),
   );
 
