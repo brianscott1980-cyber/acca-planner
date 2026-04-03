@@ -422,23 +422,23 @@ function getCustomBetTimelineEntries(): TimelineEntry[] {
     dateRange: formatTimelineDateTime(customBet.placedAtIso ?? customBet.generatedAtIso),
     status: customBet.state === "staked" ? "placed" : "generated",
     label: `${formatCustomBetSport(customBet.sport)} · ${customBet.eventName}`,
-    stakeLabel: customBet.state === "staked" ? "Stake" : "Recommendation",
-    stake:
-      customBet.state === "staked" && customBet.stakeAmount !== undefined
-        ? formatCurrency(customBet.stakeAmount, {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2,
-          })
-        : customBet.recommendedSelection,
-    oddsLabel: customBet.state === "staked" ? "Placed Odds" : "Format",
+    stakeLabel: "Event",
+    stake: `${customBet.eventName}\n${customBet.competitionName}`,
+    multilineStake: true,
+    oddsLabel: customBet.state === "staked" ? "Stake" : "Recommendation",
     odds:
       customBet.state === "staked"
-        ? customBet.placedDecimalOdds?.toFixed(2) ?? customBet.decimalOdds.toFixed(2)
-        : customBet.bettingFormatRequested,
-    returnLabel: customBet.state === "staked" ? "Event" : "Odds",
+        ? customBet.stakeAmount !== undefined
+          ? formatCurrency(customBet.stakeAmount, {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            })
+          : "N/A"
+        : customBet.recommendedSelection,
+    returnLabel: customBet.state === "staked" ? "Placed Odds" : "Odds",
     returnValue:
       customBet.state === "staked"
-        ? formatTimelineDateTime(customBet.eventStartIso)
+        ? customBet.placedDecimalOdds?.toFixed(2) ?? customBet.decimalOdds.toFixed(2)
         : customBet.decimalOdds.toFixed(2),
     outcomeLabel: customBet.state === "staked" ? "Staked" : "Custom Bet",
     timestampIso: customBet.placedAtIso ?? customBet.generatedAtIso,
