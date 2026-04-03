@@ -1,4 +1,4 @@
-const CACHE_VERSION = "caddyshack-shell-v1";
+const CACHE_VERSION = "caddyshack-shell-v2";
 
 function getBasePath() {
   const scopePath = new URL(self.registration.scope).pathname.replace(/\/$/, "");
@@ -22,6 +22,10 @@ function getShellUrls() {
     toScopeUrl("/icon-maskable.svg"),
     toScopeUrl("/apple-touch-icon.svg"),
   ];
+}
+
+function isNextAssetRequest(requestUrl) {
+  return requestUrl.pathname.startsWith(`${getBasePath()}/_next/`);
 }
 
 self.addEventListener("install", (event) => {
@@ -54,6 +58,10 @@ self.addEventListener("fetch", (event) => {
   const requestUrl = new URL(request.url);
 
   if (requestUrl.origin !== self.location.origin) {
+    return;
+  }
+
+  if (isNextAssetRequest(requestUrl)) {
     return;
   }
 

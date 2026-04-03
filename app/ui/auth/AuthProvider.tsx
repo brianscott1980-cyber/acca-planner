@@ -11,6 +11,7 @@ import {
 import type { User } from "@supabase/supabase-js";
 import type { HubUser } from "../../../types/user_type";
 import { supabase } from "../../../lib/supabase/client";
+import { shouldUseRemoteAppData } from "../../../services/app_data_service";
 import { getMemberForSupabaseUser } from "../../../services/authentication_service";
 
 type AuthContextValue = {
@@ -28,57 +29,85 @@ type AuthProviderProps = {
 };
 
 export function AuthProvider({ children }: AuthProviderProps) {
-  const [authUser, setAuthUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(Boolean(supabase));
+  const requiresSupabaseAuth = shouldUseRemoteAppData();
+  const supabaseClient = supabase;
+  const [authUserState, setAuthUserState] = useState<User | null>(null);
+  const [isLoadingState, setIsLoadingState] = useState(
+    requiresSupabaseAuth && Boolean(supabaseClient),
+  );
 
   useEffect(() => {
-    if (!supabase) {
+    if (!requiresSupabaseAuth || !supabaseClient) {
       return;
     }
 
     let isMounted = true;
+    setIsLoadingState(true);
 
-    supabase.auth.getSession().then(({ data }) => {
-      if (!isMounted) {
-        return;
-      }
+    void supabaseClient.auth
+      .getSession()
+      .then(({ data, error }) => {
+        if (!isMounted) {
+          return;
+        }
 
-      setAuthUser(data.session?.user ?? null);
-      setIsLoading(false);
-    });
+        if (error) {
+          console.error("Failed to read Supabase session", error);
+        }
+
+        setAuthUserState(data.session?.user ?? null);
+      })
+      .catch((error) => {
+        if (!isMounted) {
+          return;
+        }
+
+        console.error("Failed to read Supabase session", error);
+        setAuthUserState(null);
+      })
+      .finally(() => {
+        if (!isMounted) {
+          return;
+        }
+
+        setIsLoadingState(false);
+      });
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    } = supabaseClient.auth.onAuthStateChange((_event, session) => {
       if (!isMounted) {
         return;
       }
 
-      setAuthUser(session?.user ?? null);
-      setIsLoading(false);
+      setAuthUserState(session?.user ?? null);
+      setIsLoadingState(false);
     });
 
     return () => {
       isMounted = false;
       subscription.unsubscribe();
     };
-  }, []);
+  }, [requiresSupabaseAuth, supabaseClient]);
+
+  const authUser = requiresSupabaseAuth ? authUserState : null;
+  const isLoading = requiresSupabaseAuth ? isLoadingState : false;
 
   const value = useMemo<AuthContextValue>(
     () => ({
       authUser,
       member: getMemberForSupabaseUser(authUser),
       isLoading,
-      isConfigured: Boolean(supabase),
+      isConfigured: !requiresSupabaseAuth || Boolean(supabaseClient),
       async signOut() {
-        if (!supabase) {
+        if (!supabaseClient) {
           return;
         }
 
-        await supabase.auth.signOut();
+        await supabaseClient.auth.signOut();
       },
     }),
-    [authUser, isLoading],
+    [authUser, isLoading, requiresSupabaseAuth, supabaseClient],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

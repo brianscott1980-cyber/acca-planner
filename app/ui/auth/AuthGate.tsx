@@ -2,6 +2,7 @@
 
 import { useEffect, type ReactNode } from "react";
 import { usePathname, useRouter } from "next/navigation";
+import { shouldUseRemoteAppData } from "../../../services/app_data_service";
 import { useAuth } from "./AuthProvider";
 
 type AuthGateProps = {
@@ -11,16 +12,21 @@ type AuthGateProps = {
 export function AuthGate({ children }: AuthGateProps) {
   const pathname = usePathname();
   const router = useRouter();
+  const requiresSupabaseAuth = shouldUseRemoteAppData();
   const { authUser, member, isLoading, isConfigured, signOut } = useAuth();
 
   useEffect(() => {
-    if (isLoading || !isConfigured || authUser) {
+    if (!requiresSupabaseAuth || isLoading || !isConfigured || authUser) {
       return;
     }
 
     const nextPath = pathname && pathname !== "/" ? `?next=${encodeURIComponent(pathname)}` : "";
     router.replace(`/login/${nextPath}`);
-  }, [authUser, isConfigured, isLoading, pathname, router]);
+  }, [authUser, isConfigured, isLoading, pathname, requiresSupabaseAuth, router]);
+
+  if (!requiresSupabaseAuth) {
+    return <>{children}</>;
+  }
 
   if (!isConfigured) {
     return (

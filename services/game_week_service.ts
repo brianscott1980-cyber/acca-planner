@@ -124,8 +124,12 @@ export function getMatchdayHref({
   stage?: "pending" | null;
 }) {
   const matchdayNumber = getMatchdayNumberFromGameWeekId(gameWeekId);
-  const basePathname = matchdayNumber ? `/matchday/${matchdayNumber}` : "/matchday";
-  return stage === "pending" ? `${basePathname}/pending/` : basePathname;
+  const encodedMatchday = encodeURIComponent(
+    matchdayNumber ? String(matchdayNumber) : gameWeekId,
+  );
+  const basePathname = stage === "pending" ? "/matchday/pending/" : "/matchday/";
+
+  return `${basePathname}?matchday=${encodedMatchday}`;
 }
 
 export function getStaticMatchdayNumberParams() {
