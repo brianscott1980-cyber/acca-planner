@@ -38,8 +38,8 @@ export const metadata: Metadata = {
         type: "image/png",
       },
       {
-        url: withBasePath("/assets/app_logos/logo_1024px.png"),
-        sizes: "1024x1024",
+        url: withBasePath("/assets/app_logos/logo_180px.png"),
+        sizes: "180x180",
         type: "image/png",
       },
     ],

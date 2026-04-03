@@ -42,12 +42,6 @@ export default function manifest(): MetadataRoute.Manifest {
         purpose: "maskable",
       },
       {
-        src: withBasePath("/assets/app_logos/logo_1024px.png"),
-        sizes: "1024x1024",
-        type: "image/png",
-        purpose: "any",
-      },
-      {
         src: withBasePath("/assets/app_logos/logo_180px.png"),
         sizes: "180x180",
         type: "image/png",

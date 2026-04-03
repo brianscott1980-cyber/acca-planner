@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   Download,
   History,
@@ -50,6 +50,7 @@ const navItems = [
 export function HubAppShell({ children }: HubAppShellProps) {
   const pathname = usePathname();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const ledgerSummary = getLedgerSummary();
   const { member: currentUser, signOut } = useAuth();
   const equityShareValue =
@@ -62,12 +63,28 @@ export function HubAppShell({ children }: HubAppShellProps) {
   const [installPromptEvent, setInstallPromptEvent] =
     useState<DeferredInstallPromptEvent | null>(null);
   const [isInstallingApp, setIsInstallingApp] = useState(false);
+  const [pwaDebugState, setPwaDebugState] = useState<{
+    manifestLoaded: boolean | null;
+    serviceWorkerSupported: boolean;
+    serviceWorkerRegistered: boolean | null;
+    installPromptCaptured: boolean;
+    isStandalone: boolean;
+  }>({
+    manifestLoaded: null,
+    serviceWorkerSupported: false,
+    serviceWorkerRegistered: null,
+    installPromptCaptured: false,
+    isStandalone: false,
+  });
   const initialSimulatedNowRef = useRef<Date | null>(null);
   const mountedAtRef = useRef<number | null>(null);
   const currentMatchdayNumber = getCurrentMatchdayNumber();
   const roiToneClass =
     ledgerSummary.roiPercentage < 0 ? "is-negative" : "is-positive";
   const canInstallApp = Boolean(installPromptEvent);
+  const showPwaDebug =
+    searchParams.get("pwaDebug") === "1" ||
+    searchParams.get("pwa-debug") === "1";
   const navigateToLedgerFromHeader = (source: string) => {
     trackEvent("navigate_ledger_from_header", { source });
     router.push("/ledger");
@@ -143,6 +160,11 @@ export function HubAppShell({ children }: HubAppShellProps) {
         standaloneMediaQuery.matches ||
         (window.navigator as Navigator & { standalone?: boolean }).standalone === true;
 
+      setPwaDebugState((previous) => ({
+        ...previous,
+        isStandalone,
+      }));
+
       if (isStandalone) {
         setInstallPromptEvent(null);
       }
@@ -170,6 +192,94 @@ export function HubAppShell({ children }: HubAppShellProps) {
       standaloneMediaQuery.removeEventListener("change", syncInstallAvailability);
       window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
       window.removeEventListener("appinstalled", handleAppInstalled);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    setPwaDebugState((previous) => ({
+      ...previous,
+      installPromptCaptured: canInstallApp,
+    }));
+  }, [canInstallApp]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    let cancelled = false;
+    const serviceWorkerSupported = "serviceWorker" in navigator;
+
+    setPwaDebugState((previous) => ({
+      ...previous,
+      serviceWorkerSupported,
+    }));
+
+    const checkPwaState = async () => {
+      try {
+        const manifestResponse = await fetch(withBasePath("/manifest.webmanifest"), {
+          cache: "no-store",
+        });
+
+        if (!cancelled) {
+          setPwaDebugState((previous) => ({
+            ...previous,
+            manifestLoaded: manifestResponse.ok,
+          }));
+        }
+      } catch {
+        if (!cancelled) {
+          setPwaDebugState((previous) => ({
+            ...previous,
+            manifestLoaded: false,
+          }));
+        }
+      }
+
+      if (!serviceWorkerSupported) {
+        if (!cancelled) {
+          setPwaDebugState((previous) => ({
+            ...previous,
+            serviceWorkerRegistered: false,
+          }));
+        }
+        return;
+      }
+
+      try {
+        const registrations = await navigator.serviceWorker.getRegistrations();
+        const serviceWorkerPath = withBasePath("/sw.js");
+        const hasMatchingRegistration = registrations.some(
+          (registration) =>
+            registration.active?.scriptURL.endsWith(serviceWorkerPath) ||
+            registration.installing?.scriptURL.endsWith(serviceWorkerPath) ||
+            registration.waiting?.scriptURL.endsWith(serviceWorkerPath),
+        );
+
+        if (!cancelled) {
+          setPwaDebugState((previous) => ({
+            ...previous,
+            serviceWorkerRegistered: hasMatchingRegistration,
+          }));
+        }
+      } catch {
+        if (!cancelled) {
+          setPwaDebugState((previous) => ({
+            ...previous,
+            serviceWorkerRegistered: false,
+          }));
+        }
+      }
+    };
+
+    void checkPwaState();
+
+    return () => {
+      cancelled = true;
     };
   }, []);
 
@@ -479,8 +589,34 @@ export function HubAppShell({ children }: HubAppShellProps) {
           </div>
         </div>
       ) : null}
+
+      {showPwaDebug ? (
+        <aside className="hub-pwa-debug" aria-label="PWA debug status">
+          <p className="hub-pwa-debug-title">PWA Debug</p>
+          <div className="hub-pwa-debug-grid">
+            <span>Manifest</span>
+            <strong>{formatDebugStatus(pwaDebugState.manifestLoaded)}</strong>
+            <span>SW support</span>
+            <strong>{pwaDebugState.serviceWorkerSupported ? "yes" : "no"}</strong>
+            <span>SW registered</span>
+            <strong>{formatDebugStatus(pwaDebugState.serviceWorkerRegistered)}</strong>
+            <span>Install prompt</span>
+            <strong>{pwaDebugState.installPromptCaptured ? "yes" : "no"}</strong>
+            <span>Standalone</span>
+            <strong>{pwaDebugState.isStandalone ? "yes" : "no"}</strong>
+          </div>
+        </aside>
+      ) : null}
     </div>
   );
+}
+
+function formatDebugStatus(value: boolean | null) {
+  if (value === null) {
+    return "checking";
+  }
+
+  return value ? "yes" : "no";
 }
 
 function isActiveNavItem(pathname: string, href: string) {
