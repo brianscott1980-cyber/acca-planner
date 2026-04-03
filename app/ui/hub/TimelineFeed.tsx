@@ -259,7 +259,7 @@ function TimelineMatchday({ entry }: { entry: TimelineEntry }) {
 
   return (
     <article className="hub-timeline-item">
-      <div className={`hub-timeline-dot ${getTimelineStatusClassName(entry.status)}`} />
+      <div className={`hub-timeline-dot ${getTimelineDotClassName(entry.iconKind)}`} />
       <div
         className={`hub-timeline-card${entry.status === "loss" ? " is-muted" : ""}${
           isNavigable ? " is-clickable" : ""
@@ -582,6 +582,22 @@ function getTimelineIconClassName(iconKind: TimelineEntry["iconKind"]) {
   }
 
   return "hub-proposal-icon-aggressive";
+}
+
+function getTimelineDotClassName(iconKind: TimelineEntry["iconKind"]) {
+  if (iconKind === "money") {
+    return "is-safe";
+  }
+
+  if (iconKind === "football") {
+    return "is-balanced";
+  }
+
+  if (iconKind === "golf") {
+    return "is-safe";
+  }
+
+  return "is-aggressive";
 }
 
 function getGeneratedStrategyLabel(riskLevel: "safe" | "balanced" | "aggressive") {

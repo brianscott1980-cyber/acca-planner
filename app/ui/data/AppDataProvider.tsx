@@ -84,23 +84,16 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
     return (
       <section className="auth-shell">
         <div className="auth-card hub-panel">
-          <div className="hub-brand" style={{ justifyContent: "center", marginBottom: "1rem" }}>
-            <div className="hub-brand-mark">
-              <Image
-                className="hub-brand-logo"
-                src={withBasePath("/assets/app_logos/logo_64px.png")}
-                alt="Caddyshack logo"
-                width={36}
-                height={36}
-                priority
-              />
-            </div>
-            <div>
-              <p className="hub-brand-title">Caddyshack</p>
-              <p className="hub-brand-subtitle">AI betting hub</p>
-            </div>
+          <div style={{ display: "flex", justifyContent: "center", marginBottom: "1.25rem" }}>
+            <Image
+              src={withBasePath("/assets/app_logos/logo_512px.png")}
+              alt="Caddyshack logo"
+              width={300}
+              height={300}
+              priority
+            />
           </div>
-          <h1 className="hub-title">Syndicate Starting Up</h1>
+          <h1 className="hub-title">Loading syndicate data</h1>
           <p className="hub-subtitle">Loading the latest syndicate data.</p>
         </div>
       </section>
