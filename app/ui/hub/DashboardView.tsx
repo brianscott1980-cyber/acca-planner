@@ -4,11 +4,11 @@ import { useSyncExternalStore } from "react";
 import { useSearchParams } from "next/navigation";
 import {
   getGameWeekSelectedProposal,
-  type GameWeekViewState,
   getGameWeekViewState,
   getUserVoteForGameWeek,
 } from "../../../services/game_week_service";
 import { getSimulationUpdatedAtIso } from "../../../services/league_simulation_service";
+import type { GameWeekViewState } from "../../../types/game_week_type";
 import { ConsensusPanel } from "./ConsensusPanel";
 import { GameWeekProvider } from "./GameWeekProvider";
 import { useCurrentGameWeek } from "./GameWeekProvider";
