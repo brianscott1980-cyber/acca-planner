@@ -374,6 +374,14 @@ function renderSchemaSql(datasets) {
     statements.push("");
   }
 
+  statements.push("grant usage on schema public to authenticated;");
+  statements.push("");
+
+  for (const dataset of datasets) {
+    statements.push(renderReadAccessStatements(dataset));
+    statements.push("");
+  }
+
   return `${statements.join("\n").trim()}\n`;
 }
 
@@ -412,6 +420,20 @@ function renderCreateTable(dataset) {
   }
 
   return `create table if not exists public.${dataset.tableName} (\n${columnDefinitions.join(",\n")}\n);`;
+}
+
+function renderReadAccessStatements(dataset) {
+  const policyName = `Authenticated users can read ${dataset.tableName}`;
+
+  return [
+    `grant select on public.${dataset.tableName} to authenticated;`,
+    `drop policy if exists "${policyName}" on public.${dataset.tableName};`,
+    `create policy "${policyName}"`,
+    `on public.${dataset.tableName}`,
+    "for select",
+    "to authenticated",
+    "using (true);",
+  ].join("\n");
 }
 
 function renderSeedSql(datasets) {

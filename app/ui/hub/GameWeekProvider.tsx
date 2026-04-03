@@ -17,6 +17,7 @@ import {
   getAccessibleGameWeekById,
   getGameWeekById,
   getCurrentGameWeek,
+  getGameWeekIdFromMatchdayNumber,
   getMatchdayHref,
   isGameWeekVoteLocked,
   updateUserVoteForGameWeek,
@@ -345,9 +346,10 @@ function getInitialGameWeekState(
   loggedInUserId: string | null,
   gameWeekId: string | null,
 ) {
+  const resolvedGameWeekId = getGameWeekIdFromMatchdayNumber(gameWeekId) ?? gameWeekId;
   const currentGameWeek =
-    getAccessibleGameWeekById(gameWeekId) ??
-    getGameWeekById(gameWeekId) ??
+    getAccessibleGameWeekById(resolvedGameWeekId) ??
+    getGameWeekById(resolvedGameWeekId) ??
     getCurrentGameWeek() ??
     EMPTY_GAME_WEEK;
 

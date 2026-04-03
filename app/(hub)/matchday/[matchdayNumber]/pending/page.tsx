@@ -1,16 +1,10 @@
 import { Suspense } from "react";
-import { notFound, redirect } from "next/navigation";
 import {
   DashboardView,
   DashboardViewWithRouteGameWeekId,
 } from "../../../../ui/hub/DashboardView";
 import { GameWeekProvider } from "../../../../ui/hub/GameWeekProvider";
 import {
-  getAccessibleGameWeekById,
-  getGameWeekIdFromMatchdayNumber,
-  getGameWeekViewState,
-  getMatchdayHref,
-  getPendingProposalIdForGameWeek,
   getStaticMatchdayNumberParams,
 } from "../../../../../services/game_week_service";
 
@@ -24,40 +18,17 @@ export default async function MatchdayPendingPage({
   params: Promise<{ matchdayNumber: string }>;
 }) {
   const { matchdayNumber } = await params;
-  const gameWeekId = getGameWeekIdFromMatchdayNumber(matchdayNumber);
-
-  if (!gameWeekId) {
-    notFound();
-  }
-
-  const accessibleGameWeek = getAccessibleGameWeekById(gameWeekId);
-
-  if (accessibleGameWeek && accessibleGameWeek.id !== gameWeekId) {
-    redirect(
-      getMatchdayHref({
-        gameWeekId: accessibleGameWeek.id,
-        stage:
-          getGameWeekViewState(accessibleGameWeek) === "locked" ? "pending" : null,
-      }),
-    );
-  }
-
-  const pendingProposalId = getPendingProposalIdForGameWeek(gameWeekId);
 
   return (
     <Suspense
       fallback={
-        <GameWeekProvider gameWeekId={gameWeekId}>
-          <DashboardView
-            forcedProposalId={pendingProposalId}
-            forcedViewState="locked"
-          />
+        <GameWeekProvider gameWeekId={matchdayNumber}>
+          <DashboardView forcedViewState="locked" />
         </GameWeekProvider>
       }
     >
       <DashboardViewWithRouteGameWeekId
-        routeGameWeekId={gameWeekId}
-        routeForcedProposalId={pendingProposalId}
+        routeGameWeekId={matchdayNumber}
         routeViewState="locked"
       />
     </Suspense>
