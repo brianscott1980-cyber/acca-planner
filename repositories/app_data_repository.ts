@@ -1,6 +1,7 @@
 import { supabase } from "../lib/supabase/client";
 import { getDefaultAppDataSnapshot } from "../services/app_data_service";
 import type { AppDataSnapshot } from "../types/app_data_type";
+import type { CustomBetRecord } from "../types/custom_bet_type";
 import type { LeagueClubRecord } from "../types/league_club_type";
 import type { MatchdayProposalRecord } from "../types/matchday_type";
 
@@ -26,6 +27,7 @@ const TABLE_LOADERS: TableLoader[] = [
   { tableName: "matchday_bet_lines", snapshotKey: "matchdayBetLines" },
   { tableName: "matchday_forms", snapshotKey: "matchdayForms" },
   { tableName: "matchday_form_matches", snapshotKey: "matchdayFormMatches" },
+  { tableName: "custom_bets", snapshotKey: "customBets", optional: true },
   { tableName: "league_data_meta", snapshotKey: "leagueDataMeta" },
   {
     tableName: "league_data_matchday_simulations",
@@ -105,6 +107,13 @@ function resolveSnapshotRows(
     );
   }
 
+  if (snapshotKey === "customBets") {
+    return mergeCustomBetRows(
+      mappedRows as CustomBetRecord[],
+      fallbackRows as CustomBetRecord[],
+    );
+  }
+
   return mappedRows.length > 0 ? mappedRows : fallbackRows;
 }
 
@@ -158,13 +167,39 @@ function mergeMatchdayProposalRows(
   });
 }
 
+function mergeCustomBetRows(
+  remoteRows: CustomBetRecord[],
+  fallbackRows: CustomBetRecord[],
+) {
+  if (remoteRows.length === 0) {
+    return fallbackRows;
+  }
+
+  const mergedRows = [...remoteRows];
+  const seenIds = new Set(remoteRows.map((row) => row.id));
+
+  for (const row of fallbackRows) {
+    if (seenIds.has(row.id)) {
+      continue;
+    }
+
+    mergedRows.push(row);
+  }
+
+  return mergedRows;
+}
+
 function toCamelCase(value: string) {
   return value.replace(/_([a-z])/g, (_, character: string) => character.toUpperCase());
 }
 
 function isMissingRelationError(error: { code?: string; message?: string }) {
+  const message = String(error.message ?? "").toLowerCase();
+
   return (
     error.code === "42P01" ||
-    String(error.message ?? "").toLowerCase().includes("does not exist")
+    message.includes("does not exist") ||
+    message.includes("schema cache") ||
+    message.includes("could not find the table")
   );
 }

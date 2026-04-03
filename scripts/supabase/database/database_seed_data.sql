@@ -16,6 +16,8 @@ insert into public.league_clubs (name, slug, badge_path, badge_source_url)
 values
   ('Arsenal', 'arsenal', '/assets/clubs/premier-league/arsenal.png', 'https://r2.thesportsdb.com/images/media/team/badge/uyhbfe1612467038.png'),
   ('Aston Villa', 'aston-villa', '/assets/clubs/premier-league/aston-villa.png', 'https://r2.thesportsdb.com/images/media/team/badge/jykrpv1717309891.png'),
+  ('Bayer Leverkusen', 'bayer-leverkusen', '/assets/clubs/european/bayer-leverkusen.png', 'https://r2.thesportsdb.com/images/media/team/badge/3x9k851726760113.png'),
+  ('Bayern Munich', 'bayern-munich', '/assets/clubs/european/bayern-munich.png', 'https://r2.thesportsdb.com/images/media/team/badge/01ogkh1716960412.png'),
   ('Bournemouth', 'bournemouth', '/assets/clubs/premier-league/bournemouth.png', 'https://r2.thesportsdb.com/images/media/team/badge/y08nak1534071116.png'),
   ('Brentford', 'brentford', '/assets/clubs/premier-league/brentford.png', 'https://r2.thesportsdb.com/images/media/team/badge/grv1aw1546453779.png'),
   ('Brighton & Hove Albion', 'brighton-hove-albion', '/assets/clubs/premier-league/brighton-hove-albion.png', 'https://r2.thesportsdb.com/images/media/team/badge/ywypts1448810904.png'),
@@ -23,71 +25,119 @@ values
   ('Chelsea', 'chelsea', '/assets/clubs/premier-league/chelsea.png', 'https://r2.thesportsdb.com/images/media/team/badge/yvwvtu1448813215.png'),
   ('Crystal Palace', 'crystal-palace', '/assets/clubs/premier-league/crystal-palace.png', 'https://r2.thesportsdb.com/images/media/team/badge/ia6i3m1656014992.png'),
   ('Everton', 'everton', '/assets/clubs/premier-league/everton.png', 'https://r2.thesportsdb.com/images/media/team/badge/eqayrf1523184794.png'),
+  ('Freiburg', 'freiburg', '/assets/clubs/european/freiburg.png', 'https://r2.thesportsdb.com/images/media/team/badge/urwtup1473453288.png'),
   ('Fulham', 'fulham', '/assets/clubs/premier-league/fulham.png', 'https://r2.thesportsdb.com/images/media/team/badge/xwwvyt1448811086.png'),
+  ('Inter Milan', 'inter-milan', '/assets/clubs/european/inter-milan.png', 'https://r2.thesportsdb.com/images/media/team/badge/ryhu6d1617113103.png'),
   ('Leeds United', 'leeds-united', '/assets/clubs/premier-league/leeds-united.png', 'https://r2.thesportsdb.com/images/media/team/badge/jcgrml1756649030.png'),
   ('Liverpool', 'liverpool', '/assets/clubs/premier-league/liverpool.png', 'https://r2.thesportsdb.com/images/media/team/badge/kfaher1737969724.png'),
+  ('Mallorca', 'mallorca', '/assets/clubs/european/mallorca.png', 'https://r2.thesportsdb.com/images/media/team/badge/ssptsx1473503730.png'),
   ('Manchester City', 'manchester-city', '/assets/clubs/premier-league/manchester-city.png', 'https://r2.thesportsdb.com/images/media/team/badge/vwpvry1467462651.png'),
   ('Manchester United', 'manchester-united', '/assets/clubs/premier-league/manchester-united.png', 'https://r2.thesportsdb.com/images/media/team/badge/xzqdr11517660252.png'),
   ('Newcastle United', 'newcastle-united', '/assets/clubs/premier-league/newcastle-united.png', 'https://r2.thesportsdb.com/images/media/team/badge/lhwuiz1621593302.png'),
   ('Nottingham Forest', 'nottingham-forest', '/assets/clubs/premier-league/nottingham-forest.png', 'https://r2.thesportsdb.com/images/media/team/badge/bk4qjs1546440351.png'),
+  ('Real Madrid', 'real-madrid', '/assets/clubs/european/real-madrid.png', 'https://r2.thesportsdb.com/images/media/team/badge/g4ev2c1522175902.png'),
+  ('Roma', 'roma', '/assets/clubs/european/roma.png', 'https://r2.thesportsdb.com/images/media/team/badge/jwro2s1760820674.png'),
   ('Sunderland', 'sunderland', '/assets/clubs/premier-league/sunderland.png', 'https://r2.thesportsdb.com/images/media/team/badge/tprtus1448813498.png'),
   ('Tottenham Hotspur', 'tottenham-hotspur', '/assets/clubs/premier-league/tottenham-hotspur.png', 'https://r2.thesportsdb.com/images/media/team/badge/dfyfhl1604094109.png'),
   ('West Ham United', 'west-ham-united', '/assets/clubs/premier-league/west-ham-united.png', 'https://r2.thesportsdb.com/images/media/team/badge/yutyxs1467459956.png'),
+  ('Wolfsburg', 'wolfsburg', '/assets/clubs/european/wolfsburg.png', 'https://r2.thesportsdb.com/images/media/team/badge/07kp421599680274.png'),
   ('Wolverhampton Wanderers', 'wolverhampton-wanderers', '/assets/clubs/premier-league/wolverhampton-wanderers.png', 'https://r2.thesportsdb.com/images/media/team/badge/u9qr031621593327.png')
 on conflict (slug) do nothing;
 
 insert into public.matchday_game_weeks (id, slug, name, description, window_start_iso, window_end_iso, starts_in, proposal_ids, votes_by_user_id, simulated_slip)
 values
-  ('md-1', 'matchday-1-voting-stage', 'Matchday 1 Voting Stage', 'Ladbrokes weekend slate for 4 April 2026 to 6 April 2026. No Premier League fixtures were listed inside this window, so the build leans on SPFL, La Liga, Bundesliga, and Serie A markets only.', '2026-04-04T08:00:00.000Z', '2026-04-06T22:00:00.000Z', 'Weekend ahead', '["md-1:proposal:safe","md-1:proposal:balanced","md-1:proposal:aggressive"]'::jsonb, '{}'::jsonb, null)
+  ('md-1', 'matchday-1', 'Matchday 1 Voting Stage', 'Fresh Ladbrokes weekend slate for the opening April window, with the pot still at the original GBP70 baseline and no settled betting run pushing the AI away from a balanced call.', '2026-04-04T08:00:00.000Z', '2026-04-06T22:00:00.000Z', 'Starts tomorrow', '["proposal-md-1-safe","proposal-md-1-balanced","proposal-md-1-aggressive"]'::jsonb, '{}'::jsonb, null)
 on conflict (id) do nothing;
 
 insert into public.market_analysis_snapshots (id, bookmaker, snapshot_date, matchday_id)
 values
-  ('md-1:ladbrokes:2026-04-04', 'Ladbrokes', '2026-04-04', 'md-1')
+  ('snapshot-md-1-ladbrokes-2026-04-04', 'Ladbrokes', '2026-04-04', 'md-1')
 on conflict (id) do nothing;
 
 insert into public.market_analysis_selections (id, snapshot_id, fixture, market, selection, decimal_odds)
 values
-  ('md-1:market:real-sociedad-win', 'md-1:ladbrokes:2026-04-04', 'Real Sociedad vs Levante UD', 'Match Result', 'Real Sociedad', 1.65),
-  ('md-1:market:bayern-win', 'md-1:ladbrokes:2026-04-04', 'SC Freiburg vs Bayern Munich', 'Match Result', 'Bayern Munich', 1.4),
-  ('md-1:market:rangers-win', 'md-1:ladbrokes:2026-04-04', 'Rangers FC vs Dundee United', 'Match Result', 'Rangers FC', 1.22),
-  ('md-1:market:atalanta-win', 'md-1:ladbrokes:2026-04-04', 'US Lecce vs Atalanta BC', 'Match Result', 'Atalanta BC', 1.7),
-  ('md-1:market:leverkusen-win', 'md-1:ladbrokes:2026-04-04', 'Bayer Leverkusen vs VfL Wolfsburg', 'Match Result', 'Bayer Leverkusen', 1.4),
-  ('md-1:market:betis-win', 'md-1:ladbrokes:2026-04-04', 'Real Betis vs Espanyol Barcelona', 'Match Result', 'Real Betis', 1.8),
-  ('md-1:market:lazio-win', 'md-1:ladbrokes:2026-04-04', 'SS Lazio vs Parma Calcio', 'Match Result', 'SS Lazio', 1.8),
-  ('md-1:market:hearts-win', 'md-1:ladbrokes:2026-04-04', 'Livingston vs Hearts', 'Match Result', 'Hearts', 1.55),
-  ('md-1:market:sassuolo-win', 'md-1:ladbrokes:2026-04-04', 'US Sassuolo Calcio vs Cagliari', 'Match Result', 'US Sassuolo Calcio', 2),
-  ('md-1:market:fiorentina-win', 'md-1:ladbrokes:2026-04-04', 'Hellas Verona vs ACF Fiorentina', 'Match Result', 'ACF Fiorentina', 1.91),
-  ('md-1:market:barcelona-win', 'md-1:ladbrokes:2026-04-04', 'Atletico Madrid vs FC Barcelona', 'Match Result', 'FC Barcelona', 2.15),
-  ('md-1:market:bologna-win', 'md-1:ladbrokes:2026-04-04', 'US Cremonese vs Bologna FC', 'Match Result', 'Bologna FC', 2.05)
+  ('market-md-1-bayern-win', 'snapshot-md-1-ladbrokes-2026-04-04', 'SC Freiburg v Bayern Munich', 'Match Betting', 'Bayern Munich', 1.4),
+  ('market-md-1-leverkusen-win', 'snapshot-md-1-ladbrokes-2026-04-04', 'Bayer Leverkusen v Wolfsburg', 'Match Betting', 'Bayer Leverkusen', 1.4),
+  ('market-md-1-inter-win', 'snapshot-md-1-ladbrokes-2026-04-04', 'Inter Milan v Roma', 'Match Betting', 'Inter Milan', 1.67),
+  ('market-md-1-real-win', 'snapshot-md-1-ladbrokes-2026-04-04', 'Mallorca v Real Madrid', 'Match Betting', 'Real Madrid', 1.65),
+  ('market-md-1-mallorca-real-btts-yes', 'snapshot-md-1-ladbrokes-2026-04-04', 'Mallorca v Real Madrid', 'Both Teams to Score', 'Yes', 1.67),
+  ('market-md-1-inter-roma-btts-yes', 'snapshot-md-1-ladbrokes-2026-04-04', 'Inter Milan v Roma', 'Both Teams to Score', 'Yes', 1.91)
 on conflict (id) do nothing;
 
-insert into public.matchday_proposals (id, game_week_id, proposal_id, risk_level, title, summary, legs, status_label, bet_line_ids, ai_recommended)
+insert into public.matchday_proposals (id, game_week_id, proposal_id, risk_level, title, summary, legs, status_label, cashout_watch_list, bet_line_ids, ai_recommended)
 values
-  ('md-1:proposal:safe', 'md-1', 'safe', 'safe', 'Defensive Accumulator', 'A shorter-price fourfold that leans on the strongest favourites in Spain, Germany, Scotland, and Italy, keeping the final swing for Monday rather than front-loading volatility.', 4, 'Lower Variance', '["md-1:betline:safe:1","md-1:betline:safe:2","md-1:betline:safe:3","md-1:betline:safe:4"]'::jsonb, false),
-  ('md-1:proposal:balanced', 'md-1', 'balanced', 'balanced', 'Neutral Accumulator', 'The best blend of price and survivability this weekend, using firm home favourites before handing the final outcome to a Sunday away leg with enough edge to keep the payout meaningful.', 4, 'Balanced Build', '["md-1:betline:balanced:1","md-1:betline:balanced:2","md-1:betline:balanced:3","md-1:betline:balanced:4"]'::jsonb, true),
-  ('md-1:proposal:aggressive', 'md-1', 'aggressive', 'aggressive', 'Aggressive Accumulator', 'A higher-volatility fourfold that waits for narrower edge spots and bigger away prices, with Barcelona and Bologna carrying the sharpest late cashout swing.', 4, 'High Upside', '["md-1:betline:aggressive:1","md-1:betline:aggressive:2","md-1:betline:aggressive:3","md-1:betline:aggressive:4"]'::jsonb, false)
+  ('proposal-md-1-safe', 'md-1', 'safe', 'safe', 'Defensive Accumulator', 'Three straight result bets keep the weekend anchored to strong favourites and a home Inter side getting key attacking help back, protecting optionality while the pot is still flat at its opening level.', 3, 'Preserve', '["Protect value if Bayern fail to control territory early at Freiburg or if their main front-line threat is withdrawn before the hour mark.","Leverkusen are the shortest leg in the chain, so an early Wolfsburg lead or visible drop in home pressure is the clearest upset warning for this slip.","If Inter lose Lautaro''s attacking threat through a substitution or setback, the final leg becomes less secure and an available cashout is easier to justify."]'::jsonb, '["betline-md-1-safe-bayern-win","betline-md-1-safe-leverkusen-win","betline-md-1-safe-inter-win"]'::jsonb, null),
+  ('proposal-md-1-balanced', 'md-1', 'balanced', 'balanced', 'Balanced Accumulator', 'The recommended middle route keeps two favourite outcomes but adds the stronger Milan goals angle, which suits a stable pot with no prior settled streak demanding a more defensive or more aggressive jump.', 3, 'Balance', '["Reassess after Bayern and Madrid: if one favourite has won without much control, take that as a warning before letting the Sunday goals leg run.","For Mallorca v Real Madrid, a Madrid defensive reshuffle or a key attacker being substituted can quickly change the BTTS path and make a mid-range cashout attractive.","In Inter v Roma, stay alert for Roma growing into transitions or Inter losing their front-two intensity, because that shifts the BTTS leg from strong to fragile very quickly."]'::jsonb, '["betline-md-1-balanced-bayern-win","betline-md-1-balanced-real-win","betline-md-1-balanced-inter-roma-btts"]'::jsonb, true),
+  ('proposal-md-1-aggressive', 'md-1', 'aggressive', 'aggressive', 'Aggressive Accumulator', 'This chase version leans into two goals markets and still keeps Madrid and Leverkusen onside, holding the bigger swing for the later Sunday leg once the earlier anchors have had a chance to land.', 4, 'Upside', '["This build is most exposed if Mallorca v Real Madrid starts cagey, so a slow game with few shots or an early attacking substitution is a serious warning for the BTTS leg.","If Leverkusen do not pin Wolfsburg back early, do not ignore the upset signal just because it is the shortest-priced leg in the slip.","The last swing sits with Inter v Roma BTTS, so any injury, substitution, or tactical change that removes one side''s counter-attacking threat is a strong reason to consider cashing out."]'::jsonb, '["betline-md-1-aggressive-leverkusen-win","betline-md-1-aggressive-mallorca-real-btts","betline-md-1-aggressive-real-win","betline-md-1-aggressive-inter-roma-btts"]'::jsonb, null)
 on conflict (id) do nothing;
 
 insert into public.matchday_bet_lines (id, game_week_id, proposal_entity_id, sort_order, label, schedule_note, ai_reasoning, form_id, form_note, market_id, odds)
 values
-  ('md-1:betline:safe:1', 'md-1', 'md-1:proposal:safe', 1, 'Real Sociedad to beat Levante UD', 'Sat 4 Apr, 12:00 BST', 'Ladbrokes make Real Sociedad the clearest Saturday lunchtime anchor in La Liga, so this leg opens the slip with a firm home favourite rather than an early price swing.', null, 'Ladbrokes list Real Sociedad at 13/20 with Levante UD 19/5 and the draw 3/1 for the 12:00 BST kickoff.', 'md-1:market:real-sociedad-win', '1.65'),
-  ('md-1:betline:safe:2', 'md-1', 'md-1:proposal:safe', 2, 'Bayern Munich to beat SC Freiburg', 'Sat 4 Apr, 13:30 BST', 'Bayern are the shortest Bundesliga road price on the card, which fits the defensive brief of stacking dependable favourites before the more exposed later windows.', null, 'Ladbrokes quote Bayern Munich at 2/5 away to SC Freiburg, with Freiburg 11/2 and the draw 17/4.', 'md-1:market:bayern-win', '1.40'),
-  ('md-1:betline:safe:3', 'md-1', 'md-1:proposal:safe', 3, 'Rangers FC to beat Dundee United', 'Sat 4 Apr, 14:00 BST', 'Rangers are the most controlled SPFL match-result price in the window, so this keeps the slip on short-odds rails before the final Italian closer.', null, 'Ladbrokes list Rangers FC at 2/9 against Dundee United, while the Scottish Premiership table shows Rangers second and Dundee United outside the top five.', 'md-1:market:rangers-win', '1.22'),
-  ('md-1:betline:safe:4', 'md-1', 'md-1:proposal:safe', 4, 'Atalanta BC to beat US Lecce', 'Mon 6 Apr, 13:00 BST', 'Atalanta provide the final payout leg without turning the whole build into a longshot, preserving a sensible Monday cashout decision point.', null, 'Ladbrokes price Atalanta BC at 7/10 away to US Lecce, with Lecce 19/5 and the draw 11/4.', 'md-1:market:atalanta-win', '1.70'),
-  ('md-1:betline:balanced:1', 'md-1', 'md-1:proposal:balanced', 1, 'Bayer Leverkusen to beat VfL Wolfsburg', 'Sat 4 Apr, 13:30 BST', 'Leverkusen are still a strong home favourite, giving the balanced slip a stable opener before the more price-sensitive legs later in the sequence.', null, 'Ladbrokes have Bayer Leverkusen at 2/5 against VfL Wolfsburg, with Wolfsburg 11/2 and the draw 4/1.', 'md-1:market:leverkusen-win', '1.40'),
-  ('md-1:betline:balanced:2', 'md-1', 'md-1:proposal:balanced', 2, 'Real Betis to beat Espanyol Barcelona', 'Sat 4 Apr, 16:30 BST', 'Betis add a clear price step-up from the opener without abandoning favourite status, which is exactly where the balanced profile should start taking on more payout weight.', null, 'Ladbrokes quote Real Betis at 4/5 against Espanyol Barcelona, with Espanyol 16/5 and the draw 27/10.', 'md-1:market:betis-win', '1.80'),
-  ('md-1:betline:balanced:3', 'md-1', 'md-1:proposal:balanced', 3, 'SS Lazio to beat Parma Calcio', 'Sat 4 Apr, 18:45 BST', 'Lazio keep the Saturday night leg aggressive enough to lift the return, but the market still respects them as the stronger side rather than a coin flip.', null, 'Ladbrokes list SS Lazio at 4/5 to beat Parma Calcio, while Lazio arrived off a 2-0 win over Bologna in the latest Serie A results shown on the competition page.', 'md-1:market:lazio-win', '1.80'),
-  ('md-1:betline:balanced:4', 'md-1', 'md-1:proposal:balanced', 4, 'Hearts to beat Livingston', 'Sun 5 Apr, 13:00 BST', 'Hearts are the right kind of Sunday closer for the balanced build: strong enough to justify the final leg, but not so short that the live cashout upside disappears.', null, 'Ladbrokes price Hearts at 11/20 away to Livingston, and the Scottish Premiership table on the competition page has Hearts top with 66 points.', 'md-1:market:hearts-win', '1.55'),
-  ('md-1:betline:aggressive:1', 'md-1', 'md-1:proposal:aggressive', 1, 'US Sassuolo Calcio to beat Cagliari', 'Sat 4 Apr, 13:00 BST', 'An even-money home price is the right starting point for the aggressive card, immediately creating separation from the safer builds without moving into implausible underdog territory.', null, 'Ladbrokes list US Sassuolo Calcio at 1/1 versus Cagliari, with the draw 21/10 and Cagliari 3/1.', 'md-1:market:sassuolo-win', '2.00'),
-  ('md-1:betline:aggressive:2', 'md-1', 'md-1:proposal:aggressive', 2, 'ACF Fiorentina to beat Hellas Verona', 'Sat 4 Apr, 16:00 BST', 'Fiorentina are a narrower away favourite, which adds meaningful upside while still sitting in a price band that the slip can reasonably carry into the night session.', null, 'Ladbrokes have ACF Fiorentina at 10/11 away to Hellas Verona, with Verona 3/1 and the draw 12/5.', 'md-1:market:fiorentina-win', '1.91'),
-  ('md-1:betline:aggressive:3', 'md-1', 'md-1:proposal:aggressive', 3, 'FC Barcelona to beat Atletico Madrid', 'Sat 4 Apr, 19:00 BST', 'Barcelona are the biggest Saturday night swing in the whole build, giving the aggressive profile the kind of high-leverage leg that can radically reshape the cashout curve.', null, 'Ladbrokes quote FC Barcelona at 23/20 away to Atletico Madrid, with Atletico 2/1 and the draw 27/10.', 'md-1:market:barcelona-win', '2.15'),
-  ('md-1:betline:aggressive:4', 'md-1', 'md-1:proposal:aggressive', 4, 'Bologna FC to beat US Cremonese', 'Sun 5 Apr, 13:00 BST', 'Bologna finish the slip with another fine-margin away price, keeping the total odds high and ensuring the last live decision still carries a meaningful payout swing.', null, 'Ladbrokes list Bologna FC at 21/20 away to US Cremonese, with Cremonese 13/5 and the draw 23/10.', 'md-1:market:bologna-win', '2.05')
+  ('betline-md-1-safe-bayern-win', 'md-1', 'proposal-md-1-safe', 1, 'SC Freiburg v Bayern Munich: Bayern Munich to win', 'Sat 4 Apr, 13:30 BST', 'Bayern arrive on a five-game Bundesliga winning run with 18 goals scored, while Freiburg have taken only two wins from their last five league outings. Even with European fixtures nearby, the away-win line is still the cleanest low-volatility read.', 'form-md-1-freiburg-bayern', 'Last five league goals: Freiburg 6, Bayern Munich 18.', 'market-md-1-bayern-win', '1.40'),
+  ('betline-md-1-safe-leverkusen-win', 'md-1', 'proposal-md-1-safe', 2, 'Bayer Leverkusen v Wolfsburg: Bayer Leverkusen to win', 'Sat 4 Apr, 13:30 BST', 'Leverkusen still need a strong run for the European places and have lost only once in their last five league matches. Wolfsburg are winless in five league games and have shipped 13 goals across that spell.', 'form-md-1-leverkusen-wolfsburg', 'Last five league goals: Bayer Leverkusen 9, Wolfsburg 6.', 'market-md-1-leverkusen-win', '1.40'),
+  ('betline-md-1-safe-inter-win', 'md-1', 'proposal-md-1-safe', 3, 'Inter Milan v Roma: Inter Milan to win', 'Sun 5 Apr, 18:45 BST', 'Inter get Lautaro Martinez back for Sunday and remain top of Serie A. Roma have scored well recently, but their selection noise makes the straight home win safer than pushing immediately into a higher-variance goals play.', 'form-md-1-inter-roma', 'Last five league goals: Inter Milan 6, Roma 11.', 'market-md-1-inter-win', '1.67'),
+  ('betline-md-1-balanced-bayern-win', 'md-1', 'proposal-md-1-balanced', 1, 'SC Freiburg v Bayern Munich: Bayern Munich to win', 'Sat 4 Apr, 13:30 BST', 'Bayern''s last five league matches have produced five wins and 18 goals, and Freiburg have still been vulnerable against top-six attacking quality. The price is short, but it gives the balanced slip an early anchor without overcomplicating the first leg.', 'form-md-1-freiburg-bayern', 'Last five league goals: Freiburg 6, Bayern Munich 18.', 'market-md-1-bayern-win', '1.40'),
+  ('betline-md-1-balanced-real-win', 'md-1', 'proposal-md-1-balanced', 2, 'Mallorca v Real Madrid: Real Madrid to win', 'Sat 4 Apr, 15:15 BST', 'Mallorca have taken only two points from their last five league games and scored just three times in that run. Madrid do carry rotation risk with a European tie ahead, but their shot volume and recent away output still make the straight win the calmer angle here.', 'form-md-1-mallorca-real', 'Last five league goals: Mallorca 3, Real Madrid 11.', 'market-md-1-real-win', '1.65'),
+  ('betline-md-1-balanced-inter-roma-btts', 'md-1', 'proposal-md-1-balanced', 3, 'Inter Milan v Roma: Both teams to score', 'Sun 5 Apr, 18:45 BST', 'Inter have kept only one clean sheet across their last five Serie A matches, while Roma have scored 11 goals over their last five league games. Lautaro''s return strengthens the home attack enough to back both sides finding one.', 'form-md-1-inter-roma', 'Inter have scored 6 and Roma 11 across their last five Serie A matches.', 'market-md-1-inter-roma-btts-yes', '1.91'),
+  ('betline-md-1-aggressive-leverkusen-win', 'md-1', 'proposal-md-1-aggressive', 1, 'Bayer Leverkusen v Wolfsburg: Bayer Leverkusen to win', 'Sat 4 Apr, 13:30 BST', 'Leverkusen still profile as the stronger side on form and urgency, and Wolfsburg''s defensive run makes them hard to trust away from home. This stays in as the first aggressive anchor before the higher-variance legs kick in.', 'form-md-1-leverkusen-wolfsburg', 'Last five league goals: Bayer Leverkusen 9, Wolfsburg 6.', 'market-md-1-leverkusen-win', '1.40'),
+  ('betline-md-1-aggressive-mallorca-real-btts', 'md-1', 'proposal-md-1-aggressive', 2, 'Mallorca v Real Madrid: Both teams to score', 'Sat 4 Apr, 15:15 BST', 'Madrid have scored in every one of their last five league games but have also conceded in four of those five. Mallorca are light on wins, yet their home setup still forces them to trade chances, which keeps the BTTS price live enough for the higher-risk slip.', 'form-md-1-mallorca-real', 'Mallorca have scored 3 and Real Madrid 11 across their last five La Liga matches.', 'market-md-1-mallorca-real-btts-yes', '1.67'),
+  ('betline-md-1-aggressive-real-win', 'md-1', 'proposal-md-1-aggressive', 3, 'Mallorca v Real Madrid: Real Madrid to win', 'Sat 4 Apr, 15:15 BST', 'Keeping Madrid on the slip lets the aggressive build still lean on the stronger team even while pairing it with a goals angle. Mallorca''s recent downturn and Madrid''s top-end attacking floor keep the away result in play.', 'form-md-1-mallorca-real', 'Last five league goals: Mallorca 3, Real Madrid 11.', 'market-md-1-real-win', '1.65'),
+  ('betline-md-1-aggressive-inter-roma-btts', 'md-1', 'proposal-md-1-aggressive', 4, 'Inter Milan v Roma: Both teams to score', 'Sun 5 Apr, 18:45 BST', 'Roma have scored in four of their last five league matches and Inter''s defensive line has looked less secure recently. With Lautaro expected back and Roma still carrying enough attacking quality, the BTTS leg gives the Sunday finish a stronger upside swing.', 'form-md-1-inter-roma', 'Inter have scored 6 and Roma 11 across their last five Serie A matches.', 'market-md-1-inter-roma-btts-yes', '1.91')
 on conflict (id) do nothing;
 
--- No seed rows for public.matchday_forms.
+insert into public.matchday_forms (id, game_week_id, proposal_id, bet_line_id)
+values
+  ('form-md-1-freiburg-bayern', 'md-1', 'proposal-md-1-safe', 'betline-md-1-safe-bayern-win'),
+  ('form-md-1-leverkusen-wolfsburg', 'md-1', 'proposal-md-1-safe', 'betline-md-1-safe-leverkusen-win'),
+  ('form-md-1-mallorca-real', 'md-1', 'proposal-md-1-balanced', 'betline-md-1-balanced-real-win'),
+  ('form-md-1-inter-roma', 'md-1', 'proposal-md-1-safe', 'betline-md-1-safe-inter-win')
+on conflict (id) do nothing;
 
--- No seed rows for public.matchday_form_matches.
+insert into public.matchday_form_matches (id, form_id, team_side, sort_order, opponent, venue, final_score, goals_scored, outcome)
+values
+  ('formmatch-md-1-freiburg-1', 'form-md-1-freiburg-bayern', 'home', 1, 'Bayer Leverkusen', 'H', '3-3', 3, 'D'),
+  ('formmatch-md-1-freiburg-2', 'form-md-1-freiburg-bayern', 'home', 2, 'Eintracht Frankfurt', 'A', '2-0', 0, 'L'),
+  ('formmatch-md-1-freiburg-3', 'form-md-1-freiburg-bayern', 'home', 3, 'Borussia Monchengladbach', 'H', '2-1', 2, 'W'),
+  ('formmatch-md-1-freiburg-4', 'form-md-1-freiburg-bayern', 'home', 4, 'TSG Hoffenheim', 'A', '3-0', 0, 'L'),
+  ('formmatch-md-1-freiburg-5', 'form-md-1-freiburg-bayern', 'home', 5, 'Werder Bremen', 'H', '1-0', 1, 'W'),
+  ('formmatch-md-1-bayern-1', 'form-md-1-freiburg-bayern', 'away', 1, 'Borussia Monchengladbach', 'H', '4-1', 4, 'W'),
+  ('formmatch-md-1-bayern-2', 'form-md-1-freiburg-bayern', 'away', 2, 'Borussia Dortmund', 'A', '2-3', 3, 'W'),
+  ('formmatch-md-1-bayern-3', 'form-md-1-freiburg-bayern', 'away', 3, 'Eintracht Frankfurt', 'H', '3-2', 3, 'W'),
+  ('formmatch-md-1-bayern-4', 'form-md-1-freiburg-bayern', 'away', 4, 'Werder Bremen', 'A', '0-3', 3, 'W'),
+  ('formmatch-md-1-bayern-5', 'form-md-1-freiburg-bayern', 'away', 5, 'TSG Hoffenheim', 'H', '5-1', 5, 'W'),
+  ('formmatch-md-1-leverkusen-1', 'form-md-1-leverkusen-wolfsburg', 'home', 1, 'SC Freiburg', 'A', '3-3', 3, 'D'),
+  ('formmatch-md-1-leverkusen-2', 'form-md-1-leverkusen-wolfsburg', 'home', 2, 'Hamburger SV', 'A', '0-1', 1, 'W'),
+  ('formmatch-md-1-leverkusen-3', 'form-md-1-leverkusen-wolfsburg', 'home', 3, 'Mainz', 'H', '1-1', 1, 'D'),
+  ('formmatch-md-1-leverkusen-4', 'form-md-1-leverkusen-wolfsburg', 'home', 4, 'Union Berlin', 'A', '1-0', 0, 'L'),
+  ('formmatch-md-1-leverkusen-5', 'form-md-1-leverkusen-wolfsburg', 'home', 5, 'St. Pauli', 'H', '4-0', 4, 'W'),
+  ('formmatch-md-1-wolfsburg-1', 'form-md-1-leverkusen-wolfsburg', 'away', 1, 'Hamburger SV', 'A', '2-1', 1, 'L'),
+  ('formmatch-md-1-wolfsburg-2', 'form-md-1-leverkusen-wolfsburg', 'away', 2, 'VfB Stuttgart', 'H', '0-4', 0, 'L'),
+  ('formmatch-md-1-wolfsburg-3', 'form-md-1-leverkusen-wolfsburg', 'away', 3, 'FC Augsburg', 'A', '3-2', 2, 'L'),
+  ('formmatch-md-1-wolfsburg-4', 'form-md-1-leverkusen-wolfsburg', 'away', 4, 'RB Leipzig', 'H', '2-2', 2, 'D'),
+  ('formmatch-md-1-wolfsburg-5', 'form-md-1-leverkusen-wolfsburg', 'away', 5, 'Borussia Dortmund', 'A', '2-1', 1, 'L'),
+  ('formmatch-md-1-mallorca-1', 'form-md-1-mallorca-real', 'home', 1, 'Osasuna', 'A', '2-2', 2, 'D'),
+  ('formmatch-md-1-mallorca-2', 'form-md-1-mallorca-real', 'home', 2, 'Real Sociedad', 'H', '0-1', 0, 'L'),
+  ('formmatch-md-1-mallorca-3', 'form-md-1-mallorca-real', 'home', 3, 'Celta Vigo', 'A', '2-0', 0, 'L'),
+  ('formmatch-md-1-mallorca-4', 'form-md-1-mallorca-real', 'home', 4, 'Real Betis', 'H', '1-2', 1, 'L'),
+  ('formmatch-md-1-mallorca-5', 'form-md-1-mallorca-real', 'home', 5, 'Barcelona', 'A', '3-0', 0, 'L'),
+  ('formmatch-md-1-real-1', 'form-md-1-mallorca-real', 'away', 1, 'Elche', 'H', '4-1', 4, 'W'),
+  ('formmatch-md-1-real-2', 'form-md-1-mallorca-real', 'away', 2, 'Celta Vigo', 'A', '1-2', 2, 'W'),
+  ('formmatch-md-1-real-3', 'form-md-1-mallorca-real', 'away', 3, 'Getafe', 'H', '0-1', 0, 'L'),
+  ('formmatch-md-1-real-4', 'form-md-1-mallorca-real', 'away', 4, 'Osasuna', 'A', '2-1', 1, 'L'),
+  ('formmatch-md-1-real-5', 'form-md-1-mallorca-real', 'away', 5, 'Real Sociedad', 'H', '4-1', 4, 'W'),
+  ('formmatch-md-1-inter-1', 'form-md-1-inter-roma', 'home', 1, 'Fiorentina', 'A', '1-1', 1, 'D'),
+  ('formmatch-md-1-inter-2', 'form-md-1-inter-roma', 'home', 2, 'Atalanta', 'H', '1-1', 1, 'D'),
+  ('formmatch-md-1-inter-3', 'form-md-1-inter-roma', 'home', 3, 'AC Milan', 'A', '1-0', 0, 'L'),
+  ('formmatch-md-1-inter-4', 'form-md-1-inter-roma', 'home', 4, 'Genoa', 'H', '2-0', 2, 'W'),
+  ('formmatch-md-1-inter-5', 'form-md-1-inter-roma', 'home', 5, 'Lecce', 'A', '0-2', 2, 'W'),
+  ('formmatch-md-1-roma-1', 'form-md-1-inter-roma', 'away', 1, 'Genoa', 'A', '2-1', 1, 'L'),
+  ('formmatch-md-1-roma-2', 'form-md-1-inter-roma', 'away', 2, 'Juventus', 'H', '3-3', 3, 'D'),
+  ('formmatch-md-1-roma-3', 'form-md-1-inter-roma', 'away', 3, 'Cremonese', 'H', '3-0', 3, 'W'),
+  ('formmatch-md-1-roma-4', 'form-md-1-inter-roma', 'away', 4, 'Napoli', 'A', '2-2', 2, 'D'),
+  ('formmatch-md-1-roma-5', 'form-md-1-inter-roma', 'away', 5, 'Cagliari', 'H', '2-0', 2, 'W')
+on conflict (id) do nothing;
+
+-- No seed rows for public.custom_bets.
 
 insert into public.league_data_meta (id, simulated_at_iso, updated_at_iso)
 values
@@ -117,7 +167,7 @@ on conflict (id) do nothing;
 
 insert into public.timeline_events (id, title, description, timestamp_iso, kind, matchday_id)
 values
-  ('timeline-md-1-proposal-generated', 'Next Matchday Proposal Generated', 'Local Ladbrokes proposal slate created for the upcoming weekend window.', '2026-04-03T10:49:00.000Z', 'matchday_proposal_generated', 'md-1')
+  ('timeline-md-1-proposal-generated', 'Matchday AI Analysis Ready', E'Defensive: 3.27\nBalanced: 4.41\nAggressive: 7.37\nAI recommended: Balanced', '2026-04-03T14:47:00.000Z', 'matchday_proposal_generated', 'md-1')
 on conflict (id) do nothing;
 
 -- No seed rows for public.matchday_seed.

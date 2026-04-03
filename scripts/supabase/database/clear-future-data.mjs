@@ -10,7 +10,7 @@ const REPO_ROOT = path.resolve(SCRIPT_DIR, "../..", "..");
 const ENV_FILES = [".env.local", ".env"];
 
 async function main() {
-  const { isDryRun, excludedGameWeekIds } = parseArgs(process.argv.slice(2));
+  const { isDryRun, excludedGameWeekIds, forceStakedCustomBets } = parseArgs(process.argv.slice(2));
 
   await loadEnvironmentVariables();
 
@@ -137,6 +137,18 @@ async function main() {
       !excludedGameWeekIds.has(typeof row.matchday_id === "string" ? row.matchday_id : ""),
   );
   const futureTimelineEventIds = getUniqueStringValues(futureTimelineEventRows, "id");
+  const futureCustomBetRows = await fetchOptionalRows(
+    supabase,
+    "custom_bets",
+    "id, state, event_start_iso",
+    (query) => query.gt("event_start_iso", nowIso),
+  );
+  const futureCustomBetIds = getUniqueStringValues(
+    futureCustomBetRows.filter(
+      (row) => forceStakedCustomBets || row.state !== "staked",
+    ),
+    "id",
+  );
   const futureMatchdayVoteCount = await fetchCountByIn(
     supabase,
     "matchday_votes",
@@ -154,6 +166,7 @@ async function main() {
     { table: "ledger_transactions", ids: futureLedgerTransactionIds },
     { table: "ledger_data", ids: futureLedgerDataIds },
     { table: "timeline_events", ids: futureTimelineEventIds },
+    { table: "custom_bets", ids: futureCustomBetIds },
     { table: "league_data_matchday_simulations", ids: futureSimulationIds },
     { table: "matchday_forms", ids: futureFormIds },
     { table: "matchday_bet_lines", ids: futureBetLineIds },
@@ -188,6 +201,10 @@ async function main() {
     process.stdout.write(
       `Excluding matchday ids from cleanup: ${[...excludedGameWeekIds].join(", ")}\n`,
     );
+  }
+
+  if (forceStakedCustomBets) {
+    process.stdout.write("Force mode enabled for staked future custom bets.\n");
   }
 
   if (futureGameWeeks.length > 0) {
@@ -319,12 +336,18 @@ function stripWrappingQuotes(value) {
 function parseArgs(args) {
   const excludedGameWeekIds = new Set();
   let isDryRun = false;
+  let forceStakedCustomBets = false;
 
   for (let index = 0; index < args.length; index += 1) {
     const arg = args[index];
 
     if (arg === "--dry-run") {
       isDryRun = true;
+      continue;
+    }
+
+    if (arg === "--force-staked-custom-bets") {
+      forceStakedCustomBets = true;
       continue;
     }
 
@@ -354,6 +377,7 @@ function parseArgs(args) {
   return {
     isDryRun,
     excludedGameWeekIds,
+    forceStakedCustomBets,
   };
 }
 

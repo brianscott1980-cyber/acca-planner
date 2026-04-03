@@ -178,7 +178,7 @@ Goal:
 - Generate the next matchday proposals for the next weekend window only.
 - Use AI judgement to analyse Ladbrokes prices and construct the three accumulator strategies.
 - Update local repository data files only.
-- Add a local timeline marker event titled "Next Matchday Proposal Generated".
+- Add a local timeline marker event titled "Matchday AI Analysis Ready".
 
 Allowed competitions:
 ${leaguesBlock}
@@ -217,7 +217,7 @@ Required repo contract:
 - Update matchday_bet_lines.ts so every proposal references ordered bet lines for its chosen markets.
 - Update matchday_forms.ts and matchday_form_matches.ts only if you have enough concrete recent-form evidence to populate them credibly; otherwise leave form rows absent and rely on formNote text instead.
 - When form rows are provided, they must support the UI's visual five-circle row: one circle per recent match, circle background driven by win/draw/loss, and the text inside each circle set to that team's goals scored in that match.
-- Update timeline_events.ts with one timeline marker row titled "Next Matchday Proposal Generated" dated at generation time for the next matchday id.
+- Update timeline_events.ts with one timeline marker row titled "Matchday AI Analysis Ready" dated at generation time for the next matchday id.
 - Do not edit ledger_data.ts for proposal-generation messages. Ledger data must preserve the opening seven player deposits and any real bankroll transactions.
 - Before deciding which proposal is AI recommended, inspect the existing bankroll context in the repo:
   - use ledger_data.ts to understand the current pot against the original deposit baseline
@@ -302,8 +302,12 @@ Recent-form evidence rules:
 Local timeline marker rule:
 - Append a timeline_events row with:
   - a unique id tied to the matchday, such as timeline-md-<number>-proposal-generated
-  - title: "Next Matchday Proposal Generated"
-  - description: a short note that the local Ladbrokes proposal slate was generated
+  - title: "Matchday AI Analysis Ready"
+  - description: a four-line summary in this exact style using the final combined decimal odds for the three strategies, formatted to 2 decimal places, followed by the recommended option:
+    Defensive: <safe total odds>
+    Balanced: <balanced total odds>
+    Aggressive: <aggressive total odds>
+    AI recommended: <Defensive|Balanced|Aggressive>
   - timestampIso: current generation timestamp
   - kind: "matchday_proposal_generated"
   - matchdayId: the next matchday id

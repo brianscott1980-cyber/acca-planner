@@ -100,6 +100,12 @@ const FILES = {
     importType: "MatchdayFormMatchRecord",
     typePath: "../types/matchday_type",
   },
+  customBets: {
+    fileName: "custom_bets.ts",
+    exportName: "customBets",
+    importType: "CustomBetRecord",
+    typePath: "../types/custom_bet_type",
+  },
   matchdaySeedGameWeeks: {
     fileName: "matchday_seed.ts",
     exportName: "matchdaySeedGameWeeks",
@@ -110,6 +116,7 @@ const FILES = {
 
 async function main() {
   const isDryRun = process.argv.includes("--dry-run");
+  const forceStakedCustomBets = process.argv.includes("--force-staked-custom-bets");
   const nowIso = new Date().toISOString();
 
   const datasets = await loadDatasets();
@@ -142,6 +149,15 @@ async function main() {
   const futureSimulationIds = new Set(
     datasets.leagueDataMatchdaySimulations
       .filter((entry) => futureGameWeekIds.has(entry.gameWeekId))
+      .map((entry) => entry.id),
+  );
+  const futureCustomBetIds = new Set(
+    datasets.customBets
+      .filter(
+        (entry) =>
+          new Date(entry.eventStartIso).getTime() > Date.parse(nowIso) &&
+          (forceStakedCustomBets || entry.state !== "staked"),
+      )
       .map((entry) => entry.id),
   );
   const futureSlipIds = new Set(
@@ -203,6 +219,9 @@ async function main() {
     matchdayFormMatches: datasets.matchdayFormMatches.filter(
       (entry) => !futureFormIds.has(entry.formId),
     ),
+    customBets: datasets.customBets.filter(
+      (entry) => !futureCustomBetIds.has(entry.id),
+    ),
     matchdaySeedGameWeeks: datasets.matchdaySeedGameWeeks.filter(
       (entry) => new Date(entry.windowStartIso).getTime() <= Date.parse(nowIso),
     ),
@@ -224,6 +243,10 @@ async function main() {
   process.stdout.write(
     `${isDryRun ? "Dry run" : "Preparing"} local future cleanup as of ${nowIso}.\n`,
   );
+
+  if (forceStakedCustomBets) {
+    process.stdout.write("Force mode enabled for staked future custom bets.\n");
+  }
 
   if (futureGameWeekIds.size > 0) {
     process.stdout.write("\nFuture local matchdays:\n");

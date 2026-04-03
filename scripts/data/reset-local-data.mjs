@@ -176,6 +176,13 @@ export const matchdayFormMatches: MatchdayFormMatchRecord[] = [];
 `,
     ),
     writeDataFile(
+      "custom_bets.ts",
+      `import type { CustomBetRecord } from "../types/custom_bet_type";
+
+export const customBets: CustomBetRecord[] = [];
+`,
+    ),
+    writeDataFile(
       "matchday_seed.ts",
       `import type { GameWeekRecord } from "../types/matchday_type";
 

@@ -13,6 +13,7 @@ import type {
   MarketAnalysisSnapshotRow,
 } from "./market_analysis_type";
 import type { TimelineEventRecord } from "./timeline_type";
+import type { CustomBetRecord } from "./custom_bet_type";
 import type {
   MatchdayBetLineRecord,
   MatchdayFormMatchRecord,
@@ -32,6 +33,7 @@ export type AppDataSnapshot = {
   matchdayBetLines: MatchdayBetLineRecord[];
   matchdayForms: MatchdayFormRecord[];
   matchdayFormMatches: MatchdayFormMatchRecord[];
+  customBets: CustomBetRecord[];
   leagueDataMeta: LeagueDataMetaRecord[];
   leagueDataMatchdaySimulations: LeagueMatchdaySimulationRow[];
   leagueDataVotes: LeagueMatchdayVoteRow[];

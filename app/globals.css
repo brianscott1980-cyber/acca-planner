@@ -1296,6 +1296,11 @@ button {
   font-weight: 700;
 }
 
+.hub-metric-value.is-multiline {
+  white-space: pre-line;
+  line-height: 1.5;
+}
+
 .hub-metric-block-center {
   text-align: center;
 }
@@ -2377,6 +2382,43 @@ button {
   margin: 1.25rem 0;
 }
 
+.hub-generated-strategy-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.85rem;
+  margin: 1.25rem 0;
+}
+
+.hub-generated-strategy-card {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 0.55rem;
+  border-radius: 0.95rem;
+  padding: 0.9rem 1rem;
+}
+
+.hub-generated-strategy-label {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.hub-generated-strategy-odds-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.hub-generated-strategy-odds {
+  font-family: ui-monospace, "SFMono-Regular", monospace;
+  font-size: 1.2rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
 .hub-stat-grid.has-info {
   grid-template-columns: repeat(4, minmax(0, 1fr));
 }
@@ -3305,6 +3347,10 @@ button {
   }
 
   .hub-stat-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .hub-generated-strategy-row {
     grid-template-columns: 1fr;
   }
 

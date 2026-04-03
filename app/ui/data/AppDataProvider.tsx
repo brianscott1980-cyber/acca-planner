@@ -1,7 +1,9 @@
 "use client";
 
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import Image from "next/image";
 import { loadRemoteAppDataSnapshot } from "../../../repositories/app_data_repository";
+import { withBasePath } from "../../../lib/site";
 import {
   resetCurrentAppDataSnapshot,
   setCurrentAppDataSnapshot,
@@ -79,7 +81,30 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
   );
 
   if (isLoading) {
-    return null;
+    return (
+      <section className="auth-shell">
+        <div className="auth-card hub-panel">
+          <div className="hub-brand" style={{ justifyContent: "center", marginBottom: "1rem" }}>
+            <div className="hub-brand-mark">
+              <Image
+                className="hub-brand-logo"
+                src={withBasePath("/assets/app_logos/logo_64px.png")}
+                alt="Caddyshack logo"
+                width={36}
+                height={36}
+                priority
+              />
+            </div>
+            <div>
+              <p className="hub-brand-title">Caddyshack</p>
+              <p className="hub-brand-subtitle">AI betting hub</p>
+            </div>
+          </div>
+          <h1 className="hub-title">Syndicate Starting Up</h1>
+          <p className="hub-subtitle">Loading the latest syndicate data.</p>
+        </div>
+      </section>
+    );
   }
 
   if (isRemoteData && remoteLoadError) {

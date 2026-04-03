@@ -11,9 +11,11 @@ import {
   getProposalDisplayOdds,
   getVisibleGameWeekTimelineRecords,
 } from "../../../services/game_week_service";
+import { getCustomBetHref } from "../../../services/custom_bet_service";
 import { formatGameWeekDateRange } from "../../../services/league_simulation_service";
 import { getMembers } from "../../../repositories/user_repository";
 import { getCurrentLedgerTransactions } from "../../../services/ledger_service";
+import { getCustomBets } from "../../../repositories/custom_bet_repository";
 import { getTimelineEvents } from "../../../repositories/timeline_event_repository";
 import { getUserInitials } from "../../../services/user_service";
 
@@ -38,6 +40,17 @@ type TimelineEntry = {
   outcomeLabel?: string;
   timestampIso: string;
   matchdayId?: string;
+  customBetId?: string;
+  multilineStake?: boolean;
+  generatedStrategies?: GeneratedStrategySummary[];
+};
+
+type GeneratedStrategySummary = {
+  id: string;
+  label: string;
+  odds: string;
+  riskLevel: "safe" | "balanced" | "aggressive";
+  isRecommended: boolean;
 };
 
 export function TimelineFeed() {
@@ -143,6 +156,7 @@ export function TimelineFeed() {
         return entries;
       },
     ),
+    ...getCustomBetTimelineEntries(),
     ...getCustomTimelineEntries(),
     ...getInitialDepositTimelineEntries(),
   ].sort(
@@ -156,7 +170,7 @@ export function TimelineFeed() {
       <div className="hub-page-copy">
         <h1 className="hub-title">Timeline</h1>
         <p className="hub-subtitle">
-          Chronological record of all syndicate accumulator plays by matchday.
+          Chronological record of syndicate matchdays and one-off custom bets.
         </p>
       </div>
 
@@ -181,9 +195,14 @@ export function TimelineFeed() {
 
 function TimelineMatchday({ entry }: { entry: TimelineEntry }) {
   const router = useRouter();
-  const isNavigable = Boolean(entry.matchdayId && getGameWeekById(entry.matchdayId));
+  const isNavigable = Boolean(
+    (entry.matchdayId && getGameWeekById(entry.matchdayId)) || entry.customBetId,
+  );
   const isWin = entry.status === "win";
   const isFundedEntry = entry.status === "funded";
+  const hasGeneratedStrategies =
+    entry.status === "generated" &&
+    Boolean(entry.generatedStrategies && entry.generatedStrategies.length > 0);
   const outcomeLabel =
     entry.outcomeLabel ??
     (isWin
@@ -200,17 +219,20 @@ function TimelineMatchday({ entry }: { entry: TimelineEntry }) {
           ? "Generated"
           : "Funded");
 
-  const navigateToMatchday = () => {
+  const navigateToEntry = () => {
+    if (entry.customBetId) {
+      router.push(getCustomBetHref(entry.customBetId));
+      return;
+    }
+
     if (!entry.matchdayId) {
       return;
     }
 
-    router.push(
-      getMatchdayHref({
-        gameWeekId: entry.matchdayId,
-        stage: entry.status === "voted" ? "pending" : null,
-      }),
-    );
+    router.push(getMatchdayHref({
+      gameWeekId: entry.matchdayId,
+      stage: entry.status === "voted" ? "pending" : null,
+    }));
   };
 
   return (
@@ -231,7 +253,7 @@ function TimelineMatchday({ entry }: { entry: TimelineEntry }) {
             return;
           }
 
-          navigateToMatchday();
+          navigateToEntry();
         }}
         onKeyDown={(event) => {
           if (!isNavigable || (event.key !== "Enter" && event.key !== " ")) {
@@ -239,7 +261,7 @@ function TimelineMatchday({ entry }: { entry: TimelineEntry }) {
           }
 
           event.preventDefault();
-          navigateToMatchday();
+          navigateToEntry();
         }}
       >
         <div className="hub-timeline-head">
@@ -273,83 +295,147 @@ function TimelineMatchday({ entry }: { entry: TimelineEntry }) {
           </div>
         ) : null}
 
-        <div
-          className={`hub-stat-grid${entry.odds ? "" : " is-compact"}${
-            entry.potentialValue ? " has-potential" : ""
-          }${
-            entry.infoAvatarLabel ? " has-info" : ""
-          }`}
-        >
-          <div>
-            <span className="hub-metric-label">{entry.stakeLabel ?? "Stake"}</span>
-            <span
-              className={`hub-metric-value${
-                entry.status === "funded"
-                  ? " hub-success-text"
-                  : entry.status === "placed"
-                    ? " hub-danger-text"
-                    : entry.status === "voted"
-                      ? ` ${getTimelineStrategyTextClassName(entry)}`
-                    : ""
-              }`}
-            >
-              {entry.stake}
-            </span>
-          </div>
-          {entry.odds ? (
-            <div>
-              <span className="hub-metric-label">{entry.oddsLabel ?? "Odds"}</span>
-              <span className="hub-metric-value hub-accent-text">{entry.odds}</span>
-            </div>
-          ) : null}
-          {entry.potentialValue ? (
-            <div>
-              <span className="hub-metric-label">
-                {entry.potentialLabel ?? "Potential"}
-              </span>
-              <span className="hub-metric-value hub-accent-text">
-                {entry.potentialValue}
-              </span>
-            </div>
-          ) : null}
-          <div>
-            <span className="hub-metric-label">{entry.returnLabel ?? "Return"}</span>
-            <span
-              className={`hub-metric-value ${
-                entry.status === "win" || entry.status === "funded"
-                  ? "hub-success-text"
-                  : entry.returnTone === "positive"
-                    ? "hub-success-text"
-                  : entry.returnTone === "neutral"
-                    ? "hub-warning-text"
-                  : entry.returnTone === "negative"
-                    ? "hub-danger-text"
-                  : entry.status === "placed"
-                    ? "hub-accent-text"
-                  : entry.status === "voted"
-                    ? "hub-text"
-                  : ""
-              }`}
-            >
-              {entry.returnValue}
-            </span>
-          </div>
-          {entry.infoAvatarLabel ? (
-            <div>
-              <span className="hub-metric-label">{entry.infoLabel ?? "Info"}</span>
-              <span
-                className="hub-timeline-submitter-avatar"
-                title={entry.infoAvatarTitle}
-                aria-label={entry.infoAvatarTitle}
+        {hasGeneratedStrategies ? (
+          <div className="hub-generated-strategy-row">
+            {entry.generatedStrategies?.map((strategy) => (
+              <div
+                key={strategy.id}
+                className={`hub-generated-strategy-card ${getGeneratedStrategyClassName(
+                  strategy.riskLevel,
+                )}`}
               >
-                {entry.infoAvatarLabel}
+                <span className="hub-generated-strategy-label">{strategy.label}</span>
+                <div className="hub-generated-strategy-odds-row">
+                  <span className="hub-generated-strategy-odds">{strategy.odds}</span>
+                  {strategy.isRecommended ? (
+                    <span className="hub-ai-tag">AI</span>
+                  ) : null}
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div
+            className={`hub-stat-grid${entry.odds ? "" : " is-compact"}${
+              entry.potentialValue ? " has-potential" : ""
+            }${
+              entry.infoAvatarLabel ? " has-info" : ""
+            }`}
+          >
+            <div>
+              <span className="hub-metric-label">{entry.stakeLabel ?? "Stake"}</span>
+              <span
+                className={`hub-metric-value${
+                  entry.status === "funded"
+                    ? " hub-success-text"
+                    : entry.status === "placed"
+                      ? " hub-danger-text"
+                      : entry.status === "voted"
+                        ? ` ${getTimelineStrategyTextClassName(entry)}`
+                      : ""
+                }${entry.multilineStake ? " is-multiline" : ""}`}
+              >
+                {entry.stake}
               </span>
             </div>
-          ) : null}
-        </div>
+            {entry.odds ? (
+              <div>
+                <span className="hub-metric-label">{entry.oddsLabel ?? "Odds"}</span>
+                <span className="hub-metric-value hub-accent-text">{entry.odds}</span>
+              </div>
+            ) : null}
+            {entry.potentialValue ? (
+              <div>
+                <span className="hub-metric-label">
+                  {entry.potentialLabel ?? "Potential"}
+                </span>
+                <span className="hub-metric-value hub-accent-text">
+                  {entry.potentialValue}
+                </span>
+              </div>
+            ) : null}
+            <div>
+              <span className="hub-metric-label">{entry.returnLabel ?? "Return"}</span>
+              <span
+                className={`hub-metric-value ${
+                  entry.status === "win" || entry.status === "funded"
+                    ? "hub-success-text"
+                    : entry.returnTone === "positive"
+                      ? "hub-success-text"
+                    : entry.returnTone === "neutral"
+                      ? "hub-warning-text"
+                    : entry.returnTone === "negative"
+                      ? "hub-danger-text"
+                    : entry.status === "placed"
+                      ? "hub-accent-text"
+                    : entry.status === "voted"
+                      ? "hub-text"
+                    : ""
+                }`}
+              >
+                {entry.returnValue}
+              </span>
+            </div>
+            {entry.infoAvatarLabel ? (
+              <div>
+                <span className="hub-metric-label">{entry.infoLabel ?? "Info"}</span>
+                <span
+                  className="hub-timeline-submitter-avatar"
+                  title={entry.infoAvatarTitle}
+                  aria-label={entry.infoAvatarTitle}
+                >
+                  {entry.infoAvatarLabel}
+                </span>
+              </div>
+            ) : null}
+          </div>
+        )}
       </div>
     </article>
   );
+}
+
+function getCustomBetTimelineEntries(): TimelineEntry[] {
+  return getCustomBets().map((customBet) => ({
+    id: `custom-bet-${customBet.id}`,
+    title: customBet.timelineTitle,
+    dateRange: formatTimelineDateTime(customBet.placedAtIso ?? customBet.generatedAtIso),
+    status: customBet.state === "staked" ? "placed" : "generated",
+    label: `${formatCustomBetSport(customBet.sport)} · ${customBet.eventName}`,
+    stakeLabel: customBet.state === "staked" ? "Stake" : "Recommendation",
+    stake:
+      customBet.state === "staked" && customBet.stakeAmount !== undefined
+        ? formatCurrency(customBet.stakeAmount, {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          })
+        : customBet.recommendedSelection,
+    oddsLabel: customBet.state === "staked" ? "Placed Odds" : "Format",
+    odds:
+      customBet.state === "staked"
+        ? customBet.placedDecimalOdds?.toFixed(2) ?? customBet.decimalOdds.toFixed(2)
+        : customBet.bettingFormatRequested,
+    returnLabel: customBet.state === "staked" ? "Event" : "Odds",
+    returnValue:
+      customBet.state === "staked"
+        ? formatTimelineDateTime(customBet.eventStartIso)
+        : customBet.decimalOdds.toFixed(2),
+    outcomeLabel: customBet.state === "staked" ? "Staked" : "Custom Bet",
+    timestampIso: customBet.placedAtIso ?? customBet.generatedAtIso,
+    customBetId: customBet.id,
+  }));
+}
+
+function formatCustomBetSport(sport: "horse_racing" | "football" | "golf") {
+  if (sport === "horse_racing") {
+    return "Horse Racing";
+  }
+
+  if (sport === "football") {
+    return "Football";
+  }
+
+  return "Golf";
 }
 
 function getInitialDepositTimelineEntries(): TimelineEntry[] {
@@ -407,6 +493,13 @@ function getCustomTimelineEntries(): TimelineEntry[] {
   return getTimelineEvents()
     .map((event) => {
       const gameWeek = event.matchdayId ? getGameWeekById(event.matchdayId) : null;
+      const generatedStrategies = gameWeek?.proposals.map((proposal) => ({
+        id: proposal.id,
+        label: getGeneratedStrategyLabel(proposal.riskLevel),
+        odds: getProposalDisplayOdds(proposal),
+        riskLevel: proposal.riskLevel,
+        isRecommended: Boolean(proposal.aiRecommended),
+      }));
 
       const timelineEntry: TimelineEntry = {
         id: event.id,
@@ -421,6 +514,8 @@ function getCustomTimelineEntries(): TimelineEntry[] {
         outcomeLabel: "Generated",
         timestampIso: event.timestampIso,
         matchdayId: gameWeek?.id,
+        multilineStake: true,
+        generatedStrategies,
       };
 
       return timelineEntry;
@@ -430,6 +525,30 @@ function getCustomTimelineEntries(): TimelineEntry[] {
         new Date(right.timestampIso).getTime() -
         new Date(left.timestampIso).getTime(),
     );
+}
+
+function getGeneratedStrategyLabel(riskLevel: "safe" | "balanced" | "aggressive") {
+  if (riskLevel === "safe") {
+    return "Defensive";
+  }
+
+  if (riskLevel === "balanced") {
+    return "Balanced";
+  }
+
+  return "Aggressive";
+}
+
+function getGeneratedStrategyClassName(riskLevel: "safe" | "balanced" | "aggressive") {
+  if (riskLevel === "safe") {
+    return "hub-tag-safe";
+  }
+
+  if (riskLevel === "balanced") {
+    return "hub-tag-balanced";
+  }
+
+  return "hub-tag-aggressive";
 }
 
 function getTimelineStatusClassName(status: TimelineEntry["status"]) {

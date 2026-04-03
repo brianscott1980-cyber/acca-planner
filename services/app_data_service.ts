@@ -1,4 +1,5 @@
 import { leagueClubs } from "../data/league_clubs";
+import { customBets } from "../data/custom_bets";
 import { leagueDataBetLineOdds } from "../data/league_data_bet_line_odds";
 import { leagueDataLegResults } from "../data/league_data_leg_results";
 import { leagueDataMatchdaySimulations } from "../data/league_data_matchday_simulations";
@@ -28,6 +29,7 @@ export function getDefaultAppDataSnapshot(): AppDataSnapshot {
     matchdayBetLines,
     matchdayForms,
     matchdayFormMatches,
+    customBets,
     leagueDataMeta,
     leagueDataMatchdaySimulations,
     leagueDataVotes,
