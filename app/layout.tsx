@@ -17,18 +17,13 @@ export const metadata: Metadata = {
   icons: {
     icon: [
       {
-        url: withBasePath("/icon.svg"),
-        type: "image/svg+xml",
-      },
-      {
-        url: withBasePath("/icon-maskable.svg"),
-        rel: "mask-icon",
-        type: "image/svg+xml",
+        url: withBasePath("/assets/app_logos/logo_512px.png"),
+        type: "image/png",
       },
     ],
     apple: {
-      url: withBasePath("/apple-touch-icon.svg"),
-      type: "image/svg+xml",
+      url: withBasePath("/assets/app_logos/logo_512px.png"),
+      type: "image/png",
     },
   },
 };
