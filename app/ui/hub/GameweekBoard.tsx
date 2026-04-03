@@ -430,6 +430,9 @@ function AccumulatorCard({
     votingLocked && simulation?.simulatedSlip.proposalId === card.id
       ? simulation.simulatedSlip.placedDecimalOdds
       : undefined;
+  const hasPlacedDecimalOdds =
+    typeof currentPlacedDecimalOdds === "number" &&
+    Number.isFinite(currentPlacedDecimalOdds);
   const isAwaitingAdminPlacement =
     viewState === "locked" &&
     simulation?.selectedProposalId === card.id &&
@@ -768,13 +771,13 @@ function AccumulatorCard({
                   {getProposalDisplayOdds(card)}
                 </span>
               </div>
-              {currentPlacedDecimalOdds !== undefined ? (
+              {hasPlacedDecimalOdds ? (
                 <div>
                   <span className="hub-metric-label">Placed Odds</span>
                   <span className="hub-metric-value">{currentPlacedDecimalOdds.toFixed(2)}</span>
                 </div>
               ) : null}
-              {currentPlacedDecimalOdds !== undefined ? (
+              {hasPlacedDecimalOdds ? (
                 <div>
                   <span className="hub-metric-label">Placed At</span>
                   <span className="hub-metric-value">

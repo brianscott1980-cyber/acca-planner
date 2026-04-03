@@ -21,11 +21,17 @@ export function getSimulationSlipRecord(slipId: string): LeagueSimulationSlipRec
     };
   }
 
+  const placedDecimalOdds =
+    typeof slipRow.placedDecimalOdds === "number" &&
+    Number.isFinite(slipRow.placedDecimalOdds)
+      ? slipRow.placedDecimalOdds
+      : undefined;
+
   return {
     proposalId: slipRow.proposalId,
     timelineLabel: slipRow.timelineLabel,
     stake: slipRow.stake,
-    placedDecimalOdds: slipRow.placedDecimalOdds,
+    placedDecimalOdds,
     stakePlacedAt: slipRow.stakePlacedAt,
     settledAt: slipRow.settledAt,
     settlementKind: slipRow.settlementKind,
