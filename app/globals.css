@@ -624,6 +624,10 @@ button {
   gap: 0.9rem;
 }
 
+.hub-decision-banner-copy-block {
+  min-width: 0;
+}
+
 .hub-decision-banner-icon {
   display: inline-flex;
   align-items: center;
@@ -3253,6 +3257,37 @@ button {
 }
 
 @media (max-width: 640px) {
+  .hub-decision-banner {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.8rem;
+  }
+
+  .hub-decision-banner-main {
+    width: 100%;
+  }
+
+  .hub-decision-banner-copy-block {
+    width: 100%;
+  }
+
+  .hub-voter-block-banner {
+    width: 100%;
+    padding-top: 0.75rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    text-align: left;
+  }
+
+  .hub-voter-block-banner .hub-voters {
+    width: 100%;
+    margin-top: 0;
+    justify-content: space-between;
+  }
+
+  .hub-voter-block-banner .hub-avatar-badge {
+    margin-right: 0;
+  }
+
   .hub-grid-mobile-unvoted .hub-column-side {
     display: none;
   }

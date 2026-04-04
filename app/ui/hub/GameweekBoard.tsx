@@ -277,7 +277,7 @@ export function GameweekBoard({
             <span className="hub-decision-banner-icon">
               <MatchdayStateIcon viewState={viewState} />
             </span>
-            <div>
+            <div className="hub-decision-banner-copy-block">
               <p className="hub-decision-banner-title">
                 {getMatchdayBannerTitle(viewState, currentGameWeek)}
               </p>
