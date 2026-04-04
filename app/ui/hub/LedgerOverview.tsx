@@ -60,7 +60,7 @@ function PerformanceChart({
   highlightedTransactionIds: string[];
   onHighlightTransactions: (transactionIds: string[]) => void;
 }) {
-  const [selectedRange, setSelectedRange] = useState<LedgerRange>("all");
+  const [selectedRange, setSelectedRange] = useState<LedgerRange>("2w");
   const [activeMarkerKey, setActiveMarkerKey] = useState<string | null>(null);
   const potTimeline = getPotTimelineForRange(selectedRange);
   const chartGeometry = buildChartGeometry(potTimeline);

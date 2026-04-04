@@ -3244,7 +3244,6 @@ button {
     flex: 1 1 10rem;
   }
 
-  .hub-header,
   .hub-section-head,
   .hub-admin-controls,
   .hub-proposal-top,
@@ -3257,21 +3256,70 @@ button {
     align-items: flex-start;
   }
 
+  .hub-header {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+
   .hub-header-group {
-    flex-wrap: wrap;
+    width: 100%;
+    flex-wrap: nowrap;
+    align-items: stretch;
+    justify-content: space-between;
+    gap: 0.75rem;
+  }
+
+  .hub-header-stat {
+    display: flex;
+    flex: 1 1 0;
+    min-width: 0;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .hub-header-group > div:not(.hub-divider),
+  .hub-header-group > button {
+    min-width: 0;
+    flex: 1 1 0;
+  }
+
+  .hub-header-group .hub-divider,
+  .hub-header-group .hub-sparkline {
+    display: none;
   }
 
   .hub-header-datetime {
-    width: 100%;
-    text-align: left;
+    width: auto;
+    text-align: right;
   }
 
   .hub-roi {
-    width: 100%;
+    width: auto;
+  }
+
+  .hub-roi-row {
+    justify-content: center;
+  }
+
+  .hub-label,
+  .hub-pot-value,
+  .hub-roi-value {
+    white-space: nowrap;
   }
 
   .hub-main {
     align-self: start;
+  }
+
+  .hub-summary-stack {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .hub-summary-card {
+    min-height: 0;
   }
 
   .hub-transactions-modal {
