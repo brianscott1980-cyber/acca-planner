@@ -12,6 +12,7 @@
     "generate:pl-clubs": "node scripts/premier-league/generate-club-data.mjs",
     "instructions:next-matchday": "node scripts/ai/print-next-matchday-proposals-instructions.mjs",
     "instructions:custom-bet": "node scripts/ai/print-custom-bet-instructions.mjs",
+    "instructions:completed-bets": "node scripts/ai/print-completed-bets-review-instructions.mjs",
     "supabase:generate-db-sql": "node scripts/supabase/database/generate-database-sql.mjs",
     "supabase:clear-future": "node scripts/supabase/database/clear-future-data.mjs",
     "supabase:push-next-matchday": "node scripts/supabase/matchday/push-next-local-matchday.mjs",

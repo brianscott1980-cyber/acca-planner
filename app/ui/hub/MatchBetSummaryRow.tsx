@@ -21,6 +21,7 @@ type MatchBetSummaryRowProps = {
   onToggle: () => void;
   settlementStatus?: SimulatedSlipLegStatus | "pending" | "in_play" | "ended";
   statusLabel?: string;
+  showSettlementStatusInOddsSlot?: boolean;
 };
 
 export function MatchBetSummaryRow({
@@ -31,6 +32,7 @@ export function MatchBetSummaryRow({
   onToggle,
   settlementStatus,
   statusLabel,
+  showSettlementStatusInOddsSlot = false,
 }: MatchBetSummaryRowProps) {
   const fixtureDisplayParts = getFixtureDisplayParts(betLine.label);
   const formContent = getBetLineFormContent(betLine, fixtureDisplayParts);
@@ -44,6 +46,9 @@ export function MatchBetSummaryRow({
     });
     onToggle();
   };
+  const settlementPillClass = getSettlementPillClass(settlementStatus);
+  const settlementDisplayLabel =
+    statusLabel ?? getSettlementLabel(settlementStatus);
 
   return (
     <div className={`hub-bet-line${isExpanded ? " is-expanded" : ""}`}>
@@ -103,37 +108,20 @@ export function MatchBetSummaryRow({
           ) : null}
         </div>
         <span className="hub-bet-line-pill-wrap">
-          {settlementStatus ? (
+          {settlementStatus && !showSettlementStatusInOddsSlot ? (
             <span
-              className={`hub-outcome ${
-                settlementStatus === "won"
-                  ? "is-win"
-                  : settlementStatus === "lost"
-                    ? "is-loss"
-                  : settlementStatus === "in_play"
-                    ? "is-in-play"
-                  : settlementStatus === "ended"
-                    ? "is-ended"
-                    : settlementStatus === "cashed_out"
-                      ? "is-cashed-out"
-                      : "is-pending"
-              }`}
+              className={`hub-outcome ${settlementPillClass}`}
             >
-              {statusLabel ??
-                (settlementStatus === "won"
-                  ? "Won"
-                  : settlementStatus === "lost"
-                    ? "Lost"
-                  : settlementStatus === "in_play"
-                    ? "In Play"
-                  : settlementStatus === "ended"
-                    ? "Ended"
-                  : settlementStatus === "cashed_out"
-                    ? "Cashout"
-                    : "Pending")}
+              {settlementDisplayLabel}
             </span>
           ) : null}
-          <span className="hub-bet-line-pill">{displayOdds}</span>
+          {showSettlementStatusInOddsSlot && settlementStatus ? (
+            <span className={`hub-outcome ${settlementPillClass}`}>
+              {settlementDisplayLabel}
+            </span>
+          ) : (
+            <span className="hub-bet-line-pill">{displayOdds}</span>
+          )}
         </span>
       </button>
 
@@ -165,6 +153,58 @@ export function MatchBetSummaryRow({
       ) : null}
     </div>
   );
+}
+
+function getSettlementPillClass(
+  settlementStatus: MatchBetSummaryRowProps["settlementStatus"],
+) {
+  if (settlementStatus === "won") {
+    return "is-win";
+  }
+
+  if (settlementStatus === "lost") {
+    return "is-loss";
+  }
+
+  if (settlementStatus === "in_play") {
+    return "is-in-play";
+  }
+
+  if (settlementStatus === "ended") {
+    return "is-ended";
+  }
+
+  if (settlementStatus === "cashed_out") {
+    return "is-cashed-out";
+  }
+
+  return "is-pending";
+}
+
+function getSettlementLabel(
+  settlementStatus: MatchBetSummaryRowProps["settlementStatus"],
+) {
+  if (settlementStatus === "won") {
+    return "Won";
+  }
+
+  if (settlementStatus === "lost") {
+    return "Lost";
+  }
+
+  if (settlementStatus === "in_play") {
+    return "In Play";
+  }
+
+  if (settlementStatus === "ended") {
+    return "Ended";
+  }
+
+  if (settlementStatus === "cashed_out") {
+    return "Cashout";
+  }
+
+  return "Pending";
 }
 
 function getBetLineFormContent(

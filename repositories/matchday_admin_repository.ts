@@ -6,6 +6,8 @@ import type {
   LeagueMatchdaySimulationRow,
   LeagueMatchdayVoteRow,
   LeagueSimulationSlipRow,
+  MatchdayOutcomeRow,
+  LeagueSimulationLegResultRow,
 } from "../types/league_simulation_type";
 import type { LedgerTransactionRecord } from "../types/ledger_type";
 
@@ -74,6 +76,76 @@ export async function persistEndedMatchdayVotingRemote({
 
   if (voteError) {
     throw new Error(`Failed to upsert matchday votes for ${gameWeekId}: ${voteError.message}`);
+  }
+}
+
+export async function persistMatchdayOutcomeRemote({
+  metaRow,
+  slipRow,
+  legResultRows,
+  outcomeRow,
+  settlementLedgerRow,
+}: {
+  metaRow: LeagueDataMetaRecord;
+  slipRow: LeagueSimulationSlipRow;
+  legResultRows: LeagueSimulationLegResultRow[];
+  outcomeRow: MatchdayOutcomeRow;
+  settlementLedgerRow: LedgerTransactionRecord | null;
+}) {
+  if (!supabase) {
+    throw new Error("Supabase is not configured.");
+  }
+
+  const { error: metaError } = await supabase
+    .from("league_data_meta")
+    .upsert(mapKeysToSnakeCase(metaRow), { onConflict: "id" });
+
+  if (metaError) {
+    throw new Error(`Failed to update league data meta: ${metaError.message}`);
+  }
+
+  const { error: slipError } = await supabase
+    .from("league_data_slips")
+    .upsert(mapKeysToSnakeCase(slipRow), { onConflict: "id" });
+
+  if (slipError) {
+    throw new Error(
+      `Failed to update matchday slip for ${slipRow.gameWeekId}: ${slipError.message}`,
+    );
+  }
+
+  if (legResultRows.length > 0) {
+    const { error: legError } = await supabase
+      .from("league_data_leg_results")
+      .upsert(legResultRows.map((row) => mapKeysToSnakeCase(row)), { onConflict: "id" });
+
+    if (legError) {
+      throw new Error(
+        `Failed to update leg results for ${slipRow.gameWeekId}: ${legError.message}`,
+      );
+    }
+  }
+
+  const { error: outcomeError } = await supabase
+    .from("matchday_outcomes")
+    .upsert(mapKeysToSnakeCase(outcomeRow), { onConflict: "id" });
+
+  if (outcomeError && !isMissingRelationError(outcomeError)) {
+    throw new Error(
+      `Failed to persist matchday outcome for ${slipRow.gameWeekId}: ${outcomeError.message}`,
+    );
+  }
+
+  if (settlementLedgerRow) {
+    const { error: ledgerError } = await supabase
+      .from("ledger_transactions")
+      .upsert(mapKeysToSnakeCase(settlementLedgerRow), { onConflict: "id" });
+
+    if (ledgerError) {
+      console.error(
+        `Failed to upsert settlement ledger for ${slipRow.gameWeekId}: ${ledgerError.message}`,
+      );
+    }
   }
 }
 
@@ -153,4 +225,15 @@ function toSnakeCase(value: string) {
     .replace(/([a-z0-9])([A-Z])/g, "$1_$2")
     .replace(/[^a-zA-Z0-9]+/g, "_")
     .toLowerCase();
+}
+
+function isMissingRelationError(error: { code?: string; message?: string }) {
+  const message = String(error.message ?? "").toLowerCase();
+
+  return (
+    error.code === "42P01" ||
+    message.includes("does not exist") ||
+    message.includes("schema cache") ||
+    message.includes("could not find the table")
+  );
 }

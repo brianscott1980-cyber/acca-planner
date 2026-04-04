@@ -1,5 +1,6 @@
 import {
   persistEndedMatchdayVotingRemote,
+  persistMatchdayOutcomeRemote,
   persistPlacedMatchdayBetRemote,
 } from "../repositories/matchday_admin_repository";
 import {
@@ -12,9 +13,12 @@ import { setCurrentLedgerTransactions } from "./ledger_service";
 import type { AppDataSnapshot } from "../types/app_data_type";
 import type {
   LeagueDataMetaRecord,
+  LeagueSimulationLegResultRow,
   LeagueMatchdaySimulationRow,
   LeagueMatchdayVoteRow,
   LeagueSimulationSlipRow,
+  MatchdayOutcomeRow,
+  MatchdayOutcomeStatus,
 } from "../types/league_simulation_type";
 import type { GameWeekProposalRecord, GameWeekRecord } from "../types/matchday_type";
 import type { LedgerTransactionRecord } from "../types/ledger_type";
@@ -143,6 +147,12 @@ export async function markMatchdayBetAsPlaced({
     throw new Error("A valid placement date/time is required.");
   }
 
+  const voteResolvedAtMs = new Date(existingSimulationRow.voteResolvedAtIso).getTime();
+
+  if (Number.isFinite(voteResolvedAtMs) && placedAtMs < voteResolvedAtMs) {
+    throw new Error("Placed time cannot be earlier than the vote resolution time.");
+  }
+
   const nowIso = new Date().toISOString();
   const metaBase = currentSnapshot.leagueDataMeta[0];
   const metaRow: LeagueDataMetaRecord = {
@@ -206,6 +216,160 @@ export async function markMatchdayBetAsPlaced({
     simulationRow,
     slipRow,
     ledgerTransactionRow,
+  };
+}
+
+export async function setMatchdayBetOutcome({
+  gameWeekId,
+  outcomeStatus,
+  outcomeValueAmount,
+  outcomeAtIso,
+  outcomeSummary,
+  submittedByDisplayName,
+}: {
+  gameWeekId: string;
+  outcomeStatus: MatchdayOutcomeStatus;
+  outcomeValueAmount?: number;
+  outcomeAtIso: string;
+  outcomeSummary?: string;
+  submittedByDisplayName?: string;
+}) {
+  const currentSnapshot = getCurrentAppDataSnapshot();
+  const existingSimulationRow =
+    currentSnapshot.leagueDataMatchdaySimulations.find(
+      (simulationRow) => simulationRow.gameWeekId === gameWeekId,
+    ) ?? null;
+  const existingSlipRow =
+    currentSnapshot.leagueDataSlips.find((slipRow) => slipRow.gameWeekId === gameWeekId) ??
+    null;
+
+  if (!existingSimulationRow || !existingSlipRow) {
+    throw new Error("No placed matchday slip is available to set an outcome.");
+  }
+
+  const outcomeAtMs = new Date(outcomeAtIso).getTime();
+
+  if (!Number.isFinite(outcomeAtMs)) {
+    throw new Error("A valid outcome date/time is required.");
+  }
+
+  const requiresValue = outcomeStatus === "won" || outcomeStatus === "cashed_out";
+  const normalizedOutcomeValue = requiresValue
+    ? Number(outcomeValueAmount)
+    : 0;
+
+  if (requiresValue && (!Number.isFinite(normalizedOutcomeValue) || normalizedOutcomeValue < 0)) {
+    throw new Error("Enter a valid return value for won or cashed out outcomes.");
+  }
+
+  const nowIso = new Date().toISOString();
+  const metaBase = currentSnapshot.leagueDataMeta[0];
+  const metaRow: LeagueDataMetaRecord = {
+    id: metaBase?.id ?? "primary",
+    simulatedAtIso: metaBase?.simulatedAtIso ?? nowIso,
+    updatedAtIso: nowIso,
+  };
+
+  const settlementKind = outcomeStatus === "cashed_out" ? "cashout" : "settled";
+  const derivedStatus =
+    outcomeStatus === "lost"
+      ? "loss"
+      : normalizedOutcomeValue >= existingSlipRow.stake
+        ? "win"
+        : "loss";
+  const slipRow: LeagueSimulationSlipRow = {
+    ...existingSlipRow,
+    settledAt: outcomeAtIso,
+    settlementKind,
+    returnAmount: normalizedOutcomeValue,
+    status: derivedStatus,
+  };
+
+  const outcomeSummaryText =
+    outcomeSummary?.trim() ||
+    (outcomeStatus === "won"
+      ? "Matchday bet won."
+      : outcomeStatus === "cashed_out"
+        ? "Matchday bet cashed out."
+        : "Matchday bet lost.");
+  const outcomeRow: MatchdayOutcomeRow = {
+    id: `matchday-outcome-${gameWeekId}`,
+    gameWeekId,
+    proposalId: existingSlipRow.proposalId,
+    outcomeStatus,
+    outcomeValueAmount: normalizedOutcomeValue,
+    outcomeAtIso,
+    summary: outcomeSummaryText,
+    submittedBy: submittedByDisplayName,
+  };
+
+  const legResultRows = currentSnapshot.leagueDataLegResults
+    .filter((entry) => entry.slipId === existingSlipRow.id)
+    .map((entry): LeagueSimulationLegResultRow => {
+      if (outcomeStatus !== "cashed_out") {
+        return entry;
+      }
+
+      const kickoffAtMs = new Date(entry.kickoffAt).getTime();
+      const settledAtMs = new Date(entry.settledAt).getTime();
+      const shouldCashoutLeg =
+        (Number.isFinite(kickoffAtMs) && kickoffAtMs >= outcomeAtMs) ||
+        (Number.isFinite(kickoffAtMs) &&
+          Number.isFinite(settledAtMs) &&
+          kickoffAtMs <= outcomeAtMs &&
+          settledAtMs >= outcomeAtMs);
+
+      return shouldCashoutLeg
+        ? {
+            ...entry,
+            status: "cashed_out" as const,
+            settledAt: outcomeAtIso,
+          }
+        : entry;
+    });
+
+  const shouldCreateSettlementLedger =
+    outcomeStatus === "won" || outcomeStatus === "cashed_out";
+  const settlementLedgerRow: LedgerTransactionRecord | null = shouldCreateSettlementLedger
+    ? {
+        id: `settlement-${gameWeekId}`,
+        title: submittedByDisplayName
+          ? `${submittedByDisplayName} Matchday ${outcomeStatus === "cashed_out" ? "Cashed Out" : "Won"}`
+          : `Matchday ${outcomeStatus === "cashed_out" ? "Cashed Out" : "Won"}`,
+        dateIso: outcomeAtIso,
+        amount: Math.abs(normalizedOutcomeValue),
+        kind: "settlement",
+        gameWeekId,
+        proposalId: existingSlipRow.proposalId,
+      }
+    : null;
+
+  if (shouldUseRemoteAppData()) {
+    await persistMatchdayOutcomeRemote({
+      metaRow,
+      slipRow,
+      legResultRows,
+      outcomeRow,
+      settlementLedgerRow,
+    });
+  }
+
+  const nextSnapshot = applyMatchdayOutcomeToSnapshot({
+    snapshot: currentSnapshot,
+    metaRow,
+    slipRow,
+    legResultRows,
+    outcomeRow,
+    settlementLedgerRow,
+  });
+
+  setCurrentAppDataSnapshot(nextSnapshot);
+  setCurrentLedgerTransactions(nextSnapshot.ledgerData);
+
+  return {
+    slipRow,
+    outcomeRow,
+    settlementLedgerRow,
   };
 }
 
@@ -304,7 +468,47 @@ function applyPlacedBetToSnapshot({
   };
 }
 
+function applyMatchdayOutcomeToSnapshot({
+  snapshot,
+  metaRow,
+  slipRow,
+  legResultRows,
+  outcomeRow,
+  settlementLedgerRow,
+}: {
+  snapshot: AppDataSnapshot;
+  metaRow: LeagueDataMetaRecord;
+  slipRow: LeagueSimulationSlipRow;
+  legResultRows: LeagueSimulationLegResultRow[];
+  outcomeRow: MatchdayOutcomeRow;
+  settlementLedgerRow: LedgerTransactionRecord | null;
+}) {
+  const ledgerWithoutExistingSettlement = snapshot.ledgerData.filter(
+    (entry) => !(entry.kind === "settlement" && entry.gameWeekId === slipRow.gameWeekId),
+  );
+
+  return {
+    ...snapshot,
+    leagueDataMeta: upsertById(snapshot.leagueDataMeta, metaRow),
+    leagueDataSlips: upsertById(snapshot.leagueDataSlips, slipRow),
+    leagueDataLegResults: upsertManyById(snapshot.leagueDataLegResults, legResultRows),
+    matchdayOutcomes: upsertById(snapshot.matchdayOutcomes, outcomeRow),
+    ledgerData: settlementLedgerRow
+      ? upsertById(ledgerWithoutExistingSettlement, settlementLedgerRow)
+      : ledgerWithoutExistingSettlement,
+  };
+}
+
 function upsertById<TRecord extends { id: string }>(rows: TRecord[], row: TRecord) {
   const withoutExistingRow = rows.filter((existingRow) => existingRow.id !== row.id);
   return [...withoutExistingRow, row];
+}
+
+function upsertManyById<TRecord extends { id: string }>(rows: TRecord[], nextRows: TRecord[]) {
+  if (nextRows.length === 0) {
+    return rows;
+  }
+
+  const nextRowIds = new Set(nextRows.map((row) => row.id));
+  return [...rows.filter((row) => !nextRowIds.has(row.id)), ...nextRows];
 }

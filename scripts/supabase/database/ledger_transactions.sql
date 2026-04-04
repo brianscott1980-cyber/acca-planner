@@ -6,9 +6,12 @@ create table if not exists public.ledger_transactions (
   kind text not null check (kind in ('deposit', 'stake', 'settlement')),
   game_week_id text,
   proposal_id text,
+  custom_bet_id text,
   created_at timestamptz not null default timezone('utc'::text, now()),
   updated_at timestamptz not null default timezone('utc'::text, now())
 );
+
+alter table public.ledger_transactions add column if not exists custom_bet_id text;
 
 grant select on public.ledger_transactions to authenticated;
 

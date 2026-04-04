@@ -94,6 +94,11 @@ export type CustomBetRecord = {
   stakeAmount?: number;
   placedDecimalOdds?: number;
   placedAtIso?: string;
+  outcomeStatus?: "won" | "lost" | "cashed_out";
+  outcomeValueAmount?: number;
+  outcomeAtIso?: string;
+  outcomeSummary?: string;
+  outcomeSubmittedBy?: string;
   cashoutLowerTarget: string;
   cashoutUpperTarget: string;
   noCashoutValue: string;

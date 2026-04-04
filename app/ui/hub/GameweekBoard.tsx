@@ -49,7 +49,11 @@ import {
 import { useAuth } from "../auth/AuthProvider";
 import { useCurrentGameWeek } from "./GameWeekProvider";
 import { MatchBetSummaryRow } from "./MatchBetSummaryRow";
-import { markMatchdayBetAsPlaced } from "../../../services/matchday_admin_service";
+import {
+  markMatchdayBetAsPlaced,
+  setMatchdayBetOutcome,
+} from "../../../services/matchday_admin_service";
+import { getMatchdayFeedback } from "../../../services/bet_learning_feedback_service";
 
 type GameweekBoardProps = {
   decidedProposal?: GameWeekProposalRecord | null;
@@ -438,6 +442,15 @@ function AccumulatorCard({
     viewState === "locked" &&
     simulation?.selectedProposalId === card.id &&
     isAdminUser;
+  const isAwaitingOutcome =
+    viewState === "placed" &&
+    simulation?.selectedProposalId === card.id &&
+    isAdminUser;
+  const retrospectiveFeedback = getMatchdayFeedback(gameWeek.id);
+  const shouldShowRetrospective =
+    viewState === "review" &&
+    simulation?.selectedProposalId === card.id &&
+    Boolean(retrospectiveFeedback);
   const [stakeAmount, setStakeAmount] = useState(() => actualStake.toFixed(2));
   const [placedDecimalOdds, setPlacedDecimalOdds] = useState(() =>
     Number.parseFloat(getProposalDisplayOdds(card)).toFixed(2),
@@ -449,6 +462,16 @@ function AccumulatorCard({
   const [placementErrorMessage, setPlacementErrorMessage] = useState<string | null>(null);
   const [isSubmittingPlacement, setIsSubmittingPlacement] = useState(false);
   const [isPlacementDialogOpen, setIsPlacementDialogOpen] = useState(false);
+  const [isOutcomeDialogOpen, setIsOutcomeDialogOpen] = useState(false);
+  const [outcomeStatus, setOutcomeStatus] = useState<"won" | "lost" | "cashed_out">("won");
+  const [outcomeValueAmount, setOutcomeValueAmount] = useState("0.00");
+  const [outcomeAt, setOutcomeAt] = useState(() =>
+    toDateTimeLocalValue(new Date().toISOString()),
+  );
+  const [outcomeSummary, setOutcomeSummary] = useState("");
+  const [outcomeStatusMessage, setOutcomeStatusMessage] = useState<string | null>(null);
+  const [outcomeErrorMessage, setOutcomeErrorMessage] = useState<string | null>(null);
+  const [isSubmittingOutcome, setIsSubmittingOutcome] = useState(false);
   const Icon =
     card.riskLevel === "safe"
       ? Shield
@@ -475,6 +498,7 @@ function AccumulatorCard({
     gameWeek,
     simulatedNowMs,
     viewState,
+    retrospectiveFeedback,
   });
   const handleVote = () => {
     trackEvent("vote_proposal", {
@@ -500,6 +524,7 @@ function AccumulatorCard({
             insight={insight}
             settlementStatus={displayState?.status}
             statusLabel={displayState?.label}
+            showSettlementStatusInOddsSlot={viewState === "review"}
             isExpanded={isExpanded}
             onToggle={() =>
               setExpandedSectionId((previous) =>
@@ -570,6 +595,46 @@ function AccumulatorCard({
       ) : null}
     </div>
   );
+  const retrospectivePanel =
+    shouldShowRetrospective && retrospectiveFeedback ? (
+      <div className="hub-retrospective-panel">
+        <div className="hub-retrospective-header">
+          <Flame size={18} />
+          <h2 className="hub-panel-title hub-retrospective-title">AI Retrospective</h2>
+        </div>
+        <p className="hub-subtitle">{retrospectiveFeedback.summary}</p>
+        {retrospectiveFeedback.whySuccessful ? (
+          <p className="hub-subtitle">{retrospectiveFeedback.whySuccessful}</p>
+        ) : null}
+        {retrospectiveFeedback.whyUnsuccessful ? (
+          <p className="hub-subtitle">{retrospectiveFeedback.whyUnsuccessful}</p>
+        ) : null}
+        {retrospectiveFeedback.nextBetAdjustments.length > 0 ? (
+          <div className="hub-retrospective-section">
+            <h3 className="hub-retrospective-subtitle">Next Time</h3>
+            <ul className="hub-detail-list">
+              {retrospectiveFeedback.nextBetAdjustments.map((item) => (
+                <li key={item} className="hub-subtitle">
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
+        {retrospectiveFeedback.legFeedback.length > 0 ? (
+          <div className="hub-retrospective-section">
+            <h3 className="hub-retrospective-subtitle">Leg Lessons</h3>
+            <ul className="hub-detail-list">
+              {retrospectiveFeedback.legFeedback.map((leg) => (
+                <li key={leg.legLabel} className="hub-subtitle">
+                  {leg.legLabel}: {getLegOutcomeLabel(leg.legOutcome)}. {leg.lesson}
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
+      </div>
+    ) : null;
   const handleMarkPlaced = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
@@ -610,6 +675,50 @@ function AccumulatorCard({
       );
     } finally {
       setIsSubmittingPlacement(false);
+    }
+  };
+
+  const handleSetOutcome = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    const nextOutcomeAtIso = fromDateTimeLocalValue(outcomeAt);
+
+    if (!nextOutcomeAtIso) {
+      setOutcomeErrorMessage("Enter a valid outcome date/time.");
+      return;
+    }
+
+    const needsValue = outcomeStatus === "won" || outcomeStatus === "cashed_out";
+    const nextOutcomeValue = Number.parseFloat(outcomeValueAmount);
+
+    if (needsValue && (!Number.isFinite(nextOutcomeValue) || nextOutcomeValue < 0)) {
+      setOutcomeErrorMessage("Enter a valid return value for won or cashed out outcomes.");
+      return;
+    }
+
+    setIsSubmittingOutcome(true);
+    setOutcomeStatusMessage(null);
+    setOutcomeErrorMessage(null);
+
+    try {
+      await setMatchdayBetOutcome({
+        gameWeekId: gameWeek.id,
+        outcomeStatus,
+        outcomeValueAmount: needsValue ? nextOutcomeValue : undefined,
+        outcomeAtIso: nextOutcomeAtIso,
+        outcomeSummary,
+        submittedByDisplayName: currentUser?.displayName,
+      });
+
+      setOutcomeStatusMessage("Matchday outcome saved.");
+      setIsOutcomeDialogOpen(false);
+      refreshCurrentGameWeek();
+    } catch (error) {
+      setOutcomeErrorMessage(
+        error instanceof Error ? error.message : "Failed to set matchday outcome.",
+      );
+    } finally {
+      setIsSubmittingOutcome(false);
     }
   };
 
@@ -750,7 +859,8 @@ function AccumulatorCard({
         <div className="hub-proposal-detail-layout">
           <div className="hub-proposal-detail-main">
             {betLinesContent}
-            {cashoutPanel}
+            {retrospectivePanel}
+            {viewState !== "review" ? cashoutPanel : null}
           </div>
           <aside className="hub-proposal-detail-side">
             {isAwaitingAdminPlacement ? (
@@ -761,6 +871,16 @@ function AccumulatorCard({
               >
                 <Flag size={16} />
                 Mark Bet Placed
+              </button>
+            ) : null}
+            {isAwaitingOutcome ? (
+              <button
+                className="hub-primary-button hub-admin-placement-button"
+                type="button"
+                onClick={() => setIsOutcomeDialogOpen(true)}
+              >
+                <Flag size={16} />
+                Set Outcome
               </button>
             ) : null}
 
@@ -809,13 +929,12 @@ function AccumulatorCard({
                 votesByUserId={consensusVotesByUserId}
               />
             </div>
-
           </aside>
         </div>
       ) : (
         <>
           {betLinesContent}
-          {cashoutPanel}
+          {viewState !== "review" ? cashoutPanel : null}
         </>
       )}
       </article>
@@ -902,6 +1021,106 @@ function AccumulatorCard({
             ) : null}
             {placementErrorMessage ? (
               <p className="auth-status auth-status-error">{placementErrorMessage}</p>
+            ) : null}
+          </div>
+        </div>
+      ) : null}
+      {isAwaitingOutcome && isOutcomeDialogOpen ? (
+        <div
+          className="hub-modal-backdrop"
+          role="presentation"
+          onClick={() => setIsOutcomeDialogOpen(false)}
+        >
+          <div
+            className="hub-modal hub-admin-placement-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby={`matchday-outcome-title-${card.id}`}
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="hub-modal-header hub-transactions-modal-header">
+              <div>
+                <h2 id={`matchday-outcome-title-${card.id}`} className="hub-panel-title">
+                  Set Outcome
+                </h2>
+                <p className="hub-subtitle">
+                  Record the final outcome for this matchday bet.
+                </p>
+              </div>
+
+              <button
+                className="hub-icon-button hub-transactions-modal-close"
+                type="button"
+                aria-label="Close Set Outcome dialog"
+                onClick={() => setIsOutcomeDialogOpen(false)}
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <form className="auth-form" onSubmit={handleSetOutcome}>
+              <label className="auth-field">
+                <span className="hub-label">Result</span>
+                <select
+                  className="auth-input"
+                  value={outcomeStatus}
+                  onChange={(event) =>
+                    setOutcomeStatus(event.target.value as "won" | "lost" | "cashed_out")
+                  }
+                  required
+                >
+                  <option value="won">Won</option>
+                  <option value="lost">Lost</option>
+                  <option value="cashed_out">Cashed Out</option>
+                </select>
+              </label>
+              {outcomeStatus === "won" || outcomeStatus === "cashed_out" ? (
+                <label className="auth-field">
+                  <span className="hub-label">Return Value</span>
+                  <input
+                    className="auth-input"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={outcomeValueAmount}
+                    onChange={(event) => setOutcomeValueAmount(event.target.value)}
+                    required
+                  />
+                </label>
+              ) : null}
+              <label className="auth-field">
+                <span className="hub-label">Outcome Time</span>
+                <input
+                  className="auth-input"
+                  type="datetime-local"
+                  value={outcomeAt}
+                  onChange={(event) => setOutcomeAt(event.target.value)}
+                  required
+                />
+              </label>
+              <label className="auth-field">
+                <span className="hub-label">Summary</span>
+                <textarea
+                  className="auth-input"
+                  value={outcomeSummary}
+                  onChange={(event) => setOutcomeSummary(event.target.value)}
+                  placeholder="Optional notes"
+                  rows={3}
+                />
+              </label>
+              <button
+                className="hub-primary-button hub-admin-placement-button"
+                type="submit"
+                disabled={isSubmittingOutcome}
+              >
+                {isSubmittingOutcome ? "Saving..." : "Set Outcome"}
+              </button>
+            </form>
+            {outcomeStatusMessage ? (
+              <p className="auth-status auth-status-success">{outcomeStatusMessage}</p>
+            ) : null}
+            {outcomeErrorMessage ? (
+              <p className="auth-status auth-status-error">{outcomeErrorMessage}</p>
             ) : null}
           </div>
         </div>
@@ -1108,11 +1327,13 @@ function getBetLineDisplayStatesForView({
   gameWeek,
   simulatedNowMs,
   viewState,
+  retrospectiveFeedback,
 }: {
   card: GameWeekProposalRecord;
   gameWeek: ReturnType<typeof useCurrentGameWeek>["currentGameWeek"];
   simulatedNowMs: number;
   viewState: GameWeekViewState;
+  retrospectiveFeedback?: ReturnType<typeof getMatchdayFeedback> | null;
 }) {
   if (viewState !== "placed" && viewState !== "review") {
     return {};
@@ -1124,16 +1345,44 @@ function getBetLineDisplayStatesForView({
     return {};
   }
 
-  return Object.fromEntries(
-    (simulatedSlip.legResults ?? []).map((legResult) => [
-      legResult.betLineLabel,
-      getDisplayedBetLineState({
-        legResult,
-        simulatedNow: simulatedNowMs,
-        viewState,
-      }),
-    ]),
-  ) as Record<string, DisplayedBetLineState>;
+  const legResults = simulatedSlip.legResults ?? [];
+
+  if (legResults.length > 0) {
+    return Object.fromEntries(
+      legResults.map((legResult) => [
+        legResult.betLineLabel,
+        getDisplayedBetLineState({
+          legResult,
+          simulatedNow: simulatedNowMs,
+          viewState,
+        }),
+      ]),
+    ) as Record<string, DisplayedBetLineState>;
+  }
+
+  if (viewState === "review") {
+    const feedbackStateByLabel = buildFeedbackLegStateMap(
+      retrospectiveFeedback,
+      simulatedSlip,
+    );
+
+    if (Object.keys(feedbackStateByLabel).length > 0) {
+      return feedbackStateByLabel;
+    }
+
+    const fallbackStatus: SimulatedSlipLegStatus =
+      simulatedSlip.settlementKind === "cashout"
+        ? "cashed_out"
+        : simulatedSlip.status === "win"
+          ? "won"
+          : "lost";
+
+    return Object.fromEntries(
+      getOrderedBetLines(card).map((betLine) => [betLine.label, { status: fallbackStatus }]),
+    ) as Record<string, DisplayedBetLineState>;
+  }
+
+  return {};
 }
 
 function getDisplayedBetLineState({
@@ -1267,4 +1516,60 @@ function getPendingCountdownLabel(
 
 function getLockedMatchdayTitle(matchdayName: string) {
   return matchdayName.replace(/\s+(Preparation|Voting) Stage$/i, " Strategy Locked");
+}
+
+function getLegOutcomeLabel(outcome: "won" | "lost" | "cashed_out" | "void" | "unknown") {
+  if (outcome === "won") {
+    return "Won";
+  }
+
+  if (outcome === "lost") {
+    return "Lost";
+  }
+
+  if (outcome === "cashed_out") {
+    return "Cashed Out";
+  }
+
+  if (outcome === "void") {
+    return "Void";
+  }
+
+  return "Unknown";
+}
+
+function buildFeedbackLegStateMap(
+  retrospectiveFeedback: ReturnType<typeof getMatchdayFeedback> | null | undefined,
+  simulatedSlip: NonNullable<
+    ReturnType<typeof useCurrentGameWeek>["currentGameWeek"]["simulatedSlip"]
+  >,
+) {
+  if (!retrospectiveFeedback || retrospectiveFeedback.legFeedback.length === 0) {
+    return {};
+  }
+
+  const fallbackStatus: SimulatedSlipLegStatus =
+    simulatedSlip.settlementKind === "cashout"
+      ? "cashed_out"
+      : simulatedSlip.status === "win"
+        ? "won"
+        : "lost";
+
+  return Object.fromEntries(
+    retrospectiveFeedback.legFeedback.map((legFeedback) => {
+      const normalizedStatus =
+        legFeedback.legOutcome === "won" ||
+        legFeedback.legOutcome === "lost" ||
+        legFeedback.legOutcome === "cashed_out"
+          ? legFeedback.legOutcome
+          : fallbackStatus;
+
+      return [
+        legFeedback.legLabel,
+        {
+          status: normalizedStatus,
+        } satisfies DisplayedBetLineState,
+      ];
+    }),
+  ) as Record<string, DisplayedBetLineState>;
 }

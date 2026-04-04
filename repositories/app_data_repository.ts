@@ -49,6 +49,21 @@ const TABLE_LOADERS: TableLoader[] = [
     snapshotKey: "timelineEvents",
     optional: true,
   },
+  {
+    tableName: "matchday_outcomes",
+    snapshotKey: "matchdayOutcomes",
+    optional: true,
+  },
+  {
+    tableName: "custom_bet_outcomes",
+    snapshotKey: "customBetOutcomes",
+    optional: true,
+  },
+  {
+    tableName: "bet_learning_feedback",
+    snapshotKey: "betLearningFeedback",
+    optional: true,
+  },
 ];
 
 export async function loadRemoteAppDataSnapshot(): Promise<AppDataSnapshot> {

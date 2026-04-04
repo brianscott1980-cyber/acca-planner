@@ -160,6 +160,11 @@ create table if not exists public.custom_bets (
   stake_amount numeric(12, 2),
   placed_decimal_odds numeric(10, 2),
   placed_at_iso timestamptz,
+  outcome_status text check (outcome_status in ('won', 'lost', 'cashed_out')),
+  outcome_value_amount numeric(12, 2),
+  outcome_at_iso timestamptz,
+  outcome_summary text,
+  outcome_submitted_by text,
   cashout_lower_target text,
   cashout_upper_target text,
   no_cashout_value text,
@@ -293,6 +298,35 @@ create table if not exists public.timeline_events (
 );
 
 alter table public.timeline_events enable row level security;
+
+create table if not exists public.matchday_outcomes (
+  id text not null,
+  game_week_id text,
+  proposal_id text,
+  outcome_status text check (outcome_status in ('won', 'lost', 'cashed_out')),
+  outcome_value_amount numeric(12, 2),
+  outcome_at_iso timestamptz,
+  summary text,
+  submitted_by text,
+  primary key (id),
+  foreign key (game_week_id) references public.matchday_game_weeks (id)
+);
+
+alter table public.matchday_outcomes enable row level security;
+
+create table if not exists public.custom_bet_outcomes (
+  id text not null,
+  custom_bet_id text,
+  outcome_status text check (outcome_status in ('won', 'lost', 'cashed_out')),
+  outcome_value_amount numeric(12, 2),
+  outcome_at_iso timestamptz,
+  summary text,
+  submitted_by text,
+  primary key (id),
+  foreign key (custom_bet_id) references public.custom_bets (id)
+);
+
+alter table public.custom_bet_outcomes enable row level security;
 
 create table if not exists public.matchday_seed (
   id text not null,
@@ -545,6 +579,40 @@ on public.timeline_events
 for select
 to authenticated
 using (true);
+
+grant select on public.matchday_outcomes to authenticated;
+drop policy if exists "Authenticated users can read matchday_outcomes" on public.matchday_outcomes;
+create policy "Authenticated users can read matchday_outcomes"
+on public.matchday_outcomes
+for select
+to authenticated
+using (true);
+
+grant insert, update on public.matchday_outcomes to authenticated;
+drop policy if exists "Authenticated admins can write matchday_outcomes" on public.matchday_outcomes;
+create policy "Authenticated admins can write matchday_outcomes"
+on public.matchday_outcomes
+for all
+to authenticated
+using (coalesce(auth.jwt() -> 'app_metadata' ->> 'role', '') = 'admin')
+with check (coalesce(auth.jwt() -> 'app_metadata' ->> 'role', '') = 'admin');
+
+grant select on public.custom_bet_outcomes to authenticated;
+drop policy if exists "Authenticated users can read custom_bet_outcomes" on public.custom_bet_outcomes;
+create policy "Authenticated users can read custom_bet_outcomes"
+on public.custom_bet_outcomes
+for select
+to authenticated
+using (true);
+
+grant insert, update on public.custom_bet_outcomes to authenticated;
+drop policy if exists "Authenticated admins can write custom_bet_outcomes" on public.custom_bet_outcomes;
+create policy "Authenticated admins can write custom_bet_outcomes"
+on public.custom_bet_outcomes
+for all
+to authenticated
+using (coalesce(auth.jwt() -> 'app_metadata' ->> 'role', '') = 'admin')
+with check (coalesce(auth.jwt() -> 'app_metadata' ->> 'role', '') = 'admin');
 
 grant select on public.matchday_seed to authenticated;
 drop policy if exists "Authenticated users can read matchday_seed" on public.matchday_seed;

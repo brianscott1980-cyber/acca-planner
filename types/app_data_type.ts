@@ -1,9 +1,11 @@
 import type { LeagueClubRecord } from "./league_club_type";
 import type {
+  CustomBetOutcomeRow,
   LeagueDataMetaRecord,
   LeagueMatchdayBetLineOddsRow,
   LeagueMatchdaySimulationRow,
   LeagueMatchdayVoteRow,
+  MatchdayOutcomeRow,
   LeagueSimulationLegResultRow,
   LeagueSimulationSlipRow,
 } from "./league_simulation_type";
@@ -14,6 +16,7 @@ import type {
 } from "./market_analysis_type";
 import type { TimelineEventRecord } from "./timeline_type";
 import type { CustomBetRecord } from "./custom_bet_type";
+import type { BetLearningFeedbackRecord } from "./bet_learning_feedback_type";
 import type {
   MatchdayBetLineRecord,
   MatchdayFormMatchRecord,
@@ -40,6 +43,9 @@ export type AppDataSnapshot = {
   leagueDataBetLineOdds: LeagueMatchdayBetLineOddsRow[];
   leagueDataSlips: LeagueSimulationSlipRow[];
   leagueDataLegResults: LeagueSimulationLegResultRow[];
+  matchdayOutcomes: MatchdayOutcomeRow[];
+  customBetOutcomes: CustomBetOutcomeRow[];
+  betLearningFeedback: BetLearningFeedbackRecord[];
   ledgerData: LedgerTransactionRecord[];
   timelineEvents: TimelineEventRecord[];
 };

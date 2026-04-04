@@ -357,6 +357,10 @@ function TimelineMatchday({ entry }: { entry: TimelineEntry }) {
                   entry.potentialValue ? " has-potential" : ""
                 }${
                   entry.infoAvatarLabel ? " has-info" : ""
+                }${
+                  entry.status === "placed" && entry.matchdayId
+                    ? " has-mobile-hidden-info"
+                    : ""
                 }`}
               >
                 <div>
@@ -414,7 +418,13 @@ function TimelineMatchday({ entry }: { entry: TimelineEntry }) {
                   </span>
                 </div>
                 {entry.infoAvatarLabel ? (
-                  <div>
+                  <div
+                    className={`hub-timeline-info-cell${
+                      entry.status === "placed" && entry.matchdayId
+                        ? " hub-timeline-info-cell-hide-mobile"
+                        : ""
+                    }`}
+                  >
                     <span className="hub-metric-label">{entry.infoLabel ?? "Info"}</span>
                     <span
                       className="hub-timeline-submitter-avatar"
@@ -435,35 +445,90 @@ function TimelineMatchday({ entry }: { entry: TimelineEntry }) {
 }
 
 function getCustomBetTimelineEntries(): TimelineEntry[] {
-  return getCustomBets().map((customBet) => ({
-    id: `custom-bet-${customBet.id}`,
-    title: customBet.timelineTitle,
-    dateRange: formatTimelineDateTime(customBet.placedAtIso ?? customBet.generatedAtIso),
-    status: customBet.state === "staked" ? "placed" : "generated",
-    label: `${formatCustomBetSport(customBet.sport)} · ${customBet.eventName}`,
-    stakeLabel: "Event",
-    stake: `${customBet.eventName}\n${customBet.competitionName}`,
-    multilineStake: true,
-    oddsLabel: customBet.state === "staked" ? "Stake" : "Recommendation",
-    odds:
-      customBet.state === "staked"
-        ? customBet.stakeAmount !== undefined
+  return getCustomBets().flatMap((customBet) => {
+    const baseEntry: TimelineEntry = {
+      id: `custom-bet-${customBet.id}`,
+      title: customBet.timelineTitle,
+      dateRange: formatTimelineDateTime(customBet.placedAtIso ?? customBet.generatedAtIso),
+      status: customBet.state === "staked" ? "placed" : "generated",
+      label: `${formatCustomBetSport(customBet.sport)} · ${customBet.eventName}`,
+      stakeLabel: "Event",
+      stake: `${customBet.eventName}\n${customBet.competitionName}`,
+      multilineStake: true,
+      oddsLabel: customBet.state === "staked" ? "Stake" : "Recommendation",
+      odds:
+        customBet.state === "staked"
+          ? customBet.stakeAmount !== undefined
+            ? formatCurrency(customBet.stakeAmount, {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })
+            : "N/A"
+          : customBet.recommendedSelection,
+      returnLabel: customBet.state === "staked" ? "Placed Odds" : "Odds",
+      returnValue:
+        customBet.state === "staked"
+          ? customBet.placedDecimalOdds?.toFixed(2) ?? customBet.decimalOdds.toFixed(2)
+          : customBet.decimalOdds.toFixed(2),
+      outcomeLabel: customBet.state === "staked" ? "Staked" : "Custom Bet",
+      timestampIso: customBet.placedAtIso ?? customBet.generatedAtIso,
+      customBetId: customBet.id,
+      iconKind: customBet.sport,
+    };
+
+    if (customBet.state !== "staked" || !customBet.outcomeStatus || !customBet.outcomeAtIso) {
+      return [baseEntry];
+    }
+
+    const outcomeStatus =
+      customBet.outcomeStatus === "cashed_out"
+        ? "cashout"
+        : customBet.outcomeStatus === "won"
+          ? "win"
+          : "loss";
+    const outcomeValue =
+      customBet.outcomeStatus === "won" || customBet.outcomeStatus === "cashed_out"
+        ? customBet.outcomeValueAmount ?? 0
+        : 0;
+    const returnTone =
+      outcomeStatus === "cashout" && customBet.stakeAmount
+        ? getCashoutReturnTone(outcomeValue, customBet.stakeAmount)
+        : undefined;
+    const outcomeEntry: TimelineEntry = {
+      id: `custom-bet-outcome-${customBet.id}`,
+      title: `${customBet.title} Outcome`,
+      dateRange: formatTimelineDateTime(customBet.outcomeAtIso),
+      status: outcomeStatus,
+      label: `${formatCustomBetSport(customBet.sport)} · ${customBet.eventName}`,
+      stakeLabel: "Stake",
+      stake:
+        customBet.stakeAmount !== undefined
           ? formatCurrency(customBet.stakeAmount, {
               minimumFractionDigits: 2,
               maximumFractionDigits: 2,
             })
-          : "N/A"
-        : customBet.recommendedSelection,
-    returnLabel: customBet.state === "staked" ? "Placed Odds" : "Odds",
-    returnValue:
-      customBet.state === "staked"
-        ? customBet.placedDecimalOdds?.toFixed(2) ?? customBet.decimalOdds.toFixed(2)
-        : customBet.decimalOdds.toFixed(2),
-    outcomeLabel: customBet.state === "staked" ? "Staked" : "Custom Bet",
-    timestampIso: customBet.placedAtIso ?? customBet.generatedAtIso,
-    customBetId: customBet.id,
-    iconKind: customBet.sport,
-  }));
+          : "N/A",
+      oddsLabel: "Placed Odds",
+      odds: customBet.placedDecimalOdds?.toFixed(2) ?? customBet.decimalOdds.toFixed(2),
+      returnLabel: "Return",
+      returnValue: formatCurrency(outcomeValue, {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      }),
+      returnTone,
+      outcomeLabel:
+        outcomeStatus === "cashout"
+          ? "Cashout"
+          : outcomeStatus === "win"
+            ? "Won"
+            : "Lost",
+      timestampIso: customBet.outcomeAtIso,
+      customBetId: customBet.id,
+      iconKind: customBet.sport,
+    };
+
+    return [baseEntry, outcomeEntry];
+  });
 }
 
 function formatCustomBetSport(sport: "horse_racing" | "football" | "golf") {

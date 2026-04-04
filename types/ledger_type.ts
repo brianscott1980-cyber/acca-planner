@@ -8,6 +8,7 @@ export type LedgerTransactionRecord = {
   kind: LedgerTransactionKind;
   gameWeekId?: string;
   proposalId?: string;
+  customBetId?: string;
 };
 
 export type LedgerActivity = {

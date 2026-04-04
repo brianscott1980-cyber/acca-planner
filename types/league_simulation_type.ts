@@ -85,6 +85,29 @@ export type LeagueSimulationSlipRecord = {
   legResults: LeagueSimulationLegRecord[];
 };
 
+export type MatchdayOutcomeStatus = "won" | "lost" | "cashed_out";
+
+export type MatchdayOutcomeRow = {
+  id: string;
+  gameWeekId: string;
+  proposalId: string;
+  outcomeStatus: MatchdayOutcomeStatus;
+  outcomeValueAmount?: number;
+  outcomeAtIso: string;
+  summary: string;
+  submittedBy?: string;
+};
+
+export type CustomBetOutcomeRow = {
+  id: string;
+  customBetId: string;
+  outcomeStatus: MatchdayOutcomeStatus;
+  outcomeValueAmount?: number;
+  outcomeAtIso: string;
+  summary: string;
+  submittedBy?: string;
+};
+
 export type LeagueMatchdaySimulationRecord = {
   gameWeekId: string;
   voteResolvedAtIso: string;

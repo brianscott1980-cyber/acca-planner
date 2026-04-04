@@ -183,6 +183,13 @@ export const customBets: CustomBetRecord[] = [];
 `,
     ),
     writeDataFile(
+      "bet_learning_feedback.ts",
+      `import type { BetLearningFeedbackRecord } from "../types/bet_learning_feedback_type";
+
+export const betLearningFeedback: BetLearningFeedbackRecord[] = [];
+`,
+    ),
+    writeDataFile(
       "matchday_seed.ts",
       `import type { GameWeekRecord } from "../types/matchday_type";
 

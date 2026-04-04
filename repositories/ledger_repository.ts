@@ -12,6 +12,7 @@ type LedgerTransactionRow = {
   kind: LedgerTransactionRecord["kind"];
   game_week_id: string | null;
   proposal_id: string | null;
+  custom_bet_id: string | null;
 };
 
 export async function listLedgerTransactions() {
@@ -21,7 +22,7 @@ export async function listLedgerTransactions() {
 
   const { data, error } = await supabase
     .from(LEDGER_TRANSACTIONS_TABLE)
-    .select("id, title, date_iso, amount, kind, game_week_id, proposal_id")
+    .select("id, title, date_iso, amount, kind, game_week_id, proposal_id, custom_bet_id")
     .order("date_iso", { ascending: true });
 
   if (error) {
@@ -68,5 +69,6 @@ function mapLedgerTransactionRow(row: LedgerTransactionRow): LedgerTransactionRe
     kind: row.kind,
     gameWeekId: row.game_week_id ?? undefined,
     proposalId: row.proposal_id ?? undefined,
+    customBetId: row.custom_bet_id ?? undefined,
   };
 }

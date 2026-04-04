@@ -6,6 +6,9 @@ import { leagueDataMatchdaySimulations } from "../data/league_data_matchday_simu
 import { leagueDataMeta } from "../data/league_data_meta";
 import { leagueDataSlips } from "../data/league_data_slips";
 import { leagueDataVotes } from "../data/league_data_votes";
+import { matchdayOutcomes } from "../data/matchday_outcomes";
+import { customBetOutcomes } from "../data/custom_bet_outcomes";
+import { betLearningFeedback } from "../data/bet_learning_feedback";
 import { ledgerData } from "../data/ledger_data";
 import { marketAnalysisSelectionRows } from "../data/market_analysis_selections";
 import { marketAnalysisSnapshotRows } from "../data/market_analysis_snapshots";
@@ -36,6 +39,9 @@ export function getDefaultAppDataSnapshot(): AppDataSnapshot {
     leagueDataBetLineOdds,
     leagueDataSlips,
     leagueDataLegResults,
+    matchdayOutcomes,
+    customBetOutcomes,
+    betLearningFeedback,
     ledgerData,
     timelineEvents,
   };

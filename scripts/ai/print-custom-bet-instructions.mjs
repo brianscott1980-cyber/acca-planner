@@ -32,6 +32,7 @@ Goal:
 
 Files you may update:
 - data/custom_bets.ts
+- data/bet_learning_feedback.ts
 - public/assets/jockey_jerseys/*
 
 Rules:
@@ -42,6 +43,8 @@ Rules:
   - football: team news, club news, manager news, injuries, tactical changes, likely lineups
   - golf: player form, course fit, injury or fitness notes, weather, field strength
 - Look for circumstances, tactics, and current news that could materially improve or weaken the chance of a positive betting outcome.
+- Before finalizing the ranking, read data/bet_learning_feedback.ts and incorporate any relevant lessons from recently completed matchday or custom bets.
+- If prior feedback highlights a repeated model mistake, address it directly in the new recommendation rationale.
 - Fetch local image assets only when they are genuinely useful to the app UI and come from a credible source.
 - For horse-racing custom bets, download the jockey silks / jersey image for each proposed horse into public/assets/jockey_jerseys/ when available, and persist the local asset path in the proposed-bet detail block.
 - For football custom bets, fetch club badges only when the involved clubs are not already covered by the local club asset set.
@@ -72,6 +75,7 @@ Rules:
 - The custom bet should also include a suggested stake amount to invest based on the current pot.
 - The AI analysis should cover the shortlist together rather than writing isolated notes for one pick only.
 - Explain how the ranking was decided, what coverage or tradeoff each option provides, and which event/news factors most influenced the order.
+- The final recommendation should explicitly show how historical learning feedback changed or confirmed the ranking decision.
 - Give each proposed bet its own short summary line as well, so the UI can show per-bet feedback directly under the bet row.
 - Custom-bet cashout advice must include:
   - lower cashout target

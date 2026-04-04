@@ -6,7 +6,11 @@ import { useSearchParams } from "next/navigation";
 import { ChevronRight, Flag, Flame, Trophy, X } from "lucide-react";
 import { withBasePath } from "../../../lib/site";
 import { getCustomBet } from "../../../services/custom_bet_service";
-import { markCustomBetAsStaked } from "../../../services/custom_bet_admin_service";
+import {
+  markCustomBetAsStaked,
+  setCustomBetOutcome,
+} from "../../../services/custom_bet_admin_service";
+import { getCustomBetFeedback } from "../../../services/bet_learning_feedback_service";
 import type { CustomBetRecord } from "../../../types/custom_bet_type";
 import { useAuth } from "../auth/AuthProvider";
 import { formatCurrency } from "../../../services/ledger_service";
@@ -52,13 +56,22 @@ function CustomBetView({ customBet }: { customBet: CustomBetRecord }) {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isPlacementDialogOpen, setIsPlacementDialogOpen] = useState(false);
+  const [isOutcomeDialogOpen, setIsOutcomeDialogOpen] = useState(false);
+  const [outcomeStatus, setOutcomeStatus] = useState<"won" | "lost" | "cashed_out">("won");
+  const [outcomeValueAmount, setOutcomeValueAmount] = useState("0.00");
+  const [outcomeAt, setOutcomeAt] = useState(() =>
+    toDateTimeLocalValue(new Date().toISOString()),
+  );
+  const [outcomeSummary, setOutcomeSummary] = useState("");
+  const [outcomeStatusMessage, setOutcomeStatusMessage] = useState<string | null>(null);
+  const [outcomeErrorMessage, setOutcomeErrorMessage] = useState<string | null>(null);
+  const [isSubmittingOutcome, setIsSubmittingOutcome] = useState(false);
   const [expandedBetRank, setExpandedBetRank] = useState<number | null>(null);
   const eventWindowLabel = useMemo(
     () => formatEventWindow(currentCustomBet.eventStartIso, currentCustomBet.eventEndIso),
     [currentCustomBet.eventEndIso, currentCustomBet.eventStartIso],
   );
-  const horseRacingDetails =
-    currentCustomBet.sport === "horse_racing" ? currentCustomBet.horseRacing : undefined;
+  const retrospectiveFeedback = getCustomBetFeedback(currentCustomBet.id);
   const proposedBets =
     (currentCustomBet.proposedBets ?? []).length > 0
       ? currentCustomBet.proposedBets
@@ -125,6 +138,50 @@ function CustomBetView({ customBet }: { customBet: CustomBetRecord }) {
       );
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleSetOutcome = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    const nextOutcomeAtIso = fromDateTimeLocalValue(outcomeAt);
+
+    if (!nextOutcomeAtIso) {
+      setOutcomeErrorMessage("Enter a valid outcome date/time.");
+      return;
+    }
+
+    const needsValue = outcomeStatus === "won" || outcomeStatus === "cashed_out";
+    const nextOutcomeValue = Number.parseFloat(outcomeValueAmount);
+
+    if (needsValue && (!Number.isFinite(nextOutcomeValue) || nextOutcomeValue < 0)) {
+      setOutcomeErrorMessage("Enter a valid return value for won or cashed out outcomes.");
+      return;
+    }
+
+    setIsSubmittingOutcome(true);
+    setOutcomeStatusMessage(null);
+    setOutcomeErrorMessage(null);
+
+    try {
+      const nextCustomBet = await setCustomBetOutcome({
+        customBetId: currentCustomBet.id,
+        outcomeStatus,
+        outcomeValueAmount: needsValue ? nextOutcomeValue : undefined,
+        outcomeAtIso: nextOutcomeAtIso,
+        outcomeSummary,
+        submittedByDisplayName: currentUser?.displayName,
+      });
+
+      setCurrentCustomBet(nextCustomBet);
+      setOutcomeStatusMessage("Custom bet outcome saved.");
+      setIsOutcomeDialogOpen(false);
+    } catch (error) {
+      setOutcomeErrorMessage(
+        error instanceof Error ? error.message : "Failed to set custom bet outcome.",
+      );
+    } finally {
+      setIsSubmittingOutcome(false);
     }
   };
 
@@ -281,6 +338,47 @@ function CustomBetView({ customBet }: { customBet: CustomBetRecord }) {
               <p className="hub-subtitle">{currentCustomBet.analysisSummary}</p>
               <p className="hub-subtitle">{currentCustomBet.mediaSummary}</p>
             </div>
+            {currentCustomBet.state === "staked" &&
+            currentCustomBet.outcomeStatus &&
+            retrospectiveFeedback ? (
+              <div className="hub-custom-bet-panel hub-retrospective-panel">
+                <div className="hub-retrospective-header">
+                  <Flame size={18} />
+                  <h2 className="hub-panel-title hub-retrospective-title">AI Retrospective</h2>
+                </div>
+                <p className="hub-subtitle">{retrospectiveFeedback.summary}</p>
+                {retrospectiveFeedback.whySuccessful ? (
+                  <p className="hub-subtitle">{retrospectiveFeedback.whySuccessful}</p>
+                ) : null}
+                {retrospectiveFeedback.whyUnsuccessful ? (
+                  <p className="hub-subtitle">{retrospectiveFeedback.whyUnsuccessful}</p>
+                ) : null}
+                {retrospectiveFeedback.nextBetAdjustments.length > 0 ? (
+                  <div className="hub-retrospective-section">
+                    <h3 className="hub-retrospective-subtitle">Next Time</h3>
+                    <ul className="hub-detail-list">
+                      {retrospectiveFeedback.nextBetAdjustments.map((item) => (
+                        <li key={item} className="hub-subtitle">
+                          {item}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : null}
+                {retrospectiveFeedback.legFeedback.length > 0 ? (
+                  <div className="hub-retrospective-section">
+                    <h3 className="hub-retrospective-subtitle">Leg Lessons</h3>
+                    <ul className="hub-detail-list">
+                      {retrospectiveFeedback.legFeedback.map((leg) => (
+                        <li key={leg.legLabel} className="hub-subtitle">
+                          {leg.legLabel}: {formatFeedbackLegOutcome(leg.legOutcome)}. {leg.lesson}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : null}
+              </div>
+            ) : null}
           </div>
 
           <aside className="hub-proposal-detail-side">
@@ -292,6 +390,18 @@ function CustomBetView({ customBet }: { customBet: CustomBetRecord }) {
               >
                 <Flag size={16} />
                 Mark Bet Placed
+              </button>
+            ) : null}
+            {isAdminUser &&
+            currentCustomBet.state === "staked" &&
+            !currentCustomBet.outcomeStatus ? (
+              <button
+                className="hub-primary-button hub-admin-placement-button"
+                type="button"
+                onClick={() => setIsOutcomeDialogOpen(true)}
+              >
+                <Flag size={16} />
+                Set Outcome
               </button>
             ) : null}
 
@@ -374,7 +484,7 @@ function CustomBetView({ customBet }: { customBet: CustomBetRecord }) {
               </div>
             </div>
 
-            {currentCustomBet.state === "staked" ? (
+            {currentCustomBet.state === "staked" && !currentCustomBet.outcomeStatus ? (
               <div className="hub-custom-bet-panel">
                 <div className="hub-panel-title-row">
                   <Flag size={18} />
@@ -409,7 +519,35 @@ function CustomBetView({ customBet }: { customBet: CustomBetRecord }) {
                 </div>
               </div>
             ) : null}
-
+            {currentCustomBet.state === "staked" && currentCustomBet.outcomeStatus ? (
+              <div className="hub-custom-bet-panel">
+                <div className="hub-panel-title-row">
+                  <Flag size={18} />
+                  <h2 className="hub-panel-title">Outcome</h2>
+                </div>
+                <p className="hub-subtitle">
+                  {currentCustomBet.outcomeStatus === "won"
+                    ? `Won and returned ${formatCurrency(currentCustomBet.outcomeValueAmount ?? 0, {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                      })}.`
+                    : currentCustomBet.outcomeStatus === "cashed_out"
+                      ? `Cashed out for ${formatCurrency(currentCustomBet.outcomeValueAmount ?? 0, {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2,
+                        })}.`
+                      : "Lost with no return."}
+                </p>
+                {currentCustomBet.outcomeAtIso ? (
+                  <p className="hub-subtitle">
+                    Outcome Time: {formatPlacedAt(currentCustomBet.outcomeAtIso)}
+                  </p>
+                ) : null}
+                {currentCustomBet.outcomeSummary ? (
+                  <p className="hub-subtitle">{currentCustomBet.outcomeSummary}</p>
+                ) : null}
+              </div>
+            ) : null}
           </aside>
         </div>
       </article>
@@ -499,6 +637,112 @@ function CustomBetView({ customBet }: { customBet: CustomBetRecord }) {
             ) : null}
             {errorMessage ? (
               <p className="auth-status auth-status-error">{errorMessage}</p>
+            ) : null}
+          </div>
+        </div>
+      ) : null}
+      {isAdminUser &&
+      currentCustomBet.state === "staked" &&
+      !currentCustomBet.outcomeStatus &&
+      isOutcomeDialogOpen ? (
+        <div
+          className="hub-modal-backdrop"
+          role="presentation"
+          onClick={() => setIsOutcomeDialogOpen(false)}
+        >
+          <div
+            className="hub-modal hub-admin-placement-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby={`custom-bet-outcome-title-${currentCustomBet.id}`}
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="hub-modal-header hub-transactions-modal-header">
+              <div>
+                <h2
+                  id={`custom-bet-outcome-title-${currentCustomBet.id}`}
+                  className="hub-panel-title"
+                >
+                  Set Outcome
+                </h2>
+                <p className="hub-subtitle">
+                  Record the final outcome for this custom bet.
+                </p>
+              </div>
+
+              <button
+                className="hub-icon-button hub-transactions-modal-close"
+                type="button"
+                aria-label="Close Set Outcome dialog"
+                onClick={() => setIsOutcomeDialogOpen(false)}
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <form className="auth-form" onSubmit={handleSetOutcome}>
+              <label className="auth-field">
+                <span className="hub-label">Result</span>
+                <select
+                  className="auth-input"
+                  value={outcomeStatus}
+                  onChange={(event) =>
+                    setOutcomeStatus(event.target.value as "won" | "lost" | "cashed_out")
+                  }
+                  required
+                >
+                  <option value="won">Won</option>
+                  <option value="lost">Lost</option>
+                  <option value="cashed_out">Cashed Out</option>
+                </select>
+              </label>
+              {outcomeStatus === "won" || outcomeStatus === "cashed_out" ? (
+                <label className="auth-field">
+                  <span className="hub-label">Return Value</span>
+                  <input
+                    className="auth-input"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={outcomeValueAmount}
+                    onChange={(event) => setOutcomeValueAmount(event.target.value)}
+                    required
+                  />
+                </label>
+              ) : null}
+              <label className="auth-field">
+                <span className="hub-label">Outcome Time</span>
+                <input
+                  className="auth-input"
+                  type="datetime-local"
+                  value={outcomeAt}
+                  onChange={(event) => setOutcomeAt(event.target.value)}
+                  required
+                />
+              </label>
+              <label className="auth-field">
+                <span className="hub-label">Summary</span>
+                <textarea
+                  className="auth-input"
+                  value={outcomeSummary}
+                  onChange={(event) => setOutcomeSummary(event.target.value)}
+                  placeholder="Optional notes"
+                  rows={3}
+                />
+              </label>
+              <button
+                className="hub-primary-button hub-admin-placement-button"
+                type="submit"
+                disabled={isSubmittingOutcome}
+              >
+                {isSubmittingOutcome ? "Saving..." : "Set Outcome"}
+              </button>
+            </form>
+            {outcomeStatusMessage ? (
+              <p className="auth-status auth-status-success">{outcomeStatusMessage}</p>
+            ) : null}
+            {outcomeErrorMessage ? (
+              <p className="auth-status auth-status-error">{outcomeErrorMessage}</p>
             ) : null}
           </div>
         </div>
@@ -622,6 +866,26 @@ function getCustomBetSportTagClassName(sport: CustomBetRecord["sport"]) {
   }
 
   return "hub-tag-safe";
+}
+
+function formatFeedbackLegOutcome(outcome: "won" | "lost" | "cashed_out" | "void" | "unknown") {
+  if (outcome === "won") {
+    return "Won";
+  }
+
+  if (outcome === "lost") {
+    return "Lost";
+  }
+
+  if (outcome === "cashed_out") {
+    return "Cashed Out";
+  }
+
+  if (outcome === "void") {
+    return "Void";
+  }
+
+  return "Unknown";
 }
 
 function formatCustomBetState(state: CustomBetRecord["state"]) {

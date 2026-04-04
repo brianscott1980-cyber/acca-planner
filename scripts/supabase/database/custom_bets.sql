@@ -24,6 +24,11 @@ create table if not exists public.custom_bets (
   stake_amount numeric(12, 2),
   placed_decimal_odds numeric(10, 2),
   placed_at_iso timestamptz,
+  outcome_status text check (outcome_status in ('won', 'lost', 'cashed_out')),
+  outcome_value_amount numeric(12, 2),
+  outcome_at_iso timestamptz,
+  outcome_summary text,
+  outcome_submitted_by text,
   cashout_lower_target text,
   cashout_upper_target text,
   no_cashout_value text,
@@ -36,6 +41,12 @@ create table if not exists public.custom_bets (
   primary key (id),
   unique (slug)
 );
+
+alter table public.custom_bets add column if not exists outcome_status text check (outcome_status in ('won', 'lost', 'cashed_out'));
+alter table public.custom_bets add column if not exists outcome_value_amount numeric(12, 2);
+alter table public.custom_bets add column if not exists outcome_at_iso timestamptz;
+alter table public.custom_bets add column if not exists outcome_summary text;
+alter table public.custom_bets add column if not exists outcome_submitted_by text;
 
 grant select on public.custom_bets to authenticated;
 

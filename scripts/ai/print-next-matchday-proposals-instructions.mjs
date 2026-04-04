@@ -16,6 +16,7 @@ const LOCAL_DATA_FILES = [
   "data/matchday_bet_lines.ts",
   "data/matchday_forms.ts",
   "data/matchday_form_matches.ts",
+  "data/bet_learning_feedback.ts",
   "data/timeline_events.ts",
 ];
 
@@ -222,6 +223,7 @@ Required repo contract:
 - Before deciding which proposal is AI recommended, inspect the existing bankroll context in the repo:
   - use ledger_data.ts to understand the current pot against the original deposit baseline
   - use completed matchday outcomes, settlement history, and recent bankroll movement to judge whether recent betting form is strong, mixed, or deteriorating
+  - use bet_learning_feedback.ts to identify recurring mistakes, overconfident assumptions, and patterns that have recently underperformed or outperformed
   - use that broader context as part of the recommendation decision rather than looking at the weekend slate in isolation
 
 Proposal construction rules:
@@ -238,6 +240,7 @@ Proposal construction rules:
 - if the pot is dwindling or recent betting results have been poor, the recommendation should become more protective and prefer the safer profile unless there is a compelling reason not to
 - Do not recommend a proposal blindly from odds alone. Explain why the selected recommendation fits both the current match slate and the recent bankroll trend.
 - Leg choice and recommendation logic should also reflect whether current team news, club news, manager news, tactical changes, or availability concerns materially increase or reduce confidence in those selections.
+- Avoid repeating recently failed patterns recorded in bet_learning_feedback.ts unless current evidence clearly and explicitly supports a different conclusion.
 - Status labels must be concise and readable in the UI.
 - Titles must align with the app language, for example "Defensive Accumulator", "Balanced Accumulator", and "Aggressive Accumulator".
 
