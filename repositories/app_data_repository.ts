@@ -73,6 +73,14 @@ export async function loadRemoteAppDataSnapshot(): Promise<AppDataSnapshot> {
 
   const supabaseClient = supabase;
   const fallbackSnapshot = getDefaultAppDataSnapshot();
+  const rpcSnapshot = await loadRemoteAppDataSnapshotViaRpc({
+    supabaseClient,
+    fallbackSnapshot,
+  });
+
+  if (rpcSnapshot) {
+    return rpcSnapshot;
+  }
 
   const loadedEntries = await Promise.all(
     TABLE_LOADERS.map(async ({ tableName, snapshotKey, optional }) => {
@@ -95,6 +103,52 @@ export async function loadRemoteAppDataSnapshot(): Promise<AppDataSnapshot> {
   );
 
   return Object.fromEntries(loadedEntries) as AppDataSnapshot;
+}
+
+async function loadRemoteAppDataSnapshotViaRpc({
+  supabaseClient,
+  fallbackSnapshot,
+}: {
+  supabaseClient: NonNullable<typeof supabase>;
+  fallbackSnapshot: AppDataSnapshot;
+}) {
+  const { data, error } = await supabaseClient.rpc("fetch_app_data_snapshot");
+
+  if (error) {
+    if (isMissingFunctionError(error)) {
+      return null;
+    }
+
+    throw new Error(`Failed to load app snapshot via RPC: ${error.message}`);
+  }
+
+  if (!data || typeof data !== "object") {
+    return null;
+  }
+
+  return hydrateSnapshotFromRpcPayload(
+    data as Partial<Record<keyof AppDataSnapshot, unknown[]>>,
+    fallbackSnapshot,
+  );
+}
+
+function hydrateSnapshotFromRpcPayload(
+  payload: Partial<Record<keyof AppDataSnapshot, unknown[]>>,
+  fallbackSnapshot: AppDataSnapshot,
+) {
+  const entries = TABLE_LOADERS.map(({ snapshotKey }) => {
+    const rawRows = payload[snapshotKey];
+    const mappedRows = Array.isArray(rawRows)
+      ? rawRows.map((row) => mapRemoteRowToAppShape(row as Record<string, unknown>))
+      : [];
+
+    return [
+      snapshotKey,
+      resolveSnapshotRows(snapshotKey, mappedRows, fallbackSnapshot[snapshotKey]),
+    ] as const;
+  });
+
+  return Object.fromEntries(entries) as AppDataSnapshot;
 }
 
 function mapRemoteRowToAppShape(row: Record<string, unknown>) {
@@ -216,5 +270,16 @@ function isMissingRelationError(error: { code?: string; message?: string }) {
     message.includes("does not exist") ||
     message.includes("schema cache") ||
     message.includes("could not find the table")
+  );
+}
+
+function isMissingFunctionError(error: { code?: string; message?: string }) {
+  const message = String(error.message ?? "").toLowerCase();
+
+  return (
+    error.code === "42883" ||
+    error.code === "PGRST202" ||
+    message.includes("function fetch_app_data_snapshot") ||
+    message.includes("could not find the function")
   );
 }
