@@ -120,4 +120,95 @@ export const customBets: CustomBetRecord[] = [
       notableRivals: [],
     },
   },
+  {
+    id: "custom-bet-2026-04-12-masters-tournament-mixed-shortlist",
+    slug: "2026-04-12-masters-tournament-mixed-shortlist",
+    title: "Masters Tournament 2026",
+    state: "pending",
+    sport: "golf",
+    bookmaker: "Ladbrokes",
+    eventName: "The Masters Tournament",
+    competitionName: "PGA Tour Major Championship",
+    bettingFormatRequested: "Mixed shortlist (single/each-way/top finish)",
+    proposedBets: [
+      {
+        rank: 1,
+        market: "Top 10 Finish",
+        selection: "Xander Schauffele",
+        decimalOdds: 2.75,
+        summary:
+          "Most balanced risk/reward profile for Augusta this week: elite long-iron consistency, fewer blow-up holes, and a strong probability route to payout without needing an outright win.",
+      },
+      {
+        rank: 2,
+        market: "Each-way",
+        selection: "Ludvig Aberg",
+        decimalOdds: 17,
+        summary:
+          "Higher-upside each-way angle with realistic place equity if approach play stays sharp, but slightly more volatile round-to-round than the top-ranked option.",
+      },
+      {
+        rank: 3,
+        market: "Outright Winner (Single)",
+        selection: "Scottie Scheffler",
+        decimalOdds: 6.5,
+        summary:
+          "Strongest win-equity candidate in the field, but pure outright exposure is less forgiving than the ranked protection-first options above.",
+      },
+    ],
+    recommendedMarket: "Top 10 Finish",
+    recommendedSelection: "Xander Schauffele",
+    decimalOdds: 2.75,
+    summary:
+      "AI custom bet for Masters Sunday 2026: a ranked golf shortlist led by Xander Schauffele Top 10 for consistency and downside control, with Aberg each-way and Scheffler outright retained as higher-upside alternatives.",
+    analysisSummary:
+      "The shortlist is intentionally mixed-format to balance payout chance against event volatility at Augusta. Schauffele Top 10 ranks first because it offers the most stable path to return in a high-pressure major setup where round-by-round variance is meaningful. Aberg each-way sits second as the best blend of ceiling and place coverage when his tee-to-green game is dialled in. Scheffler outright remains a credible high-win-probability option, but it ranks third here only because win-only markets are structurally harsher when stake protection is the priority.",
+    mediaSummary:
+      "Recent Masters build-up has centred on elite iron play, scrambling under pressure, and late-round composure as the biggest separators. Weather and Augusta green-speed conditions can amplify volatility, so this ranking favours resilient scoring profiles over pure headline price alone.",
+    timelineTitle: "Custom Bet Ready",
+    timelineDescription:
+      "Masters 2026 shortlist ready: Schauffele Top 10, Aberg each-way, and Scheffler outright.",
+    generatedAtIso: "2026-04-04T12:30:00.000Z",
+    eventStartIso: "2026-04-09T11:00:00.000Z",
+    eventEndIso: "2026-04-12T22:00:00.000Z",
+    suggestedStakeAmount: 7,
+    cashoutLowerTarget:
+      "Protect near-stake value if Schauffele is tracking inside the top-10 line heading into the back nine on Sunday and live pricing offers a controlled exit.",
+    cashoutUpperTarget:
+      "Take a stronger profit if he remains safely inside the top-10 band with a multi-shot buffer late in the final round.",
+    noCashoutValue:
+      "Let it run if his ball-striking remains stable through Amen Corner and the live position still supports the original top-10 edge.",
+    cashoutAdvice: [
+      "Prioritise position versus the top-10 cut line rather than leaderboard emotion; this market is about margin control, not only winning the tournament.",
+      "If weather or pin setups become punitive, reduce exposure earlier because Augusta can swing quickly over a short stretch.",
+      "If Schauffele is gaining strokes tee-to-green while holding a cushion to the line, avoid unnecessary early exits.",
+    ],
+    watchPoints: [
+      "Monitor wind and firmness changes through rounds three and four; Augusta volatility can compress players around the top-10 boundary quickly.",
+      "Track short-game sharpness on fast greens, especially from 6-12 feet where momentum swings are often decided.",
+      "Watch for late leaderboard bunching that can reduce top-10 safety even when scoring appears steady.",
+    ],
+    riskFactors: [
+      "Major-championship pressure can create abrupt scoring variance even for elite players.",
+      "Top-10 markets can tighten rapidly in-play around key leaderboard clusters.",
+      "Single-event golf exposure remains sensitive to putting variance over a small sample of rounds.",
+    ],
+    golf: {
+      tournament: "The Masters Tournament",
+      course: "Augusta National Golf Club",
+      marketType: "Top 10 Finish",
+      playerName: "Xander Schauffele",
+      eachWayTerms: "Alternative shortlist option includes each-way terms where available.",
+      keyStats: [
+        "Consistent approach proximity and high GIR profile suitable for Augusta scoring pressure.",
+        "Reliable bogey-avoidance profile versus many similarly priced alternatives.",
+        "Stable major setup temperament reduces downside compared with win-only exposure.",
+      ],
+      fieldAngles: [
+        "Weather and pin-position difficulty can amplify late-round volatility around top-10 lines.",
+        "Augusta rewards controlled iron trajectories and disciplined misses under Sunday pressure.",
+        "This shortlist ranks payout durability first, with outright upside retained as secondary optionality.",
+      ],
+    },
+  },
 ];

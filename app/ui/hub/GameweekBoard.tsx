@@ -412,8 +412,8 @@ function AccumulatorCard({
   simulatedNowMs: number;
   voteSimulationStatus: ReturnType<typeof useCurrentGameWeek>["voteSimulationStatus"];
 }) {
-  const [expandedSectionId, setExpandedSectionId] = useState<string | null>(
-    null,
+  const [expandedSectionId, setExpandedSectionId] = useState<string | null>(() =>
+    votingLocked && selected ? "cashout" : null,
   );
   const { member: currentUser } = useAuth();
   const { refreshCurrentGameWeek } = useCurrentGameWeek();
