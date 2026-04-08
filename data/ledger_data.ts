@@ -49,5 +49,14 @@ export const ledgerData: LedgerTransactionRecord[] = [
     "dateIso": "2026-03-23T09:00:00.000Z",
     "amount": 10,
     "kind": "deposit"
+  },
+  {
+    "id": "stake-md-1",
+    "title": "Brian Scott Market Bet Placed",
+    "dateIso": "2026-04-03T22:34:00.000Z",
+    "amount": -19,
+    "kind": "stake",
+    "gameWeekId": "md-1",
+    "proposalId": "proposal-md-1-balanced"
   }
 ];

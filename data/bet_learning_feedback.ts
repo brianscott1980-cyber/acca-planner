@@ -6,14 +6,14 @@ export const betLearningFeedback: BetLearningFeedbackRecord[] = [
     betType: "matchday",
     betId: "md-1",
     betTitle: "Matchday 1 Balanced Accumulator",
-    reviewedAtIso: "2026-04-05T00:10:00.000Z",
-    completedAtIso: "2026-04-04T15:35:00.000Z",
+    reviewedAtIso: "2026-04-05T20:10:00.000Z",
+    completedAtIso: "2026-04-05T19:50:00.000Z",
     outcome: "lost",
     stakeAmount: 19,
     returnAmount: 0,
     roiPercent: -100,
     summary:
-      "The balanced slip failed because the second leg (Mallorca v Real Madrid: Real Madrid to win) lost 2-1, which killed the accumulator before the final Inter v Roma BTTS leg.",
+      "AI retrospective completed after settlement: the balanced slip failed because the second leg (Mallorca v Real Madrid: Real Madrid to win) lost 2-1, which killed the accumulator before the final Inter v Roma BTTS leg.",
     whyUnsuccessful:
       "The model accepted Real Madrid win at short odds in a spot with rotation and motivation asymmetry risk. Bayern won their leg, but the Mallorca upset removed all payout paths immediately.",
     newsSummary:
@@ -57,9 +57,9 @@ export const betLearningFeedback: BetLearningFeedbackRecord[] = [
       },
       {
         legLabel: "Inter Milan v Roma: Both teams to score",
-        legOutcome: "unknown",
+        legOutcome: "won",
         whatHappened:
-          "The accumulator was already dead before this leg kicked off, so this leg did not contribute to settlement.",
+          "The leg itself landed (Inter 2-1 Roma, BTTS won), but the accumulator had already failed on the Mallorca v Real Madrid leg.",
         whyItMattered:
           "No direct impact on payout because the previous leg had already voided winning paths.",
         newsSignals: [
