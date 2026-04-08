@@ -17,4 +17,20 @@ export const matchdayGameWeeks: MatchdayGameWeekRecord[] = [
     ],
     votesByUserId: {},
   },
+  {
+    id: "md-2",
+    slug: "matchday-2",
+    name: "Matchday 2 Voting Stage",
+    description:
+      "After a full-loss opener, this slate leans more protective: stronger home anchors remain central, with only controlled away-favourite exposure in higher-risk variants.",
+    windowStartIso: "2026-04-11T08:00:00.000Z",
+    windowEndIso: "2026-04-13T22:00:00.000Z",
+    startsIn: "Starts Saturday",
+    proposalIds: [
+      "proposal-md-2-safe",
+      "proposal-md-2-balanced",
+      "proposal-md-2-aggressive",
+    ],
+    votesByUserId: {},
+  },
 ];

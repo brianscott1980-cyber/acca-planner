@@ -25,4 +25,46 @@ export const matchdayForms: MatchdayFormRecord[] = [
     proposalId: "proposal-md-1-safe",
     betLineId: "betline-md-1-safe-inter-win",
   },
+  {
+    id: "form-md-2-arsenal-bournemouth",
+    gameWeekId: "md-2",
+    proposalId: "proposal-md-2-safe",
+    betLineId: "betline-md-2-safe-arsenal-win",
+  },
+  {
+    id: "form-md-2-como-inter",
+    gameWeekId: "md-2",
+    proposalId: "proposal-md-2-safe",
+    betLineId: "betline-md-2-safe-inter-win",
+  },
+  {
+    id: "form-md-2-liverpool-fulham",
+    gameWeekId: "md-2",
+    proposalId: "proposal-md-2-balanced",
+    betLineId: "betline-md-2-balanced-liverpool-win",
+  },
+  {
+    id: "form-md-2-falkirk-rangers",
+    gameWeekId: "md-2",
+    proposalId: "proposal-md-2-balanced",
+    betLineId: "betline-md-2-balanced-rangers-win",
+  },
+  {
+    id: "form-md-2-parma-napoli",
+    gameWeekId: "md-2",
+    proposalId: "proposal-md-2-balanced",
+    betLineId: "betline-md-2-balanced-napoli-win",
+  },
+  {
+    id: "form-md-2-aberdeen-hibernian",
+    gameWeekId: "md-2",
+    proposalId: "proposal-md-2-aggressive",
+    betLineId: "betline-md-2-aggressive-aberdeen-btts",
+  },
+  {
+    id: "form-md-2-atalanta-juventus",
+    gameWeekId: "md-2",
+    proposalId: "proposal-md-2-aggressive",
+    betLineId: "betline-md-2-aggressive-juventus-win",
+  },
 ];

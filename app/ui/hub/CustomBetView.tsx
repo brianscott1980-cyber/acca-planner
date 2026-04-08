@@ -81,6 +81,7 @@ function CustomBetView({ customBet }: { customBet: CustomBetRecord }) {
             market: currentCustomBet.recommendedMarket,
             selection: currentCustomBet.recommendedSelection,
             decimalOdds: currentCustomBet.decimalOdds,
+            suggestedStakeAmount: currentCustomBet.suggestedStakeAmount,
             summary: currentCustomBet.summary,
             horseRacing:
               currentCustomBet.sport === "horse_racing" && currentCustomBet.horseRacing
@@ -231,6 +232,16 @@ function CustomBetView({ customBet }: { customBet: CustomBetRecord }) {
               </div>
               {proposedBets.map((proposedBet) => {
                 const horseProfile = proposedBet.horseRacing;
+                const suggestedStakeAmountForBet =
+                  proposedBet.suggestedStakeAmount ??
+                  getSuggestedStakeForProposedBet({
+                    proposedBet,
+                    totalSuggestedStakeAmount: currentCustomBet.suggestedStakeAmount,
+                    proposedBets,
+                  });
+                const isBestOption =
+                  proposedBet.selection === currentCustomBet.recommendedSelection &&
+                  proposedBet.market === currentCustomBet.recommendedMarket;
                 const hasExpandableHorseProfile = Boolean(
                   horseProfile &&
                     (horseProfile.officialRating ||
@@ -281,6 +292,9 @@ function CustomBetView({ customBet }: { customBet: CustomBetRecord }) {
                             <span className="hub-custom-bet-selection-title">
                               {proposedBet.rank}. {proposedBet.selection}
                             </span>
+                            {isBestOption ? (
+                              <span className="hub-tag hub-tag-primary">Best Option</span>
+                            ) : null}
                           </span>
                         </span>
                         <span className="hub-bet-line-note">
@@ -289,6 +303,15 @@ function CustomBetView({ customBet }: { customBet: CustomBetRecord }) {
                         <span className="hub-bet-line-note">{proposedBet.summary}</span>
                       </div>
                       <span className="hub-bet-line-pill-wrap">
+                        {suggestedStakeAmountForBet !== undefined ? (
+                          <span className="hub-metric-pill hub-custom-bet-stake-pill">
+                            Stake{" "}
+                            {formatCurrency(suggestedStakeAmountForBet, {
+                              minimumFractionDigits: 2,
+                              maximumFractionDigits: 2,
+                            })}
+                          </span>
+                        ) : null}
                         <span className="hub-metric-pill">{proposedBet.decimalOdds.toFixed(2)}</span>
                       </span>
                     </button>
@@ -936,4 +959,67 @@ function fromDateTimeLocalValue(value: string) {
 
   const parsedDate = new Date(value);
   return Number.isNaN(parsedDate.getTime()) ? null : parsedDate.toISOString();
+}
+
+function getSuggestedStakeForProposedBet({
+  proposedBet,
+  totalSuggestedStakeAmount,
+  proposedBets,
+}: {
+  proposedBet: CustomBetRecord["proposedBets"][number];
+  totalSuggestedStakeAmount: number | undefined;
+  proposedBets: CustomBetRecord["proposedBets"];
+}) {
+  if (
+    totalSuggestedStakeAmount === undefined ||
+    !Number.isFinite(totalSuggestedStakeAmount) ||
+    totalSuggestedStakeAmount <= 0
+  ) {
+    return undefined;
+  }
+
+  if (proposedBets.length <= 1) {
+    return roundCurrency(totalSuggestedStakeAmount);
+  }
+
+  const rankedProposedBets = [...proposedBets].sort((a, b) => a.rank - b.rank);
+  const weightByRank = getWeightByRank(rankedProposedBets.length);
+  const weightedCost = rankedProposedBets.reduce((total, bet, index) => {
+    const weight = weightByRank[index] ?? 0;
+    const multiplier = getBetCostMultiplier(bet.market);
+    return total + weight * multiplier;
+  }, 0);
+
+  if (weightedCost <= 0) {
+    return undefined;
+  }
+
+  const targetIndex = rankedProposedBets.findIndex((bet) => bet.rank === proposedBet.rank);
+  if (targetIndex < 0) {
+    return undefined;
+  }
+
+  const targetWeight = weightByRank[targetIndex] ?? 0;
+  const baseUnitStake = totalSuggestedStakeAmount / weightedCost;
+  return roundCurrency(baseUnitStake * targetWeight);
+}
+
+function roundCurrency(value: number) {
+  return Math.round(value * 100) / 100;
+}
+
+function getWeightByRank(proposedBetCount: number) {
+  if (proposedBetCount >= 3) {
+    return [0.55, 0.3, 0.15];
+  }
+
+  if (proposedBetCount === 2) {
+    return [0.65, 0.35];
+  }
+
+  return [1];
+}
+
+function getBetCostMultiplier(market: string) {
+  return /each[\s-]?way/i.test(market) ? 2 : 1;
 }

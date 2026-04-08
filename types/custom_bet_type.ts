@@ -7,6 +7,7 @@ export type CustomBetRecommendation = {
   market: string;
   selection: string;
   decimalOdds: number;
+  suggestedStakeAmount?: number;
   summary: string;
   horseRacing?: {
     trainer?: string;

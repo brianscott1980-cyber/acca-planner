@@ -1812,6 +1812,12 @@ button {
   }
 }
 
+.hub-custom-bet-stake-pill {
+  border-color: rgba(16, 185, 129, 0.35);
+  background: rgba(16, 185, 129, 0.12);
+  color: #bbf7d0;
+}
+
 .hub-cashout-watch-static {
   border-top: 0;
 }

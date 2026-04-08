@@ -7,4 +7,10 @@ export const marketAnalysisSnapshotRows: MarketAnalysisSnapshotRow[] = [
     snapshotDate: "2026-04-04",
     matchdayId: "md-1",
   },
+  {
+    id: "snapshot-md-2-ladbrokes-2026-04-11",
+    bookmaker: "Ladbrokes",
+    snapshotDate: "2026-04-11",
+    matchdayId: "md-2",
+  },
 ];

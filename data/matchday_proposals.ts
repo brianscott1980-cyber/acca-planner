@@ -66,4 +66,68 @@ export const matchdayProposals: MatchdayProposalRecord[] = [
       "betline-md-1-aggressive-inter-roma-btts",
     ],
   },
+  {
+    id: "proposal-md-2-safe",
+    gameWeekId: "md-2",
+    proposalId: "safe",
+    riskLevel: "safe",
+    title: "Defensive Accumulator",
+    summary:
+      "A protection-first two-leg card built around home control first, then one measured away favourite, applying the post-matchday lesson to avoid stacking multiple short away risks.",
+    legs: 2,
+    statusLabel: "Preserve",
+    cashoutWatchList: [
+      "If Arsenal's territorial control is weaker than expected in the opening half, protect value early rather than forcing full exposure.",
+      "Como v Inter is the closing risk point, so any Inter lineup disruption or loss of attacking cohesion should trigger a cashout review.",
+      "This profile is designed to preserve bankroll first after the last losing matchday.",
+    ],
+    aiRecommended: true,
+    betLineIds: [
+      "betline-md-2-safe-arsenal-win",
+      "betline-md-2-safe-inter-win",
+    ],
+  },
+  {
+    id: "proposal-md-2-balanced",
+    gameWeekId: "md-2",
+    proposalId: "balanced",
+    riskLevel: "balanced",
+    title: "Balanced Accumulator",
+    summary:
+      "A three-league middle profile with two control-led anchors before one away favourite, reflecting the lesson to avoid clustering medium-confidence away outcomes in one slip.",
+    legs: 3,
+    statusLabel: "Balance",
+    cashoutWatchList: [
+      "If Liverpool fail to generate early box pressure, treat that as a signal to protect rather than roll the full slip onward.",
+      "Falkirk v Rangers is the structural midpoint; if Rangers lose midfield control, a mid-return exit is reasonable.",
+      "Parma v Napoli is the final risk leg, so late Napoli team-news shocks should reduce hold confidence.",
+    ],
+    betLineIds: [
+      "betline-md-2-balanced-liverpool-win",
+      "betline-md-2-balanced-rangers-win",
+      "betline-md-2-balanced-napoli-win",
+    ],
+  },
+  {
+    id: "proposal-md-2-aggressive",
+    gameWeekId: "md-2",
+    proposalId: "aggressive",
+    riskLevel: "aggressive",
+    title: "Aggressive Accumulator",
+    summary:
+      "A higher-variance four-leg chase that keeps upside in two goals legs and one stronger away price, but still sequences a stabiliser in the middle to avoid uncontrolled compounding risk.",
+    legs: 4,
+    statusLabel: "Upside",
+    cashoutWatchList: [
+      "Arsenal v Bournemouth BTTS needs open-game tempo; if Arsenal lock the game down after a lead, the upside path weakens fast.",
+      "Aberdeen v Hibernian BTTS is the first volatility test, so a very slow chance profile is the earliest exit warning.",
+      "Atalanta v Juventus and Parma v Napoli carry the late payout swing; if lineups lose key attackers, protect profit before kickoff.",
+    ],
+    betLineIds: [
+      "betline-md-2-aggressive-arsenal-btts",
+      "betline-md-2-aggressive-aberdeen-btts",
+      "betline-md-2-aggressive-juventus-win",
+      "betline-md-2-aggressive-parma-btts",
+    ],
+  },
 ];

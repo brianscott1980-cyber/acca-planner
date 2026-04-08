@@ -16,6 +16,12 @@ export const leagueClubs: LeagueClubRecord[] = [
     badgeSourceUrl: "https://r2.thesportsdb.com/images/media/team/badge/jykrpv1717309891.png",
   },
   {
+    name: "Atalanta",
+    slug: "atalanta",
+    badgePath: "/assets/clubs/european/atalanta.png",
+    badgeSourceUrl: "https://r2.thesportsdb.com/images/media/team/badge/lrvxg71534873930.png",
+  },
+  {
     name: "Bayer Leverkusen",
     slug: "bayer-leverkusen",
     badgePath: "/assets/clubs/european/bayer-leverkusen.png",
@@ -64,10 +70,22 @@ export const leagueClubs: LeagueClubRecord[] = [
     badgeSourceUrl: "https://r2.thesportsdb.com/images/media/team/badge/ia6i3m1656014992.png",
   },
   {
+    name: "Como",
+    slug: "como",
+    badgePath: "/assets/clubs/european/como.png",
+    badgeSourceUrl: "https://r2.thesportsdb.com/images/media/team/badge/02x81t1627405841.png",
+  },
+  {
     name: "Everton",
     slug: "everton",
     badgePath: "/assets/clubs/premier-league/everton.png",
     badgeSourceUrl: "https://r2.thesportsdb.com/images/media/team/badge/eqayrf1523184794.png",
+  },
+  {
+    name: "Falkirk",
+    slug: "falkirk",
+    badgePath: "/assets/clubs/european/falkirk.png",
+    badgeSourceUrl: "https://r2.thesportsdb.com/images/media/team/badge/w37ucy1685023169.png",
   },
   {
     name: "Freiburg",
@@ -86,6 +104,18 @@ export const leagueClubs: LeagueClubRecord[] = [
     slug: "inter-milan",
     badgePath: "/assets/clubs/european/inter-milan.png",
     badgeSourceUrl: "https://r2.thesportsdb.com/images/media/team/badge/ryhu6d1617113103.png",
+  },
+  {
+    name: "Hibernian",
+    slug: "hibernian",
+    badgePath: "/assets/clubs/european/hibernian.png",
+    badgeSourceUrl: "https://r2.thesportsdb.com/images/media/team/badge/qjys3z1684928969.png",
+  },
+  {
+    name: "Juventus",
+    slug: "juventus",
+    badgePath: "/assets/clubs/european/juventus.png",
+    badgeSourceUrl: "https://r2.thesportsdb.com/images/media/team/badge/uxf0gr1742983727.png",
   },
   {
     name: "Leeds United",
@@ -124,6 +154,12 @@ export const leagueClubs: LeagueClubRecord[] = [
     badgeSourceUrl: "https://r2.thesportsdb.com/images/media/team/badge/lhwuiz1621593302.png",
   },
   {
+    name: "Napoli",
+    slug: "napoli",
+    badgePath: "/assets/clubs/european/napoli.png",
+    badgeSourceUrl: "https://r2.thesportsdb.com/images/media/team/badge/l8qyxv1742982541.png",
+  },
+  {
     name: "Nottingham Forest",
     slug: "nottingham-forest",
     badgePath: "/assets/clubs/premier-league/nottingham-forest.png",
@@ -140,6 +176,24 @@ export const leagueClubs: LeagueClubRecord[] = [
     slug: "roma",
     badgePath: "/assets/clubs/european/roma.png",
     badgeSourceUrl: "https://r2.thesportsdb.com/images/media/team/badge/jwro2s1760820674.png",
+  },
+  {
+    name: "Parma",
+    slug: "parma",
+    badgePath: "/assets/clubs/european/parma.png",
+    badgeSourceUrl: "https://r2.thesportsdb.com/images/media/team/badge/6yiaxs1627406063.png",
+  },
+  {
+    name: "Rangers",
+    slug: "rangers",
+    badgePath: "/assets/clubs/european/rangers.png",
+    badgeSourceUrl: "https://r2.thesportsdb.com/images/media/team/badge/ti24j61614290048.png",
+  },
+  {
+    name: "Aberdeen",
+    slug: "aberdeen",
+    badgePath: "/assets/clubs/european/aberdeen.png",
+    badgeSourceUrl: "https://r2.thesportsdb.com/images/media/team/badge/xuvwys1447597299.png",
   },
   {
     name: "Sunderland",

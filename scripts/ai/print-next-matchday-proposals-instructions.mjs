@@ -7,6 +7,8 @@ const LEAGUES = [
   "Spanish La Liga",
   "German Bundesliga",
   "Italian Serie A",
+  "UEFA Champions League",
+  "UEFA Europa League",
 ];
 const LOCAL_DATA_FILES = [
   "data/market_analysis_snapshots.ts",
@@ -185,13 +187,21 @@ Allowed competitions:
 ${leaguesBlock}
 
 Interpretation rules:
-- Treat the duplicated request for Italian Serie A as the same competition, not two separate leagues.
 - The weekend window is the next Saturday 09:00 through Monday 23:00 in ${LONDON_TIME_ZONE}.
 - Include only fixtures whose kick-off falls inside that window.
 - Use Ladbrokes odds information only.
-- Exclude leagues, fixtures, and markets outside that scope.
+- Exclude competitions, fixtures, and markets outside that scope.
+- Always validate fixture status against live schedule sources before finalising selections.
+- Never include fixtures that have already kicked off, finished, been postponed, or been cancelled.
+- If a fixture has already been played (for example Inter v Roma already completed), it is ineligible and must be replaced.
+- Treat cached or stale fixture/odds data as invalid for generation. Re-check live fixture list and live odds immediately before writing files.
+- If live odds are unavailable for a candidate leg at generation time, do not use that leg.
+- Use the generation-time clock as the authority for what is "upcoming". Include the concrete generation timestamp in reasoning where date sensitivity matters.
 - Do not write to Supabase, do not run remote sync scripts, and do not update remote tables.
 - When evaluating possible legs, do not rely on prices and recent scores alone. Also check the latest credible context that could positively or negatively affect likely team performance, including team news, club news, manager news, injuries, suspensions, expected absences, rotation risk, tactical changes, fixture congestion, and any other material signal around the team.
+- For every club appearing in generated matchday legs, verify that a usable local badge asset exists in the repo mapping used by the UI.
+- If a required club badge is missing, download a credible badge asset and update local data/mappings so the badge renders for that club.
+- Badge completeness is mandatory for generated matchdays; do not finish with unresolved missing club badges for included fixtures.
 
 Files you may update:
 ${filesBlock}
@@ -230,6 +240,10 @@ Proposal construction rules:
 - Generate exactly three proposals with proposal ids safe, balanced, and aggressive.
 - Each proposal may contain between 2 and 5 legs.
 - Choose the leg count for each proposal from the available Ladbrokes odds in the target weekend window so the final slip best matches its intended risk profile.
+- Build a competition spread across the three proposals. Do not concentrate all legs in a single competition when credible options exist in other allowed competitions.
+- Target at least 3 distinct competitions represented across the combined safe, balanced, and aggressive proposals.
+- The safe and balanced proposals should usually include at least 2 different competitions each unless fixture availability makes that impossible.
+- If the generated weekend genuinely lacks usable cross-competition options, explicitly state that constraint in summary/aiReasoning text instead of silently concentrating the card.
 - The safe proposal must have the lowest combined decimal odds of the three.
 - The balanced proposal must sit clearly between the safe and aggressive proposals on total odds and volatility.
 - The aggressive proposal must have the highest combined decimal odds and the highest upside.
@@ -297,6 +311,7 @@ Selection quality rules:
 
 Recent-form evidence rules:
 - For every fixture used in a proposed leg, look up the last 5 matches for both teams before finalising the selection.
+- Apply the same recent-form and team-context checks to UEFA Champions League and UEFA Europa League fixtures as domestic-league fixtures.
 - Capture the goal count for each team across those previous 5 matches, and use that evidence when deciding whether an over-goals or both-teams-to-score market is justified.
 - Reflect the last-5 scoring evidence in aiReasoning, summary text, and formNote content rather than making unsupported claims.
 - Update matchday_forms.ts and matchday_form_matches.ts when you have enough concrete last-5 evidence to do so accurately. Populate exactly 5 matches per team side when you do this. If the evidence cannot be verified cleanly, do not invent form data.
@@ -323,9 +338,13 @@ Validation checklist before finishing:
 - Every proposal betLineId points to a bet line row for that same matchday.
 - Every marketId used by a bet line exists in market_analysis_selections.ts and belongs to the snapshot row for this matchday.
 - Safe total odds < balanced total odds < aggressive total odds.
+- The three proposals together represent at least 3 distinct competitions when credible fixtures are available.
 - The aiRecommended choice is justified by both the current market slate and the current bankroll / recent-results context.
 - Cashout guidance is meaningfully differentiated across safe, balanced, and aggressive and references relevant team-news or in-play patterns for that proposal.
 - No generated fixture falls outside ${weekendWindow.startLabel} to ${weekendWindow.endLabel}.
+- No generated fixture has a kickoff earlier than the generation timestamp.
+- No generated fixture is already settled, in-play, postponed, or cancelled at generation time.
+- Every club referenced in generated bet lines has a working local badge path for UI rendering, or a newly downloaded badge has been added and wired.
 - Only local data files were modified.
 
 Return format:

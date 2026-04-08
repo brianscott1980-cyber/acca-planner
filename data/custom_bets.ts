@@ -17,6 +17,7 @@ export const customBets: CustomBetRecord[] = [
         market: "Each-way",
         selection: "Grangeclare West",
         decimalOdds: 9,
+        suggestedStakeAmount: 4,
         summary:
           "Best current balance of proven Aintree stamina, solid recent prep, and still-fair Ladbrokes win-and-place value.",
         horseRacing: {
@@ -37,6 +38,7 @@ export const customBets: CustomBetRecord[] = [
         market: "Each-way",
         selection: "Iroko",
         decimalOdds: 13,
+        suggestedStakeAmount: 2.5,
         summary:
           "Cleaner weight and profile than many principals, but the price is shorter than the top pick so the place-value cushion is less generous.",
         horseRacing: {
@@ -52,6 +54,7 @@ export const customBets: CustomBetRecord[] = [
         market: "Each-way",
         selection: "I Am Maximus",
         decimalOdds: 9,
+        suggestedStakeAmount: 1.5,
         summary:
           "Elite course credentials keep him on the shortlist, but top-weight and a tighter price make him the least forgiving value angle of the three.",
         horseRacing: {
@@ -121,57 +124,60 @@ export const customBets: CustomBetRecord[] = [
     },
   },
   {
-    id: "custom-bet-2026-04-12-masters-tournament-mixed-shortlist",
-    slug: "2026-04-12-masters-tournament-mixed-shortlist",
+    id: "custom-bet-2026-04-12-masters-tournament-top-10-shortlist",
+    slug: "2026-04-12-masters-tournament-top-10-shortlist",
     title: "Masters Tournament 2026",
     state: "pending",
     sport: "golf",
     bookmaker: "Ladbrokes",
     eventName: "The Masters Tournament",
     competitionName: "PGA Tour Major Championship",
-    bettingFormatRequested: "Mixed shortlist (single/each-way/top finish)",
+    bettingFormatRequested: "Top 10 Finish single",
     proposedBets: [
       {
         rank: 1,
         market: "Top 10 Finish",
         selection: "Xander Schauffele",
-        decimalOdds: 2.75,
+        decimalOdds: 2.8,
+        suggestedStakeAmount: 5.5,
         summary:
-          "Most balanced risk/reward profile for Augusta this week: elite long-iron consistency, fewer blow-up holes, and a strong probability route to payout without needing an outright win.",
+          "Best risk-adjusted route this week: elite tee-to-green consistency and strong major temperament give the cleanest probability of payout without needing an outright win.",
       },
       {
         rank: 2,
-        market: "Each-way",
-        selection: "Ludvig Aberg",
-        decimalOdds: 17,
+        market: "Top 10 Finish",
+        selection: "Tommy Fleetwood",
+        decimalOdds: 4.8,
+        suggestedStakeAmount: 2.75,
         summary:
-          "Higher-upside each-way angle with realistic place equity if approach play stays sharp, but slightly more volatile round-to-round than the top-ranked option.",
+          "Reliable top-finish profile when long-iron play is dialled in, with enough Augusta suitability to stay around the top-10 line across four rounds.",
       },
       {
         rank: 3,
-        market: "Outright Winner (Single)",
+        market: "Top 10 Finish",
         selection: "Scottie Scheffler",
-        decimalOdds: 6.5,
+        decimalOdds: 1.9,
+        suggestedStakeAmount: 1.75,
         summary:
-          "Strongest win-equity candidate in the field, but pure outright exposure is less forgiving than the ranked protection-first options above.",
+          "Highest baseline consistency in the field and still useful in a top-10 structure, though short odds reduce upside compared with the top-ranked option.",
       },
     ],
     recommendedMarket: "Top 10 Finish",
     recommendedSelection: "Xander Schauffele",
-    decimalOdds: 2.75,
+    decimalOdds: 2.8,
     summary:
-      "AI custom bet for Masters Sunday 2026: a ranked golf shortlist led by Xander Schauffele Top 10 for consistency and downside control, with Aberg each-way and Scheffler outright retained as higher-upside alternatives.",
+      "AI custom bet for Masters week 2026: a ranked Top 10 shortlist led by Xander Schauffele for payout durability, with Fleetwood and Scheffler retained as same-format alternatives.",
     analysisSummary:
-      "The shortlist is intentionally mixed-format to balance payout chance against event volatility at Augusta. Schauffele Top 10 ranks first because it offers the most stable path to return in a high-pressure major setup where round-by-round variance is meaningful. Aberg each-way sits second as the best blend of ceiling and place coverage when his tee-to-green game is dialled in. Scheffler outright remains a credible high-win-probability option, but it ranks third here only because win-only markets are structurally harsher when stake protection is the priority.",
+      "The refreshed shortlist now keeps one coherent format across all three options: Top 10 Finish singles. Schauffele Top 10 remains ranked first because recent major-level ball-striking consistency gives the most reliable probability of payout in a week where leaderboard compression is likely. Fleetwood Top 10 sits second as the stronger value alternative when his long-iron game is stable. Scheffler Top 10 is intentionally ranked third because the probability is high but short pricing compresses upside. With current pot form holding up, the suggested total outlay is increased to GBP 10 to apply slightly more aggression while still keeping this as a controlled one-off position.",
     mediaSummary:
-      "Recent Masters build-up has centred on elite iron play, scrambling under pressure, and late-round composure as the biggest separators. Weather and Augusta green-speed conditions can amplify volatility, so this ranking favours resilient scoring profiles over pure headline price alone.",
+      "Latest market context keeps Scheffler as clear favourite, with McIlroy and DeChambeau in the main chase group and Rahm close behind. This update reflects major-week Augusta volatility, so the recommendation uses one Top 10 structure across the shortlist instead of mixing formats, making stake sizing cleaner and easier to execute against the current bankroll.",
     timelineTitle: "Custom Bet Ready",
     timelineDescription:
-      "Masters 2026 shortlist ready: Schauffele Top 10, Aberg each-way, and Scheffler outright.",
-    generatedAtIso: "2026-04-04T12:30:00.000Z",
+      "Masters 2026 shortlist refreshed: Schauffele, Fleetwood, and Scheffler Top 10.",
+    generatedAtIso: "2026-04-07T07:52:42.000Z",
     eventStartIso: "2026-04-09T11:00:00.000Z",
     eventEndIso: "2026-04-12T22:00:00.000Z",
-    suggestedStakeAmount: 7,
+    suggestedStakeAmount: 10,
     cashoutLowerTarget:
       "Protect near-stake value if Schauffele is tracking inside the top-10 line heading into the back nine on Sunday and live pricing offers a controlled exit.",
     cashoutUpperTarget:
@@ -198,16 +204,15 @@ export const customBets: CustomBetRecord[] = [
       course: "Augusta National Golf Club",
       marketType: "Top 10 Finish",
       playerName: "Xander Schauffele",
-      eachWayTerms: "Alternative shortlist option includes each-way terms where available.",
       keyStats: [
-        "Consistent approach proximity and high GIR profile suitable for Augusta scoring pressure.",
-        "Reliable bogey-avoidance profile versus many similarly priced alternatives.",
-        "Stable major setup temperament reduces downside compared with win-only exposure.",
+        "High-end tee-to-green stability under major pressure supports a lower-volatility top-finish route.",
+        "Bogey-avoidance and long-iron control profile fit Augusta's scoring stress points.",
+        "Risk-managed format preference aligns with recent model-learning feedback after a full-loss matchday result.",
       ],
       fieldAngles: [
-        "Weather and pin-position difficulty can amplify late-round volatility around top-10 lines.",
-        "Augusta rewards controlled iron trajectories and disciplined misses under Sunday pressure.",
-        "This shortlist ranks payout durability first, with outright upside retained as secondary optionality.",
+        "A modest 2026 Augusta setup extension increases the premium on controlled long-game execution.",
+        "Major-week leaderboard bunching can punish short outright exposure; top-finish structures absorb that variance better.",
+        "This shortlist ranks payout durability first inside one consistent market format.",
       ],
     },
   },

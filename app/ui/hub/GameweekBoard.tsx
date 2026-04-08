@@ -1400,7 +1400,9 @@ function getDisplayedBetLineState({
 }) {
   if (viewState === "review") {
     return {
-      status: legResult.status,
+      // In review mode, each leg should show the settled match outcome itself
+      // even when the overall slip was cashed out.
+      status: legResult.actualStatus,
     };
   }
 

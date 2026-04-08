@@ -41,7 +41,7 @@ Rules:
 - Review the latest credible media context relevant to the sport:
   - horse racing: stable news, jockey booking, going, draw, rivals, prep signals, horse age, weight, official rating, recent form, ownership, and any other credible horse-specific factors typically used in race assessment
   - football: team news, club news, manager news, injuries, tactical changes, likely lineups
-  - golf: player form, course fit, injury or fitness notes, weather, field strength
+  - golf: player form, course fit, injury or fitness notes, weather, field strength, course condition, underdog status, experience factor, age, annual expectation on players performance across tournaments.
 - Look for circumstances, tactics, and current news that could materially improve or weaken the chance of a positive betting outcome.
 - Before finalizing the ranking, read data/bet_learning_feedback.ts and incorporate any relevant lessons from recently completed matchday or custom bets.
 - If prior feedback highlights a repeated model mistake, address it directly in the new recommendation rationale.
@@ -61,11 +61,20 @@ Rules:
 - Rank the proposed bets from most recommended to least recommended.
 - The top-ranked proposed bet should still populate the primary recommendation fields used by the timeline and admin placement flow.
 - Use the current pot as part of the recommendation, and produce a suggested stake amount for the custom bet.
+- Keep one coherent market family per custom bet shortlist. Do not mix formats such as each-way, outright, and top-finish in the same run.
+- For each proposal, specify exactly one bet format and one market line.
+- Treat suggestedStakeAmount on the custom bet row as the total outlay required to cover all proposed bets together.
 - Suggested stake sizing must reflect:
   - current pot size
+  - overall pot performance trend (improving, flat, or deteriorating)
   - event volatility
   - whether the format is win-only, each-way, or otherwise more or less protective
   - the fact that a one-off custom bet should usually risk less of the pot than the main aggressive matchday stake
+- Per-proposal suggestedStakeAmount values must account for format cost multipliers so the combined outlay stays within the total suggested stake:
+  - each-way counts as 2x stake cost (win part plus place part)
+  - single, outright, and top-finish bets count as 1x stake cost
+- Use slightly more aggressive one-off custom-bet sizing when pot form and pot level support it. For a healthy mid-sized pot and stable/improving recent performance, calibrate around GBP 10 total unless risk factors clearly justify lower.
+- Pick a clear best option from the shortlist based on both current pot size and recent bankroll performance, not market odds alone.
 - Placement-specific fields must stay empty on generation:
   - stakeAmount
   - placedDecimalOdds
@@ -124,6 +133,7 @@ Required custom bet row shape:
   - rank
   - market
   - selection
+  - suggestedStakeAmount
   - decimalOdds
   - summary
   - sport-specific structured detail when credible
