@@ -22,6 +22,12 @@ export const leagueClubs: LeagueClubRecord[] = [
     badgeSourceUrl: "https://r2.thesportsdb.com/images/media/team/badge/lrvxg71534873930.png",
   },
   {
+    name: "Atletico Madrid",
+    slug: "atletico-madrid",
+    badgePath: "/assets/clubs/european/atletico-madrid.png",
+    badgeSourceUrl: "https://r2.thesportsdb.com/images/media/team/badge/0ulh3q1719984315.png",
+  },
+  {
     name: "Bayer Leverkusen",
     slug: "bayer-leverkusen",
     badgePath: "/assets/clubs/european/bayer-leverkusen.png",
@@ -34,6 +40,12 @@ export const leagueClubs: LeagueClubRecord[] = [
     badgeSourceUrl: "https://r2.thesportsdb.com/images/media/team/badge/01ogkh1716960412.png",
   },
   {
+    name: "Barcelona",
+    slug: "barcelona",
+    badgePath: "/assets/clubs/european/barcelona.png",
+    badgeSourceUrl: "https://r2.thesportsdb.com/images/media/team/badge/wq9sir1639406443.png",
+  },
+  {
     name: "Bournemouth",
     slug: "bournemouth",
     badgePath: "/assets/clubs/premier-league/bournemouth.png",
@@ -44,6 +56,12 @@ export const leagueClubs: LeagueClubRecord[] = [
     slug: "brentford",
     badgePath: "/assets/clubs/premier-league/brentford.png",
     badgeSourceUrl: "https://r2.thesportsdb.com/images/media/team/badge/grv1aw1546453779.png",
+  },
+  {
+    name: "Braga",
+    slug: "braga",
+    badgePath: "/assets/clubs/european/braga.png",
+    badgeSourceUrl: "https://r2.thesportsdb.com/images/media/team/badge/8g4aod1678717261.png",
   },
   {
     name: "Brighton & Hove Albion",
@@ -182,6 +200,18 @@ export const leagueClubs: LeagueClubRecord[] = [
     slug: "parma",
     badgePath: "/assets/clubs/european/parma.png",
     badgeSourceUrl: "https://r2.thesportsdb.com/images/media/team/badge/6yiaxs1627406063.png",
+  },
+  {
+    name: "Paris SG",
+    slug: "paris-sg",
+    badgePath: "/assets/clubs/european/paris-sg.png",
+    badgeSourceUrl: "https://r2.thesportsdb.com/images/media/team/badge/rwqrrq1473504808.png",
+  },
+  {
+    name: "Real Betis",
+    slug: "real-betis",
+    badgePath: "/assets/clubs/european/real-betis.png",
+    badgeSourceUrl: "https://r2.thesportsdb.com/images/media/team/badge/2oqulv1663245386.png",
   },
   {
     name: "Rangers",

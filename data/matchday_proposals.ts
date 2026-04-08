@@ -62,5 +62,67 @@ export const matchdayProposals: MatchdayProposalRecord[] = [
       "betline-md-1-aggressive-real-win",
       "betline-md-1-aggressive-inter-roma-btts"
     ]
+  },
+  {
+    "id": "proposal-md-2-safe",
+    "gameWeekId": "md-2",
+    "proposalId": "safe",
+    "riskLevel": "safe",
+    "title": "Defensive Accumulator",
+    "summary": "With bankroll drawdown after Matchday 1, the defensive route uses two draw-no-bet protections plus one shorter Champions League favourite so we can keep upside alive without exposing the full stake to one upset.",
+    "legs": 3,
+    "statusLabel": "Protect",
+    "cashoutWatchList": [
+      "If Barcelona lose territorial control early or sit too deep after leading, protect value before the later legs increase variance.",
+      "For Paris SG v Liverpool, any late defensive reshuffle or early injury in the PSG back line is a key trigger to reduce risk.",
+      "In Braga v Real Betis, if Betis lose midfield control and are pinned in for long phases, take a pragmatic cashout instead of forcing full settlement."
+    ],
+    "aiRecommended": true,
+    "betLineIds": [
+      "betline-md-2-safe-barcelona-win",
+      "betline-md-2-safe-psg-dnb",
+      "betline-md-2-safe-betis-dnb"
+    ]
+  },
+  {
+    "id": "proposal-md-2-balanced",
+    "gameWeekId": "md-2",
+    "proposalId": "balanced",
+    "riskLevel": "balanced",
+    "title": "Balanced Accumulator",
+    "summary": "This middle profile keeps both headline Champions League winners and adds a goals-based Europa line, balancing stronger favourite pricing with one volatility booster rather than pushing into a full chase card.",
+    "legs": 3,
+    "statusLabel": "Balance",
+    "cashoutWatchList": [
+      "If one of the two Champions League favourites wins with poor chance creation, treat that as a warning before letting the Europa goals leg run.",
+      "If PSG-Liverpool starts at a frantic tempo with early high-value chances, hold the edge; if it turns slow and compact, protect earlier than usual.",
+      "For Braga-Betis over 2.5, a low-shot first half with conservative shape from both sides is the clearest signal to take a mid-range cashout."
+    ],
+    "betLineIds": [
+      "betline-md-2-balanced-barcelona-win",
+      "betline-md-2-balanced-psg-win",
+      "betline-md-2-balanced-braga-betis-over-2-5"
+    ]
+  },
+  {
+    "id": "proposal-md-2-aggressive",
+    "gameWeekId": "md-2",
+    "proposalId": "aggressive",
+    "riskLevel": "aggressive",
+    "title": "Aggressive Accumulator",
+    "summary": "The upside build stacks both Champions League winners, adds a high-goals PSG-Liverpool angle, and finishes with a Braga result swing, creating the largest return profile but with clear multi-leg variance.",
+    "legs": 4,
+    "statusLabel": "Upside",
+    "cashoutWatchList": [
+      "Do not ignore game-state warning signs in Paris SG v Liverpool: if the press intensity drops and tempo dies, the over 3.5 leg can collapse quickly.",
+      "If Barcelona lead early but begin conceding field position and box entries, the risk profile changes and a strong cashout should be considered.",
+      "Braga as the late swing leg carries the largest upset risk: if Betis dominate transitions or set-piece pressure, protect before full downside lands."
+    ],
+    "betLineIds": [
+      "betline-md-2-aggressive-barcelona-win",
+      "betline-md-2-aggressive-psg-win",
+      "betline-md-2-aggressive-psg-liverpool-over-3-5",
+      "betline-md-2-aggressive-braga-win"
+    ]
   }
 ];

@@ -60,6 +60,7 @@ export function HubAppShell({ children }: HubAppShellProps) {
       ? 0
       : ledgerSummary.currentPot / ledgerSummary.memberCount;
   const [simulatedNow, setSimulatedNow] = useState(() => getSimulatedNow());
+  const [isHydrated, setIsHydrated] = useState(false);
   const [showMobileProfileDialog, setShowMobileProfileDialog] = useState(false);
   const [showMobileInstallDialog, setShowMobileInstallDialog] = useState(false);
   const [installPromptEvent, setInstallPromptEvent] =
@@ -127,6 +128,10 @@ export function HubAppShell({ children }: HubAppShellProps) {
     trackEvent("install_app_dialog_dismissed", { method });
     setShowMobileInstallDialog(false);
   };
+
+  useEffect(() => {
+    setIsHydrated(true);
+  }, []);
 
   useEffect(() => {
     initialSimulatedNowRef.current = getSimulatedNow();
@@ -411,8 +416,8 @@ export function HubAppShell({ children }: HubAppShellProps) {
               onClick={() => navigateToLedgerFromHeader("current_pot")}
             >
               <p className="hub-label">Current Pot</p>
-              <p className="hub-pot-value">
-                {formatCurrency(ledgerSummary.currentPot)}
+              <p className="hub-pot-value" suppressHydrationWarning>
+                {isHydrated ? formatCurrency(ledgerSummary.currentPot) : "—"}
               </p>
             </button>
             <div className="hub-divider" />
@@ -430,7 +435,9 @@ export function HubAppShell({ children }: HubAppShellProps) {
                       : "hub-success-text"
                   }`}
                 >
-                  {formatPercent(ledgerSummary.roiPercentage)}
+                  <span suppressHydrationWarning>
+                    {isHydrated ? formatPercent(ledgerSummary.roiPercentage) : "—"}
+                  </span>
                 </span>
                 <MiniSparkline />
               </div>
@@ -444,11 +451,13 @@ export function HubAppShell({ children }: HubAppShellProps) {
                   onClick={() => navigateToLedgerFromHeader("your_share")}
                 >
                   <p className="hub-label">Your Share</p>
-                  <p className="hub-pot-value">
-                    {formatCurrency(equityShareValue, {
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 2,
-                    })}
+                  <p className="hub-pot-value" suppressHydrationWarning>
+                    {isHydrated
+                      ? formatCurrency(equityShareValue, {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2,
+                        })
+                      : "—"}
                   </p>
                 </button>
               </>

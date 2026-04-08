@@ -236,9 +236,7 @@ function buildTimelineEntries(): TimelineEntry[] {
 
 function TimelineMatchday({ entry }: { entry: TimelineEntry }) {
   const router = useRouter();
-  const isNavigable = Boolean(
-    (entry.matchdayId && getGameWeekById(entry.matchdayId)) || entry.customBetId,
-  );
+  const isNavigable = Boolean(entry.matchdayId || entry.customBetId);
   const isWin = entry.status === "win";
   const isFundedEntry = entry.status === "funded";
   const hasGeneratedStrategies =
@@ -599,6 +597,7 @@ function getCustomTimelineEntries(): TimelineEntry[] {
   return getTimelineEvents()
     .map((event) => {
       const gameWeek = event.matchdayId ? getGameWeekById(event.matchdayId) : null;
+      const resolvedMatchdayId = event.matchdayId ?? gameWeek?.id;
       const generatedStrategies = gameWeek?.proposals.map((proposal) => ({
         id: proposal.id,
         label: getGeneratedStrategyLabel(proposal.riskLevel),
@@ -616,10 +615,10 @@ function getCustomTimelineEntries(): TimelineEntry[] {
         stakeLabel: "Event",
         stake: event.description ?? "Local proposal slate updated",
         returnLabel: "Matchday",
-        returnValue: gameWeek?.name ?? event.matchdayId ?? "Timeline",
+        returnValue: gameWeek?.name ?? resolvedMatchdayId ?? "Timeline",
         outcomeLabel: "Generated",
         timestampIso: event.timestampIso,
-        matchdayId: gameWeek?.id,
+        matchdayId: resolvedMatchdayId,
         multilineStake: true,
         generatedStrategies,
         iconKind: "football",

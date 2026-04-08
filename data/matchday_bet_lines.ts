@@ -130,5 +130,115 @@ export const matchdayBetLines: MatchdayBetLineRecord[] = [
     "formNote": "Inter have scored 6 and Roma 11 across their last five Serie A matches.",
     "odds": "1.91",
     "marketId": "market-md-1-inter-roma-btts-yes"
+  },
+  {
+    "id": "betline-md-2-safe-barcelona-win",
+    "gameWeekId": "md-2",
+    "proposalEntityId": "proposal-md-2-safe",
+    "sortOrder": 1,
+    "label": "Barcelona v Atletico Madrid: Barcelona to win",
+    "scheduleNote": "Wed 8 Apr, 20:00 BST",
+    "aiReasoning": "Barcelona keep a stronger home control profile in high-leverage European nights, and the straight home result gives the defensive slip its lowest-volatility anchor.",
+    "odds": "1.54",
+    "marketId": "market-md-2-barcelona-win"
+  },
+  {
+    "id": "betline-md-2-safe-psg-dnb",
+    "gameWeekId": "md-2",
+    "proposalEntityId": "proposal-md-2-safe",
+    "sortOrder": 2,
+    "label": "Paris SG v Liverpool: Paris SG draw no bet",
+    "scheduleNote": "Wed 8 Apr, 20:00 BST",
+    "aiReasoning": "PSG carry enough attacking threat to justify siding with them, but draw-no-bet protects the card against a high-quality Liverpool response in a tight first-leg script.",
+    "odds": "1.36",
+    "marketId": "market-md-2-psg-dnb"
+  },
+  {
+    "id": "betline-md-2-safe-betis-dnb",
+    "gameWeekId": "md-2",
+    "proposalEntityId": "proposal-md-2-safe",
+    "sortOrder": 3,
+    "label": "Braga v Real Betis: Real Betis draw no bet",
+    "scheduleNote": "Thu 9 Apr, 17:45 BST",
+    "aiReasoning": "Betis bring the cleaner technical floor, and the draw-no-bet structure reduces exposure in what projects as a close Europa tie with tactical trade-offs on both sides.",
+    "odds": "1.80",
+    "marketId": "market-md-2-betis-dnb"
+  },
+  {
+    "id": "betline-md-2-balanced-barcelona-win",
+    "gameWeekId": "md-2",
+    "proposalEntityId": "proposal-md-2-balanced",
+    "sortOrder": 1,
+    "label": "Barcelona v Atletico Madrid: Barcelona to win",
+    "scheduleNote": "Wed 8 Apr, 20:00 BST",
+    "aiReasoning": "The balanced build still needs a dependable opener, and Barcelona at home is the cleanest path to start the sequence without overpaying for protection.",
+    "odds": "1.54",
+    "marketId": "market-md-2-barcelona-win"
+  },
+  {
+    "id": "betline-md-2-balanced-psg-win",
+    "gameWeekId": "md-2",
+    "proposalEntityId": "proposal-md-2-balanced",
+    "sortOrder": 2,
+    "label": "Paris SG v Liverpool: Paris SG to win",
+    "scheduleNote": "Wed 8 Apr, 20:00 BST",
+    "aiReasoning": "Compared with draw-no-bet, the straight PSG result boosts return while staying inside a plausible match script where their front line creates the higher shot-quality moments.",
+    "odds": "1.75",
+    "marketId": "market-md-2-psg-win"
+  },
+  {
+    "id": "betline-md-2-balanced-braga-betis-over-2-5",
+    "gameWeekId": "md-2",
+    "proposalEntityId": "proposal-md-2-balanced",
+    "sortOrder": 3,
+    "label": "Braga v Real Betis: Over 2.5 goals",
+    "scheduleNote": "Thu 9 Apr, 17:45 BST",
+    "aiReasoning": "Both sides are comfortable attacking wide and committing numbers around the box, so over 2.5 is the selected price-enhancing leg rather than forcing a result call.",
+    "odds": "1.90",
+    "marketId": "market-md-2-braga-betis-over-2-5"
+  },
+  {
+    "id": "betline-md-2-aggressive-barcelona-win",
+    "gameWeekId": "md-2",
+    "proposalEntityId": "proposal-md-2-aggressive",
+    "sortOrder": 1,
+    "label": "Barcelona v Atletico Madrid: Barcelona to win",
+    "scheduleNote": "Wed 8 Apr, 20:00 BST",
+    "aiReasoning": "Aggressive slips still benefit from one structured opener, and Barcelona home win is retained as the first control leg before higher-variance markets.",
+    "odds": "1.54",
+    "marketId": "market-md-2-barcelona-win"
+  },
+  {
+    "id": "betline-md-2-aggressive-psg-win",
+    "gameWeekId": "md-2",
+    "proposalEntityId": "proposal-md-2-aggressive",
+    "sortOrder": 2,
+    "label": "Paris SG v Liverpool: Paris SG to win",
+    "scheduleNote": "Wed 8 Apr, 20:00 BST",
+    "aiReasoning": "Keeping the PSG result leg in the aggressive set compounds upside early and aligns with the home side carrying the cleaner chance to dictate attacking phases.",
+    "odds": "1.75",
+    "marketId": "market-md-2-psg-win"
+  },
+  {
+    "id": "betline-md-2-aggressive-psg-liverpool-over-3-5",
+    "gameWeekId": "md-2",
+    "proposalEntityId": "proposal-md-2-aggressive",
+    "sortOrder": 3,
+    "label": "Paris SG v Liverpool: Over 3.5 goals",
+    "scheduleNote": "Wed 8 Apr, 20:00 BST",
+    "aiReasoning": "This is the key volatility leg: if both front lines trade transitions and one side scores early, the game-state can open quickly toward a four-goal total.",
+    "odds": "2.20",
+    "marketId": "market-md-2-psg-liverpool-over-3-5"
+  },
+  {
+    "id": "betline-md-2-aggressive-braga-win",
+    "gameWeekId": "md-2",
+    "proposalEntityId": "proposal-md-2-aggressive",
+    "sortOrder": 4,
+    "label": "Braga v Real Betis: Braga to win",
+    "scheduleNote": "Thu 9 Apr, 17:45 BST",
+    "aiReasoning": "Braga as the final leg creates the largest late swing, reflecting home-energy upside in a fixture where the market still prices both sides as live.",
+    "odds": "2.60",
+    "marketId": "market-md-2-braga-win"
   }
 ];

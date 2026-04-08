@@ -15,5 +15,20 @@ export const matchdayGameWeeks: MatchdayGameWeekRecord[] = [
       "proposal-md-1-aggressive"
     ],
     "votesByUserId": {}
+  },
+  {
+    "id": "md-2",
+    "slug": "matchday-2",
+    "name": "Matchday 2 Voting Stage",
+    "description": "Midweek European card focused on this evening's Champions League ties and the Europa follow-up, with the pot now at GBP51 after Matchday 1 so the recommendation tilts more protective.",
+    "windowStartIso": "2026-04-08T16:30:00.000Z",
+    "windowEndIso": "2026-04-09T22:30:00.000Z",
+    "startsIn": "Live tonight",
+    "proposalIds": [
+      "proposal-md-2-safe",
+      "proposal-md-2-balanced",
+      "proposal-md-2-aggressive"
+    ],
+    "votesByUserId": {}
   }
 ];

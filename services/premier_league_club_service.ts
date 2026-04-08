@@ -3,6 +3,7 @@ import { getLeagueClubByName } from "../repositories/premier_league_club_reposit
 const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 
 const CLUB_ALIAS_MAP: Record<string, string> = {
+  "atletico madrid": "Atletico Madrid",
   arsenal: "Arsenal",
   "aston villa": "Aston Villa",
   "as roma": "Roma",
@@ -10,7 +11,9 @@ const CLUB_ALIAS_MAP: Record<string, string> = {
   leverkusen: "Bayer Leverkusen",
   "bayern munich": "Bayern Munich",
   bayern: "Bayern Munich",
+  barcelona: "Barcelona",
   bournemouth: "Bournemouth",
+  braga: "Braga",
   brentford: "Brentford",
   brighton: "Brighton & Hove Albion",
   "brighton hove albion": "Brighton & Hove Albion",
@@ -37,9 +40,13 @@ const CLUB_ALIAS_MAP: Record<string, string> = {
   "nottingham forest": "Nottingham Forest",
   "real mallorca": "Mallorca",
   "real madrid": "Real Madrid",
+  "real betis": "Real Betis",
   roma: "Roma",
   "sc freiburg": "Freiburg",
   sunderland: "Sunderland",
+  psg: "Paris SG",
+  "paris sg": "Paris SG",
+  "paris saint germain": "Paris SG",
   spurs: "Tottenham Hotspur",
   "tottenham hotspur": "Tottenham Hotspur",
   "vfl wolfsburg": "Wolfsburg",

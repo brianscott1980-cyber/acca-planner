@@ -174,7 +174,9 @@ function getNextLocalGameWeek(gameWeeks) {
   const now = Date.now();
 
   return gameWeeks
-    .filter((entry) => new Date(entry.windowStartIso).getTime() > now)
+    // Include the currently live matchday as a valid publish target.
+    // This allows syncing "today's" card after kickoff has started.
+    .filter((entry) => new Date(entry.windowEndIso).getTime() > now)
     .sort(
       (left, right) =>
         new Date(left.windowStartIso).getTime() - new Date(right.windowStartIso).getTime(),

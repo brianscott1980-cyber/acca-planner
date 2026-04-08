@@ -8,5 +8,13 @@ export const timelineEvents: TimelineEventRecord[] = [
     "timestampIso": "2026-04-03T14:47:00.000Z",
     "kind": "matchday_proposal_generated",
     "matchdayId": "md-1"
+  },
+  {
+    "id": "timeline-md-2-proposal-generated",
+    "title": "Matchday AI Analysis Ready",
+    "description": "Defensive: 3.77\nBalanced: 5.12\nAggressive: 15.41\nAI recommended: Defensive",
+    "timestampIso": "2026-04-08T17:18:00.000Z",
+    "kind": "matchday_proposal_generated",
+    "matchdayId": "md-2"
   }
 ];

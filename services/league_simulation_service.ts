@@ -42,15 +42,9 @@ export function getGameWeekSimulation(gameWeekId: string) {
 }
 
 export function getSortedGameWeeks() {
-  const availableGameWeekIds = new Set(
-    getLeagueMatchdaySimulationRows().map((simulation) => simulation.gameWeekId),
-  );
-  const visibleGameWeeks =
-    availableGameWeekIds.size > 0
-      ? getMatchdaySchedule().filter((gameWeek) => availableGameWeekIds.has(gameWeek.id))
-      : getMatchdaySchedule();
-
-  return [...visibleGameWeeks]
+  // Always include the full local matchday schedule.
+  // A game week can be valid and visible before any simulation row exists.
+  return [...getMatchdaySchedule()]
     .sort(
       (left, right) =>
         new Date(left.windowStartIso).getTime() -
