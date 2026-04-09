@@ -322,6 +322,13 @@ Selection quality rules:
 - Summaries and aiReasoning text should explain why the market fits the slip profile, not just restate the selection.
 - Keep proposal summaries concise but specific about price, sequencing, and weekend context.
 - For the single aiRecommended proposal, the summary or aiReasoning should also make clear why that option suits the current pot level and the recent betting trend.
+- Every individual bet line aiReasoning must be specific and evidence-backed, not generic:
+  - include at least one concrete numeric signal from verified form evidence (for example goals, W-D-L, or both)
+  - include at least one current context signal that affects confidence (for example availability, rotation, tactical profile, schedule load, or matchup dynamic)
+  - include one explicit in-play invalidation trigger that would reduce confidence or justify earlier cashout
+  - keep each aiReasoning to 1-3 tight sentences; avoid filler phrases like "fits the profile", "used as", or "positioned as" without evidence
+- Do not place source logs, evidence-confidence notes, or public-sentiment notes inside individual bet-line aiReasoning fields.
+- Keep source logs, evidence-confidence, and public-sentiment statements at proposal level (especially the aiRecommended proposal summary/reasoning), not in per-leg text.
 
 Recent-form evidence rules:
 - For every fixture used in a proposed leg, look up the last 5 matches for both teams before finalising the selection.
