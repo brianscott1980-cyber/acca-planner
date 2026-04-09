@@ -1283,16 +1283,15 @@ function getMatchdayBannerCopy({
 
   if (viewState === "placed") {
     const stakePrefix = simulatedSlip?.isFreeStake ? "Free stake committed" : "Stake committed";
-    const hasPlacedOdds =
-      typeof simulatedSlip?.placedDecimalOdds === "number" &&
-      Number.isFinite(simulatedSlip.placedDecimalOdds);
+    const placedOdds = simulatedSlip?.placedDecimalOdds;
+    const hasPlacedOdds = typeof placedOdds === "number" && Number.isFinite(placedOdds);
     const potentialReturn =
       hasPlacedOdds && simulatedSlip
-        ? simulatedSlip.stake * simulatedSlip.placedDecimalOdds
+        ? simulatedSlip.stake * placedOdds
         : null;
 
     return `${stakePrefix}: £${simulatedSlip?.stake.toFixed(2) ?? "0.00"}${
-      simulatedSlip?.placedDecimalOdds ? ` at ${simulatedSlip.placedDecimalOdds.toFixed(2)}` : ""
+      hasPlacedOdds ? ` at ${placedOdds.toFixed(2)}` : ""
     }${
       potentialReturn !== null ? ` (potential return £${potentialReturn.toFixed(2)})` : ""
     }. The open legs now determine whether this matchday reaches a full result or an earlier cashout.`;
