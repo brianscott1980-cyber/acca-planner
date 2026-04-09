@@ -267,6 +267,9 @@ function CustomBetView({ customBet }: { customBet: CustomBetRecord }) {
                       horseProfile.recentForm),
                 );
                 const isExpanded = expandedBetRank === proposedBet.rank;
+                const proposedBetOddsLabel = Number.isFinite(proposedBet.decimalOdds)
+                  ? proposedBet.decimalOdds.toFixed(2)
+                  : "N/A";
 
                 return (
                   <div
@@ -333,7 +336,7 @@ function CustomBetView({ customBet }: { customBet: CustomBetRecord }) {
                             })}
                           </span>
                         ) : null}
-                        <span className="hub-metric-pill">{proposedBet.decimalOdds.toFixed(2)}</span>
+                        <span className="hub-metric-pill">{proposedBetOddsLabel}</span>
                       </span>
                     </button>
 

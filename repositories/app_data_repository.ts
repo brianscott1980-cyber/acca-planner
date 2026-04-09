@@ -152,9 +152,24 @@ function hydrateSnapshotFromRpcPayload(
 }
 
 function mapRemoteRowToAppShape(row: Record<string, unknown>) {
+  return mapKeysToCamelCase(row) as Record<string, unknown>;
+}
+
+function mapKeysToCamelCase<TValue>(value: TValue): TValue {
+  if (Array.isArray(value)) {
+    return value.map((entry) => mapKeysToCamelCase(entry)) as TValue;
+  }
+
+  if (!value || typeof value !== "object") {
+    return value;
+  }
+
   return Object.fromEntries(
-    Object.entries(row).map(([key, value]) => [toCamelCase(key), value]),
-  );
+    Object.entries(value).map(([key, entryValue]) => [
+      toCamelCase(key),
+      mapKeysToCamelCase(entryValue),
+    ]),
+  ) as TValue;
 }
 
 function resolveSnapshotRows(
