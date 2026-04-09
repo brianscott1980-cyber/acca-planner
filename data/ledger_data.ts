@@ -101,7 +101,7 @@ export const ledgerData = [
     "id": "stake-md-2",
     "title": "Market Bet Placed",
     "dateIso": "2026-04-09T12:42:00+00:00",
-    "amount": -16,
+    "amount": -10,
     "kind": "stake",
     "gameWeekId": "md-2",
     "proposalId": "safe",

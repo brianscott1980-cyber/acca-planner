@@ -68,9 +68,12 @@ export function getSortedGameWeeks() {
 export function getCurrentSimulatedGameWeek() {
   const now = getSimulatedNow().getTime();
   const sortedGameWeeks = getSortedGameWeeks();
+  const firstOpenVotingGameWeek = sortedGameWeeks.find(
+    (gameWeek) => !isGameWeekVoteResolved(gameWeek),
+  );
 
   return (
-    sortedGameWeeks.find((gameWeek) => !gameWeek.simulatedSlip) ??
+    firstOpenVotingGameWeek ??
     sortedGameWeeks.find(
       (gameWeek) => new Date(gameWeek.windowEndIso).getTime() >= now,
     ) ??

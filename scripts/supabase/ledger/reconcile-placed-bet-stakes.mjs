@@ -86,41 +86,47 @@ async function loadMatchdayStakeRows(supabase) {
 }
 
 async function loadCustomBetStakeRows(supabase) {
-  const stakeColumnCandidates = ["stake_amount", "suggested_stake_amount", "stake"];
-  let data = null;
-  let selectedStakeColumn = null;
-  let lastError = null;
+  const { data, error } = await supabase
+    .from("custom_bets")
+    .select("*")
+    .eq("state", "staked");
 
-  for (const stakeColumn of stakeColumnCandidates) {
-    const query = await supabase
-      .from("custom_bets")
-      .select(`id, state, ${stakeColumn}, placed_at_iso`)
-      .eq("state", "staked")
-      .not("placed_at_iso", "is", null)
-      .gt(stakeColumn, 0);
-
-    if (!query.error) {
-      data = query.data ?? [];
-      selectedStakeColumn = stakeColumn;
-      break;
-    }
-
-    lastError = query.error;
-  }
-
-  if (!selectedStakeColumn || !data) {
+  if (error) {
     process.stdout.write(
-      `Skipping custom bet stake reconciliation: ${lastError?.message ?? "no compatible stake column found"}\n`,
+      `Skipping custom bet stake reconciliation: ${error.message}\n`,
     );
     return [];
   }
 
+  const rows = (data ?? [])
+    .map((row) => {
+      const stakeAmount = Number(
+        row.stake_amount ?? row.suggested_stake_amount ?? row.stake ?? 0,
+      );
+      const isFreeStake = Boolean(
+        row.is_free_stake || row.custom_bet_type === "free_bet_offer",
+      );
+      const placedAtIso =
+        row.placed_at_iso ??
+        row.generated_at_iso ??
+        row.event_start_iso ??
+        null;
+
+      return {
+        id: row.id,
+        stakeAmount,
+        isFreeStake,
+        placedAtIso,
+      };
+    })
+    .filter((row) => row.placedAtIso && (row.isFreeStake || row.stakeAmount > 0));
+
   const nowIso = new Date().toISOString();
-  return (data ?? []).map((row) => ({
+  return rows.map((row) => ({
     id: `stake-custom-bet-${row.id}`,
-    title: "Custom Bet Placed",
-    date_iso: row.placed_at_iso,
-    amount: -Math.abs(Number(row[selectedStakeColumn] ?? 0)),
+    title: row.isFreeStake ? "Custom Bet Free Offer" : "Custom Bet Placed",
+    date_iso: row.placedAtIso,
+    amount: row.isFreeStake ? 0 : -Math.abs(row.stakeAmount),
     kind: "stake",
     game_week_id: null,
     proposal_id: null,

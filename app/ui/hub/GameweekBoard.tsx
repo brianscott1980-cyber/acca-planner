@@ -442,6 +442,10 @@ function AccumulatorCard({
   const hasPlacedDecimalOdds =
     typeof currentPlacedDecimalOdds === "number" &&
     Number.isFinite(currentPlacedDecimalOdds);
+  const placedPotentialReturn =
+    hasPlacedDecimalOdds && Number.isFinite(actualStake)
+      ? actualStake * currentPlacedDecimalOdds
+      : null;
   const isAwaitingAdminPlacement =
     viewState === "locked" &&
     simulation?.selectedProposalId === card.id &&
@@ -919,6 +923,12 @@ function AccumulatorCard({
                   <span className="hub-metric-value">{currentPlacedDecimalOdds.toFixed(2)}</span>
                 </div>
               ) : null}
+              {placedPotentialReturn !== null ? (
+                <div>
+                  <span className="hub-metric-label">Potential Return</span>
+                  <span className="hub-metric-value">£{placedPotentialReturn.toFixed(2)}</span>
+                </div>
+              ) : null}
               {hasPlacedDecimalOdds ? (
                 <div>
                   <span className="hub-metric-label">Placed At</span>
@@ -1273,9 +1283,18 @@ function getMatchdayBannerCopy({
 
   if (viewState === "placed") {
     const stakePrefix = simulatedSlip?.isFreeStake ? "Free stake committed" : "Stake committed";
+    const hasPlacedOdds =
+      typeof simulatedSlip?.placedDecimalOdds === "number" &&
+      Number.isFinite(simulatedSlip.placedDecimalOdds);
+    const potentialReturn =
+      hasPlacedOdds && simulatedSlip
+        ? simulatedSlip.stake * simulatedSlip.placedDecimalOdds
+        : null;
 
     return `${stakePrefix}: £${simulatedSlip?.stake.toFixed(2) ?? "0.00"}${
       simulatedSlip?.placedDecimalOdds ? ` at ${simulatedSlip.placedDecimalOdds.toFixed(2)}` : ""
+    }${
+      potentialReturn !== null ? ` (potential return £${potentialReturn.toFixed(2)})` : ""
     }. The open legs now determine whether this matchday reaches a full result or an earlier cashout.`;
   }
 

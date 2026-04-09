@@ -66,13 +66,16 @@ const DATASETS = {
 };
 
 async function main() {
-  const { isDryRun, voteHandlingMode } = parseArgs(process.argv.slice(2));
+  const { isDryRun, voteHandlingMode, targetGameWeekId } = parseArgs(process.argv.slice(2));
 
   await loadEnvironmentVariables();
 
   const supabase = createSupabaseAdminClient();
   const datasets = await loadDatasets();
-  const nextGameWeek = getNextLocalGameWeek(datasets.matchdayGameWeeks);
+  const nextGameWeek = getNextLocalGameWeek(
+    datasets.matchdayGameWeeks,
+    targetGameWeekId,
+  );
 
   if (!nextGameWeek) {
     throw new Error(
@@ -170,7 +173,11 @@ async function loadTsExport(config) {
   return importedModule[config.exportName] ?? [];
 }
 
-function getNextLocalGameWeek(gameWeeks) {
+function getNextLocalGameWeek(gameWeeks, targetGameWeekId = null) {
+  if (targetGameWeekId) {
+    return gameWeeks.find((entry) => entry.id === targetGameWeekId) ?? null;
+  }
+
   const now = Date.now();
 
   return gameWeeks
@@ -538,6 +545,7 @@ function stripWrappingQuotes(value) {
 function parseArgs(args) {
   let isDryRun = false;
   let voteHandlingMode = null;
+  let targetGameWeekId = null;
 
   for (const arg of args) {
     if (arg === "--dry-run") {
@@ -570,12 +578,24 @@ function parseArgs(args) {
       }
 
       voteHandlingMode = nextMode;
+      continue;
+    }
+
+    if (arg.startsWith("--game-week-id=")) {
+      const nextGameWeekId = arg.split("=")[1]?.trim();
+
+      if (!nextGameWeekId) {
+        throw new Error("Missing value for --game-week-id. Example: --game-week-id=md-3");
+      }
+
+      targetGameWeekId = nextGameWeekId;
     }
   }
 
   return {
     isDryRun,
     voteHandlingMode,
+    targetGameWeekId,
   };
 }
 

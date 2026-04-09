@@ -21,7 +21,7 @@ export const leagueDataSlips = [
     "gameWeekId": "md-2",
     "proposalId": "safe",
     "timelineLabel": "Defensive Accumulator",
-    "stake": 16,
+    "stake": 10,
     "stakePlacedAt": "2026-04-09T12:42:00+00:00",
     "settledAt": "2026-04-09T12:42:00+00:00",
     "settlementKind": "settled",

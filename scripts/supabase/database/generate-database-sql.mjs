@@ -732,7 +732,7 @@ function collectColumns(dataset) {
 
 function renderAdminWriteStatements(dataset) {
   const adminCheckExpression =
-    "coalesce(auth.jwt() -> 'app_metadata' ->> 'role', '') = 'admin'";
+    "coalesce(auth.jwt() -> 'app_metadata' ->> 'role', '') = 'admin' or exists (select 1 from public.users where users.role = 'admin' and lower(coalesce(users.email, '')) = lower(coalesce(auth.jwt() ->> 'email', '')))";
   const insertPolicyName = `Authenticated admins can insert ${dataset.tableName}`;
   const updatePolicyName = `Authenticated admins can update ${dataset.tableName}`;
 

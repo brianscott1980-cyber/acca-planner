@@ -31,15 +31,39 @@ create policy "Authenticated admins can insert ledger transactions"
 on public.ledger_transactions
 for insert
 to authenticated
-with check (coalesce(auth.jwt() -> 'app_metadata' ->> 'role', '') = 'admin');
+with check (
+  coalesce(auth.jwt() -> 'app_metadata' ->> 'role', '') = 'admin'
+  or exists (
+    select 1
+    from public.users
+    where users.role = 'admin'
+      and lower(coalesce(users.email, '')) = lower(coalesce(auth.jwt() ->> 'email', ''))
+  )
+);
 
 drop policy if exists "Authenticated admins can update ledger transactions" on public.ledger_transactions;
 create policy "Authenticated admins can update ledger transactions"
 on public.ledger_transactions
 for update
 to authenticated
-using (coalesce(auth.jwt() -> 'app_metadata' ->> 'role', '') = 'admin')
-with check (coalesce(auth.jwt() -> 'app_metadata' ->> 'role', '') = 'admin');
+using (
+  coalesce(auth.jwt() -> 'app_metadata' ->> 'role', '') = 'admin'
+  or exists (
+    select 1
+    from public.users
+    where users.role = 'admin'
+      and lower(coalesce(users.email, '')) = lower(coalesce(auth.jwt() ->> 'email', ''))
+  )
+)
+with check (
+  coalesce(auth.jwt() -> 'app_metadata' ->> 'role', '') = 'admin'
+  or exists (
+    select 1
+    from public.users
+    where users.role = 'admin'
+      and lower(coalesce(users.email, '')) = lower(coalesce(auth.jwt() ->> 'email', ''))
+  )
+);
 
 do $$
 begin
