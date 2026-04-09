@@ -12,5 +12,11 @@ export const marketAnalysisSnapshotRows = [
     "bookmaker": "Ladbrokes",
     "snapshotDate": "2026-04-08",
     "matchdayId": "md-2"
+  },
+  {
+    "id": "snapshot-md-3-ladbrokes-2026-04-11",
+    "bookmaker": "Ladbrokes",
+    "snapshotDate": "2026-04-11",
+    "matchdayId": "md-3"
   }
 ] as unknown as MarketAnalysisSnapshotRow[];

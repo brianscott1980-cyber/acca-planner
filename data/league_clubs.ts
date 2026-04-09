@@ -120,5 +120,53 @@ export const leagueClubs = [
     "slug": "wolverhampton-wanderers",
     "badgePath": "/assets/clubs/premier-league/wolverhampton-wanderers.png",
     "badgeSourceUrl": "https://r2.thesportsdb.com/images/media/team/badge/u9qr031621593327.png"
+  },
+  {
+    "name": "Aberdeen",
+    "slug": "aberdeen",
+    "badgePath": "/assets/clubs/european/aberdeen.png",
+    "badgeSourceUrl": "https://r2.thesportsdb.com/images/media/team/badge/xuvwys1447597299.png"
+  },
+  {
+    "name": "Atalanta",
+    "slug": "atalanta",
+    "badgePath": "/assets/clubs/european/atalanta.png",
+    "badgeSourceUrl": "https://r2.thesportsdb.com/images/media/team/badge/lrvxg71534873930.png"
+  },
+  {
+    "name": "Falkirk",
+    "slug": "falkirk",
+    "badgePath": "/assets/clubs/european/falkirk.png",
+    "badgeSourceUrl": "https://r2.thesportsdb.com/images/media/team/badge/w37ucy1685023169.png"
+  },
+  {
+    "name": "Hibernian",
+    "slug": "hibernian",
+    "badgePath": "/assets/clubs/european/hibernian.png",
+    "badgeSourceUrl": "https://r2.thesportsdb.com/images/media/team/badge/qjys3z1684928969.png"
+  },
+  {
+    "name": "Juventus",
+    "slug": "juventus",
+    "badgePath": "/assets/clubs/european/juventus.png",
+    "badgeSourceUrl": "https://r2.thesportsdb.com/images/media/team/badge/uxf0gr1742983727.png"
+  },
+  {
+    "name": "Napoli",
+    "slug": "napoli",
+    "badgePath": "/assets/clubs/european/napoli.png",
+    "badgeSourceUrl": "https://r2.thesportsdb.com/images/media/team/badge/l8qyxv1742982541.png"
+  },
+  {
+    "name": "Parma",
+    "slug": "parma",
+    "badgePath": "/assets/clubs/european/parma.png",
+    "badgeSourceUrl": "https://r2.thesportsdb.com/images/media/team/badge/6yiaxs1627406063.png"
+  },
+  {
+    "name": "Rangers",
+    "slug": "rangers",
+    "badgePath": "/assets/clubs/european/rangers.png",
+    "badgeSourceUrl": "https://r2.thesportsdb.com/images/media/team/badge/ti24j61614290048.png"
   }
 ] as unknown as LeagueClubRecord[];

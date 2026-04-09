@@ -41,5 +41,21 @@ export const matchdayGameWeeks = [
       "paul_devine": "safe"
     },
     "simulatedSlip": null
+  },
+  {
+    "id": "md-3",
+    "slug": "matchday-3",
+    "name": "Matchday 3 Voting Stage",
+    "description": "Weekend card built with a more protective recommendation after bankroll drawdown to roughly GBP35, using cross-league coverage from the Premier League, Serie A, and SPFL.",
+    "windowStartIso": "2026-04-11T08:00:00+00:00",
+    "windowEndIso": "2026-04-13T22:00:00+00:00",
+    "startsIn": "Starts Saturday",
+    "proposalIds": [
+      "proposal-md-3-safe",
+      "proposal-md-3-balanced",
+      "proposal-md-3-aggressive"
+    ],
+    "votesByUserId": {},
+    "simulatedSlip": null
   }
 ] as unknown as MatchdayGameWeekRecord[];

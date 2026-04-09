@@ -128,5 +128,70 @@ export const matchdayProposals = [
       "For Paris SG v Liverpool, any late defensive reshuffle or early injury in the PSG back line is a key trigger to reduce risk.",
       "In Braga v Real Betis, if Betis lose midfield control and are pinned in for long phases, take a pragmatic cashout instead of forcing full settlement."
     ]
+  },
+  {
+    "id": "proposal-md-3-aggressive",
+    "gameWeekId": "md-3",
+    "proposalId": "aggressive",
+    "riskLevel": "aggressive",
+    "title": "Aggressive Accumulator",
+    "summary": "This upside build stacks two BTTS Serie A legs with a Scottish goals leg, then adds Villa and Arsenal result exposure to chase the largest return profile across the weekend.",
+    "legs": 5,
+    "statusLabel": "Upside",
+    "betLineIds": [
+      "betline-md-3-aggressive-arsenal-win",
+      "betline-md-3-aggressive-aberdeen-hibs-btts",
+      "betline-md-3-aggressive-atalanta-juventus-btts",
+      "betline-md-3-aggressive-villa-win",
+      "betline-md-3-aggressive-parma-napoli-btts"
+    ],
+    "aiRecommended": null,
+    "cashoutWatchList": [
+      "Because this card leans heavily on goals and one away winner, protect early if Saturday tempo is slower than expected across either BTTS leg.",
+      "If Aston Villa lose midfield territory at the City Ground or key attackers are withdrawn early, reduce risk before the final Sunday leg.",
+      "For Parma v Napoli BTTS, an early Napoli lead followed by defensive game management is the key signal that this final leg has weakened."
+    ]
+  },
+  {
+    "id": "proposal-md-3-balanced",
+    "gameWeekId": "md-3",
+    "proposalId": "balanced",
+    "riskLevel": "balanced",
+    "title": "Balanced Accumulator",
+    "summary": "The middle route uses one EPL favourite, one protected Serie A result line, and one EPL goals leg to keep return upside while avoiding the full volatility of the aggressive card.",
+    "legs": 3,
+    "statusLabel": "Balance",
+    "betLineIds": [
+      "betline-md-3-balanced-arsenal-win",
+      "betline-md-3-balanced-juventus-dnb",
+      "betline-md-3-balanced-forest-villa-over-2-5"
+    ],
+    "aiRecommended": null,
+    "cashoutWatchList": [
+      "If Arsenal win but with low chance creation and visible rotation fatigue, reassess before letting the two higher-variance legs run.",
+      "Juventus draw-no-bet is the protection core; if Atalanta overwhelm the first-half chance map, prioritise protecting a green position.",
+      "For Forest v Villa over 2.5, long low-event periods after halftime are a clear warning to cash out earlier."
+    ]
+  },
+  {
+    "id": "proposal-md-3-safe",
+    "gameWeekId": "md-3",
+    "proposalId": "safe",
+    "riskLevel": "safe",
+    "title": "Defensive Accumulator",
+    "summary": "With the pot near GBP35 after back-to-back stake outflows, the defensive recommendation anchors to two shorter winners plus Napoli draw-no-bet to preserve downside control while keeping a modest weekend return path live.",
+    "legs": 3,
+    "statusLabel": "Protect",
+    "betLineIds": [
+      "betline-md-3-safe-rangers-win",
+      "betline-md-3-safe-liverpool-win",
+      "betline-md-3-safe-napoli-dnb"
+    ],
+    "aiRecommended": true,
+    "cashoutWatchList": [
+      "If Rangers fail to establish territory control early away at Falkirk, treat that as the first upset warning and protect before volatility compounds.",
+      "Liverpool is the middle stabiliser: if major attacking rotation appears or Fulham create repeated transition chances, reduce risk rather than forcing full settlement.",
+      "Napoli draw-no-bet is deliberately protective for the late leg, but if Napoli lose midfield control and defensive absences bite, take the available cashout."
+    ]
   }
 ] as unknown as MatchdayProposalRecord[];

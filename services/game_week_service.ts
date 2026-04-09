@@ -332,26 +332,46 @@ export function getRecommendedStake(
   gameWeek: GameWeekRecord,
   proposal: GameWeekProposalRecord,
 ) {
+  const SAFE_MINIMUM_STAKE = 5;
+  const MIN_LADDER_GAP = 1;
   const { currentPot, initialPotTotal } = getLedgerSummary();
   const completedGameWeeks = getCompletedGameWeekCount();
-  const aggressiveProposal =
-    gameWeek.proposals.find((entry) => entry.riskLevel === "aggressive") ??
-    getHighestOddsProposal(gameWeek);
-  const aggressiveOdds = getProposalDecimalOdds(aggressiveProposal);
-  const proposalOdds = getProposalDecimalOdds(proposal);
-  const aggressiveStake = calculateAggressiveStake({
+  const roundedPot = Math.max(0, Math.round(currentPot));
+
+  if (roundedPot <= 0) {
+    return 0;
+  }
+
+  const rawAggressiveStake = calculateAggressiveStake({
     currentPot,
     initialPotTotal,
     completedGameWeeks,
   });
+  const effectiveSafeMinimum =
+    roundedPot >= SAFE_MINIMUM_STAKE ? SAFE_MINIMUM_STAKE : roundedPot;
+  const safeStake = Math.max(
+    effectiveSafeMinimum,
+    Math.round(rawAggressiveStake * 0.55),
+  );
+  const aggressiveStake = Math.max(
+    safeStake + MIN_LADDER_GAP * 2,
+    rawAggressiveStake,
+  );
+  const balancedStake = clamp(
+    Math.round((safeStake + aggressiveStake) / 2),
+    safeStake + MIN_LADDER_GAP,
+    aggressiveStake - MIN_LADDER_GAP,
+  );
 
-  if (proposal.id === aggressiveProposal.id) {
+  if (proposal.riskLevel === "aggressive") {
     return aggressiveStake;
   }
 
-  const relativeStake = aggressiveStake * (proposalOdds / aggressiveOdds);
+  if (proposal.riskLevel === "balanced") {
+    return balancedStake;
+  }
 
-  return Math.max(1, Math.round(relativeStake));
+  return safeStake;
 }
 
 export function getOrderedBetLines(proposal: GameWeekProposalRecord) {
@@ -523,14 +543,6 @@ function getMonthIndex(monthLabel: string) {
   };
 
   return monthIndexes[monthLabel] ?? null;
-}
-
-function getHighestOddsProposal(gameWeek: GameWeekRecord) {
-  return gameWeek.proposals.reduce((highest, proposal) =>
-    getProposalDecimalOdds(proposal) > getProposalDecimalOdds(highest)
-      ? proposal
-      : highest,
-  );
 }
 
 function getSequenceReasoning(currentIndex: number, lastIndex: number) {

@@ -104,5 +104,85 @@ export const marketAnalysisSelectionRows = [
     "market": "Match Betting",
     "selection": "Paris SG",
     "decimalOdds": 1.75
+  },
+  {
+    "id": "market-md-3-aberdeen-hibs-btts-yes",
+    "snapshotId": "snapshot-md-3-ladbrokes-2026-04-11",
+    "fixture": "Aberdeen v Hibernian",
+    "market": "Both Teams to Score",
+    "selection": "Yes",
+    "decimalOdds": 1.74
+  },
+  {
+    "id": "market-md-3-arsenal-win",
+    "snapshotId": "snapshot-md-3-ladbrokes-2026-04-11",
+    "fixture": "Arsenal v Bournemouth",
+    "market": "Match Betting",
+    "selection": "Arsenal",
+    "decimalOdds": 1.57
+  },
+  {
+    "id": "market-md-3-atalanta-juventus-btts-yes",
+    "snapshotId": "snapshot-md-3-ladbrokes-2026-04-11",
+    "fixture": "Atalanta v Juventus",
+    "market": "Both Teams to Score",
+    "selection": "Yes",
+    "decimalOdds": 1.72
+  },
+  {
+    "id": "market-md-3-forest-villa-over-2-5",
+    "snapshotId": "snapshot-md-3-ladbrokes-2026-04-11",
+    "fixture": "Nottingham Forest v Aston Villa",
+    "market": "Over/Under 2.5 Goals",
+    "selection": "Over 2.5",
+    "decimalOdds": 1.83
+  },
+  {
+    "id": "market-md-3-liverpool-win",
+    "snapshotId": "snapshot-md-3-ladbrokes-2026-04-11",
+    "fixture": "Liverpool v Fulham",
+    "market": "Match Betting",
+    "selection": "Liverpool",
+    "decimalOdds": 1.53
+  },
+  {
+    "id": "market-md-3-napoli-dnb",
+    "snapshotId": "snapshot-md-3-ladbrokes-2026-04-11",
+    "fixture": "Parma v Napoli",
+    "market": "Draw No Bet",
+    "selection": "Napoli",
+    "decimalOdds": 1.38
+  },
+  {
+    "id": "market-md-3-parma-napoli-btts-yes",
+    "snapshotId": "snapshot-md-3-ladbrokes-2026-04-11",
+    "fixture": "Parma v Napoli",
+    "market": "Both Teams to Score",
+    "selection": "Yes",
+    "decimalOdds": 1.85
+  },
+  {
+    "id": "market-md-3-rangers-win",
+    "snapshotId": "snapshot-md-3-ladbrokes-2026-04-11",
+    "fixture": "Falkirk v Rangers",
+    "market": "Match Betting",
+    "selection": "Rangers",
+    "decimalOdds": 1.44
+  },
+  {
+    "id": "market-md-3-juventus-dnb",
+    "snapshotId": "snapshot-md-3-ladbrokes-2026-04-11",
+    "fixture": "Atalanta v Juventus",
+    "market": "Draw No Bet",
+    "selection": "Juventus",
+    "decimalOdds": 1.62
+  },
+  {
+    "id": "market-md-3-villa-win",
+    "snapshotId": "snapshot-md-3-ladbrokes-2026-04-11",
+    "fixture": "Nottingham Forest v Aston Villa",
+    "market": "Match Betting",
+    "selection": "Aston Villa",
+    "decimalOdds": 2.5
   }
 ] as unknown as MarketAnalysisSelectionRow[];

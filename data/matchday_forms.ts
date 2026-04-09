@@ -42,5 +42,47 @@ export const matchdayForms = [
     "gameWeekId": "md-2",
     "proposalId": "proposal-md-2-safe",
     "betLineId": "betline-md-2-safe-psg-dnb"
+  },
+  {
+    "id": "form-md-3-aberdeen-hibernian",
+    "gameWeekId": "md-3",
+    "proposalId": "proposal-md-3-aggressive",
+    "betLineId": "betline-md-3-aggressive-aberdeen-hibs-btts"
+  },
+  {
+    "id": "form-md-3-arsenal-bournemouth",
+    "gameWeekId": "md-3",
+    "proposalId": "proposal-md-3-balanced",
+    "betLineId": "betline-md-3-balanced-arsenal-win"
+  },
+  {
+    "id": "form-md-3-atalanta-juventus",
+    "gameWeekId": "md-3",
+    "proposalId": "proposal-md-3-balanced",
+    "betLineId": "betline-md-3-balanced-juventus-dnb"
+  },
+  {
+    "id": "form-md-3-forest-villa",
+    "gameWeekId": "md-3",
+    "proposalId": "proposal-md-3-balanced",
+    "betLineId": "betline-md-3-balanced-forest-villa-over-2-5"
+  },
+  {
+    "id": "form-md-3-liverpool-fulham",
+    "gameWeekId": "md-3",
+    "proposalId": "proposal-md-3-safe",
+    "betLineId": "betline-md-3-safe-liverpool-win"
+  },
+  {
+    "id": "form-md-3-parma-napoli",
+    "gameWeekId": "md-3",
+    "proposalId": "proposal-md-3-safe",
+    "betLineId": "betline-md-3-safe-napoli-dnb"
+  },
+  {
+    "id": "form-md-3-rangers-falkirk",
+    "gameWeekId": "md-3",
+    "proposalId": "proposal-md-3-safe",
+    "betLineId": "betline-md-3-safe-rangers-win"
   }
 ] as unknown as MatchdayFormRecord[];

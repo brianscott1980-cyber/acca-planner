@@ -106,6 +106,12 @@ function CustomBetView({ customBet }: { customBet: CustomBetRecord }) {
                 : undefined,
           },
         ];
+  const displayedProposedBets =
+    currentCustomBet.state === "staked" && currentCustomBet.placedProposalRank
+      ? proposedBets.filter(
+          (proposedBet) => proposedBet.rank === currentCustomBet.placedProposalRank,
+        )
+      : proposedBets;
 
   const handleMarkPlaced = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -247,7 +253,7 @@ function CustomBetView({ customBet }: { customBet: CustomBetRecord }) {
                 <Trophy size={18} />
                 <h2 className="hub-panel-title">Proposed Bets</h2>
               </div>
-              {proposedBets.map((proposedBet) => {
+              {displayedProposedBets.map((proposedBet) => {
                 const horseProfile = proposedBet.horseRacing;
                 const suggestedStakeAmountForBet =
                   proposedBet.suggestedStakeAmount ??

@@ -203,6 +203,20 @@ Interpretation rules:
 - If a required club badge is missing, download a credible badge asset and update local data/mappings so the badge renders for that club.
 - Badge completeness is mandatory for generated matchdays; do not finish with unresolved missing club badges for included fixtures.
 
+Evidence and sentiment rules:
+- Evidence standard: use at least 10 unique internet reference sources before finalising matchday proposals.
+- Source quality standard:
+  - Prioritise official and primary sources first (competition/league organisers, official club channels, official fixture/schedule pages, official bookmaker market pages).
+  - Then use established sports media and data providers.
+  - Do not rely on aggregator-only, forum-only, or low-credibility pages as primary justification.
+- Public sentiment standard:
+  - In addition to trusted sports sources, check recent Reddit and social-media discussion for public sentiment hints around likely match outcomes.
+  - Treat social sentiment as a secondary signal only; never let it override stronger official/statistical evidence.
+  - Prefer recent, fixture-specific threads and discussions over generic season chatter.
+- Keep a concise source log in proposal reasoning (or summary where reasoning is surfaced) listing at least 10 sources that materially informed selections and recommendation.
+- If fewer than 10 credible sources are available, do not guess; explicitly state the evidence gap in proposal reasoning and downgrade confidence.
+- Include a short "Evidence confidence" statement and a short "Public sentiment check" statement in the proposal reasoning for the aiRecommended option.
+
 Files you may update:
 ${filesBlock}
 
@@ -341,6 +355,7 @@ Validation checklist before finishing:
 - The three proposals together represent at least 3 distinct competitions when credible fixtures are available.
 - The aiRecommended choice is justified by both the current market slate and the current bankroll / recent-results context.
 - Cashout guidance is meaningfully differentiated across safe, balanced, and aggressive and references relevant team-news or in-play patterns for that proposal.
+- Proposal reasoning includes a concise source log with at least 10 credible references and explicitly records evidence confidence plus public-sentiment alignment for the aiRecommended option.
 - No generated fixture falls outside ${weekendWindow.startLabel} to ${weekendWindow.endLabel}.
 - No generated fixture has a kickoff earlier than the generation timestamp.
 - No generated fixture is already settled, in-play, postponed, or cancelled at generation time.
