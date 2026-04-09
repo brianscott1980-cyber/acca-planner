@@ -24,4 +24,33 @@ for select
 to authenticated
 using (true);
 
-alter publication supabase_realtime add table public.ledger_transactions;
+grant insert, update on public.ledger_transactions to authenticated;
+
+drop policy if exists "Authenticated admins can insert ledger transactions" on public.ledger_transactions;
+create policy "Authenticated admins can insert ledger transactions"
+on public.ledger_transactions
+for insert
+to authenticated
+with check (coalesce(auth.jwt() -> 'app_metadata' ->> 'role', '') = 'admin');
+
+drop policy if exists "Authenticated admins can update ledger transactions" on public.ledger_transactions;
+create policy "Authenticated admins can update ledger transactions"
+on public.ledger_transactions
+for update
+to authenticated
+using (coalesce(auth.jwt() -> 'app_metadata' ->> 'role', '') = 'admin')
+with check (coalesce(auth.jwt() -> 'app_metadata' ->> 'role', '') = 'admin');
+
+do $$
+begin
+  if not exists (
+    select 1
+    from pg_publication_tables
+    where pubname = 'supabase_realtime'
+      and schemaname = 'public'
+      and tablename = 'ledger_transactions'
+  ) then
+    alter publication supabase_realtime add table public.ledger_transactions;
+  end if;
+end
+$$;

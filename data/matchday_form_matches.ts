@@ -1,61 +1,6 @@
 import type { MatchdayFormMatchRecord } from "../types/matchday_type";
 
-export const matchdayFormMatches: MatchdayFormMatchRecord[] = [
-  {
-    "id": "formmatch-md-1-freiburg-1",
-    "formId": "form-md-1-freiburg-bayern",
-    "teamSide": "home",
-    "sortOrder": 1,
-    "opponent": "Bayer Leverkusen",
-    "venue": "H",
-    "finalScore": "3-3",
-    "goalsScored": 3,
-    "outcome": "D"
-  },
-  {
-    "id": "formmatch-md-1-freiburg-2",
-    "formId": "form-md-1-freiburg-bayern",
-    "teamSide": "home",
-    "sortOrder": 2,
-    "opponent": "Eintracht Frankfurt",
-    "venue": "A",
-    "finalScore": "2-0",
-    "goalsScored": 0,
-    "outcome": "L"
-  },
-  {
-    "id": "formmatch-md-1-freiburg-3",
-    "formId": "form-md-1-freiburg-bayern",
-    "teamSide": "home",
-    "sortOrder": 3,
-    "opponent": "Borussia Monchengladbach",
-    "venue": "H",
-    "finalScore": "2-1",
-    "goalsScored": 2,
-    "outcome": "W"
-  },
-  {
-    "id": "formmatch-md-1-freiburg-4",
-    "formId": "form-md-1-freiburg-bayern",
-    "teamSide": "home",
-    "sortOrder": 4,
-    "opponent": "TSG Hoffenheim",
-    "venue": "A",
-    "finalScore": "3-0",
-    "goalsScored": 0,
-    "outcome": "L"
-  },
-  {
-    "id": "formmatch-md-1-freiburg-5",
-    "formId": "form-md-1-freiburg-bayern",
-    "teamSide": "home",
-    "sortOrder": 5,
-    "opponent": "Werder Bremen",
-    "venue": "H",
-    "finalScore": "1-0",
-    "goalsScored": 1,
-    "outcome": "W"
-  },
+export const matchdayFormMatches = [
   {
     "id": "formmatch-md-1-bayern-1",
     "formId": "form-md-1-freiburg-bayern",
@@ -112,6 +57,116 @@ export const matchdayFormMatches: MatchdayFormMatchRecord[] = [
     "outcome": "W"
   },
   {
+    "id": "formmatch-md-1-freiburg-1",
+    "formId": "form-md-1-freiburg-bayern",
+    "teamSide": "home",
+    "sortOrder": 1,
+    "opponent": "Bayer Leverkusen",
+    "venue": "H",
+    "finalScore": "3-3",
+    "goalsScored": 3,
+    "outcome": "D"
+  },
+  {
+    "id": "formmatch-md-1-freiburg-2",
+    "formId": "form-md-1-freiburg-bayern",
+    "teamSide": "home",
+    "sortOrder": 2,
+    "opponent": "Eintracht Frankfurt",
+    "venue": "A",
+    "finalScore": "2-0",
+    "goalsScored": 0,
+    "outcome": "L"
+  },
+  {
+    "id": "formmatch-md-1-freiburg-3",
+    "formId": "form-md-1-freiburg-bayern",
+    "teamSide": "home",
+    "sortOrder": 3,
+    "opponent": "Borussia Monchengladbach",
+    "venue": "H",
+    "finalScore": "2-1",
+    "goalsScored": 2,
+    "outcome": "W"
+  },
+  {
+    "id": "formmatch-md-1-freiburg-4",
+    "formId": "form-md-1-freiburg-bayern",
+    "teamSide": "home",
+    "sortOrder": 4,
+    "opponent": "TSG Hoffenheim",
+    "venue": "A",
+    "finalScore": "3-0",
+    "goalsScored": 0,
+    "outcome": "L"
+  },
+  {
+    "id": "formmatch-md-1-freiburg-5",
+    "formId": "form-md-1-freiburg-bayern",
+    "teamSide": "home",
+    "sortOrder": 5,
+    "opponent": "Werder Bremen",
+    "venue": "H",
+    "finalScore": "1-0",
+    "goalsScored": 1,
+    "outcome": "W"
+  },
+  {
+    "id": "formmatch-md-1-inter-1",
+    "formId": "form-md-1-inter-roma",
+    "teamSide": "home",
+    "sortOrder": 1,
+    "opponent": "Fiorentina",
+    "venue": "A",
+    "finalScore": "1-1",
+    "goalsScored": 1,
+    "outcome": "D"
+  },
+  {
+    "id": "formmatch-md-1-inter-2",
+    "formId": "form-md-1-inter-roma",
+    "teamSide": "home",
+    "sortOrder": 2,
+    "opponent": "Atalanta",
+    "venue": "H",
+    "finalScore": "1-1",
+    "goalsScored": 1,
+    "outcome": "D"
+  },
+  {
+    "id": "formmatch-md-1-inter-3",
+    "formId": "form-md-1-inter-roma",
+    "teamSide": "home",
+    "sortOrder": 3,
+    "opponent": "AC Milan",
+    "venue": "A",
+    "finalScore": "1-0",
+    "goalsScored": 0,
+    "outcome": "L"
+  },
+  {
+    "id": "formmatch-md-1-inter-4",
+    "formId": "form-md-1-inter-roma",
+    "teamSide": "home",
+    "sortOrder": 4,
+    "opponent": "Genoa",
+    "venue": "H",
+    "finalScore": "2-0",
+    "goalsScored": 2,
+    "outcome": "W"
+  },
+  {
+    "id": "formmatch-md-1-inter-5",
+    "formId": "form-md-1-inter-roma",
+    "teamSide": "home",
+    "sortOrder": 5,
+    "opponent": "Lecce",
+    "venue": "A",
+    "finalScore": "0-2",
+    "goalsScored": 2,
+    "outcome": "W"
+  },
+  {
     "id": "formmatch-md-1-leverkusen-1",
     "formId": "form-md-1-leverkusen-wolfsburg",
     "teamSide": "home",
@@ -165,61 +220,6 @@ export const matchdayFormMatches: MatchdayFormMatchRecord[] = [
     "finalScore": "4-0",
     "goalsScored": 4,
     "outcome": "W"
-  },
-  {
-    "id": "formmatch-md-1-wolfsburg-1",
-    "formId": "form-md-1-leverkusen-wolfsburg",
-    "teamSide": "away",
-    "sortOrder": 1,
-    "opponent": "Hamburger SV",
-    "venue": "A",
-    "finalScore": "2-1",
-    "goalsScored": 1,
-    "outcome": "L"
-  },
-  {
-    "id": "formmatch-md-1-wolfsburg-2",
-    "formId": "form-md-1-leverkusen-wolfsburg",
-    "teamSide": "away",
-    "sortOrder": 2,
-    "opponent": "VfB Stuttgart",
-    "venue": "H",
-    "finalScore": "0-4",
-    "goalsScored": 0,
-    "outcome": "L"
-  },
-  {
-    "id": "formmatch-md-1-wolfsburg-3",
-    "formId": "form-md-1-leverkusen-wolfsburg",
-    "teamSide": "away",
-    "sortOrder": 3,
-    "opponent": "FC Augsburg",
-    "venue": "A",
-    "finalScore": "3-2",
-    "goalsScored": 2,
-    "outcome": "L"
-  },
-  {
-    "id": "formmatch-md-1-wolfsburg-4",
-    "formId": "form-md-1-leverkusen-wolfsburg",
-    "teamSide": "away",
-    "sortOrder": 4,
-    "opponent": "RB Leipzig",
-    "venue": "H",
-    "finalScore": "2-2",
-    "goalsScored": 2,
-    "outcome": "D"
-  },
-  {
-    "id": "formmatch-md-1-wolfsburg-5",
-    "formId": "form-md-1-leverkusen-wolfsburg",
-    "teamSide": "away",
-    "sortOrder": 5,
-    "opponent": "Borussia Dortmund",
-    "venue": "A",
-    "finalScore": "2-1",
-    "goalsScored": 1,
-    "outcome": "L"
   },
   {
     "id": "formmatch-md-1-mallorca-1",
@@ -332,61 +332,6 @@ export const matchdayFormMatches: MatchdayFormMatchRecord[] = [
     "outcome": "W"
   },
   {
-    "id": "formmatch-md-1-inter-1",
-    "formId": "form-md-1-inter-roma",
-    "teamSide": "home",
-    "sortOrder": 1,
-    "opponent": "Fiorentina",
-    "venue": "A",
-    "finalScore": "1-1",
-    "goalsScored": 1,
-    "outcome": "D"
-  },
-  {
-    "id": "formmatch-md-1-inter-2",
-    "formId": "form-md-1-inter-roma",
-    "teamSide": "home",
-    "sortOrder": 2,
-    "opponent": "Atalanta",
-    "venue": "H",
-    "finalScore": "1-1",
-    "goalsScored": 1,
-    "outcome": "D"
-  },
-  {
-    "id": "formmatch-md-1-inter-3",
-    "formId": "form-md-1-inter-roma",
-    "teamSide": "home",
-    "sortOrder": 3,
-    "opponent": "AC Milan",
-    "venue": "A",
-    "finalScore": "1-0",
-    "goalsScored": 0,
-    "outcome": "L"
-  },
-  {
-    "id": "formmatch-md-1-inter-4",
-    "formId": "form-md-1-inter-roma",
-    "teamSide": "home",
-    "sortOrder": 4,
-    "opponent": "Genoa",
-    "venue": "H",
-    "finalScore": "2-0",
-    "goalsScored": 2,
-    "outcome": "W"
-  },
-  {
-    "id": "formmatch-md-1-inter-5",
-    "formId": "form-md-1-inter-roma",
-    "teamSide": "home",
-    "sortOrder": 5,
-    "opponent": "Lecce",
-    "venue": "A",
-    "finalScore": "0-2",
-    "goalsScored": 2,
-    "outcome": "W"
-  },
-  {
     "id": "formmatch-md-1-roma-1",
     "formId": "form-md-1-inter-roma",
     "teamSide": "away",
@@ -440,5 +385,390 @@ export const matchdayFormMatches: MatchdayFormMatchRecord[] = [
     "finalScore": "2-0",
     "goalsScored": 2,
     "outcome": "W"
+  },
+  {
+    "id": "formmatch-md-1-wolfsburg-1",
+    "formId": "form-md-1-leverkusen-wolfsburg",
+    "teamSide": "away",
+    "sortOrder": 1,
+    "opponent": "Hamburger SV",
+    "venue": "A",
+    "finalScore": "2-1",
+    "goalsScored": 1,
+    "outcome": "L"
+  },
+  {
+    "id": "formmatch-md-1-wolfsburg-2",
+    "formId": "form-md-1-leverkusen-wolfsburg",
+    "teamSide": "away",
+    "sortOrder": 2,
+    "opponent": "VfB Stuttgart",
+    "venue": "H",
+    "finalScore": "0-4",
+    "goalsScored": 0,
+    "outcome": "L"
+  },
+  {
+    "id": "formmatch-md-1-wolfsburg-3",
+    "formId": "form-md-1-leverkusen-wolfsburg",
+    "teamSide": "away",
+    "sortOrder": 3,
+    "opponent": "FC Augsburg",
+    "venue": "A",
+    "finalScore": "3-2",
+    "goalsScored": 2,
+    "outcome": "L"
+  },
+  {
+    "id": "formmatch-md-1-wolfsburg-4",
+    "formId": "form-md-1-leverkusen-wolfsburg",
+    "teamSide": "away",
+    "sortOrder": 4,
+    "opponent": "RB Leipzig",
+    "venue": "H",
+    "finalScore": "2-2",
+    "goalsScored": 2,
+    "outcome": "D"
+  },
+  {
+    "id": "formmatch-md-1-wolfsburg-5",
+    "formId": "form-md-1-leverkusen-wolfsburg",
+    "teamSide": "away",
+    "sortOrder": 5,
+    "opponent": "Borussia Dortmund",
+    "venue": "A",
+    "finalScore": "2-1",
+    "goalsScored": 1,
+    "outcome": "L"
+  },
+  {
+    "id": "formmatch-md-2-atletico-1",
+    "formId": "form-md-2-barcelona-atletico",
+    "teamSide": "away",
+    "sortOrder": 1,
+    "opponent": "Barcelona",
+    "venue": "H",
+    "finalScore": "1-2",
+    "goalsScored": 1,
+    "outcome": "L"
+  },
+  {
+    "id": "formmatch-md-2-atletico-2",
+    "formId": "form-md-2-barcelona-atletico",
+    "teamSide": "away",
+    "sortOrder": 2,
+    "opponent": "Real Madrid",
+    "venue": "A",
+    "finalScore": "3-2",
+    "goalsScored": 2,
+    "outcome": "L"
+  },
+  {
+    "id": "formmatch-md-2-atletico-3",
+    "formId": "form-md-2-barcelona-atletico",
+    "teamSide": "away",
+    "sortOrder": 3,
+    "opponent": "Tottenham Hotspur",
+    "venue": "A",
+    "finalScore": "3-2",
+    "goalsScored": 2,
+    "outcome": "L"
+  },
+  {
+    "id": "formmatch-md-2-atletico-4",
+    "formId": "form-md-2-barcelona-atletico",
+    "teamSide": "away",
+    "sortOrder": 4,
+    "opponent": "Getafe",
+    "venue": "H",
+    "finalScore": "1-0",
+    "goalsScored": 1,
+    "outcome": "W"
+  },
+  {
+    "id": "formmatch-md-2-atletico-5",
+    "formId": "form-md-2-barcelona-atletico",
+    "teamSide": "away",
+    "sortOrder": 5,
+    "opponent": "Tottenham Hotspur",
+    "venue": "H",
+    "finalScore": "5-2",
+    "goalsScored": 5,
+    "outcome": "W"
+  },
+  {
+    "id": "formmatch-md-2-barcelona-1",
+    "formId": "form-md-2-barcelona-atletico",
+    "teamSide": "home",
+    "sortOrder": 1,
+    "opponent": "Rayo Vallecano",
+    "venue": "H",
+    "finalScore": "1-0",
+    "goalsScored": 1,
+    "outcome": "W"
+  },
+  {
+    "id": "formmatch-md-2-barcelona-2",
+    "formId": "form-md-2-barcelona-atletico",
+    "teamSide": "home",
+    "sortOrder": 2,
+    "opponent": "Newcastle United",
+    "venue": "H",
+    "finalScore": "7-2",
+    "goalsScored": 7,
+    "outcome": "W"
+  },
+  {
+    "id": "formmatch-md-2-barcelona-3",
+    "formId": "form-md-2-barcelona-atletico",
+    "teamSide": "home",
+    "sortOrder": 3,
+    "opponent": "Sevilla",
+    "venue": "H",
+    "finalScore": "5-2",
+    "goalsScored": 5,
+    "outcome": "W"
+  },
+  {
+    "id": "formmatch-md-2-barcelona-4",
+    "formId": "form-md-2-barcelona-atletico",
+    "teamSide": "home",
+    "sortOrder": 4,
+    "opponent": "Newcastle United",
+    "venue": "A",
+    "finalScore": "1-1",
+    "goalsScored": 1,
+    "outcome": "D"
+  },
+  {
+    "id": "formmatch-md-2-barcelona-5",
+    "formId": "form-md-2-barcelona-atletico",
+    "teamSide": "home",
+    "sortOrder": 5,
+    "opponent": "Athletic Club",
+    "venue": "A",
+    "finalScore": "0-1",
+    "goalsScored": 1,
+    "outcome": "W"
+  },
+  {
+    "id": "formmatch-md-2-betis-1",
+    "formId": "form-md-2-braga-betis",
+    "teamSide": "away",
+    "sortOrder": 1,
+    "opponent": "Athletic Club",
+    "venue": "A",
+    "finalScore": "2-1",
+    "goalsScored": 1,
+    "outcome": "L"
+  },
+  {
+    "id": "formmatch-md-2-betis-2",
+    "formId": "form-md-2-braga-betis",
+    "teamSide": "away",
+    "sortOrder": 2,
+    "opponent": "Panathinaikos",
+    "venue": "H",
+    "finalScore": "4-0",
+    "goalsScored": 4,
+    "outcome": "W"
+  },
+  {
+    "id": "formmatch-md-2-betis-3",
+    "formId": "form-md-2-braga-betis",
+    "teamSide": "away",
+    "sortOrder": 3,
+    "opponent": "Celta Vigo",
+    "venue": "H",
+    "finalScore": "1-1",
+    "goalsScored": 1,
+    "outcome": "D"
+  },
+  {
+    "id": "formmatch-md-2-betis-4",
+    "formId": "form-md-2-braga-betis",
+    "teamSide": "away",
+    "sortOrder": 4,
+    "opponent": "Panathinaikos",
+    "venue": "A",
+    "finalScore": "1-0",
+    "goalsScored": 0,
+    "outcome": "L"
+  },
+  {
+    "id": "formmatch-md-2-betis-5",
+    "formId": "form-md-2-braga-betis",
+    "teamSide": "away",
+    "sortOrder": 5,
+    "opponent": "Getafe",
+    "venue": "A",
+    "finalScore": "2-0",
+    "goalsScored": 0,
+    "outcome": "L"
+  },
+  {
+    "id": "formmatch-md-2-braga-1",
+    "formId": "form-md-2-braga-betis",
+    "teamSide": "home",
+    "sortOrder": 1,
+    "opponent": "Ferencvaros",
+    "venue": "A",
+    "finalScore": "2-0",
+    "goalsScored": 0,
+    "outcome": "L"
+  },
+  {
+    "id": "formmatch-md-2-braga-2",
+    "formId": "form-md-2-braga-betis",
+    "teamSide": "home",
+    "sortOrder": 2,
+    "opponent": "Sporting CP",
+    "venue": "H",
+    "finalScore": "2-2",
+    "goalsScored": 2,
+    "outcome": "D"
+  },
+  {
+    "id": "formmatch-md-2-braga-3",
+    "formId": "form-md-2-braga-betis",
+    "teamSide": "home",
+    "sortOrder": 3,
+    "opponent": "Nacional",
+    "venue": "A",
+    "finalScore": "1-2",
+    "goalsScored": 2,
+    "outcome": "W"
+  },
+  {
+    "id": "formmatch-md-2-braga-4",
+    "formId": "form-md-2-braga-betis",
+    "teamSide": "home",
+    "sortOrder": 4,
+    "opponent": "Vitoria Guimaraes",
+    "venue": "H",
+    "finalScore": "3-2",
+    "goalsScored": 3,
+    "outcome": "W"
+  },
+  {
+    "id": "formmatch-md-2-braga-5",
+    "formId": "form-md-2-braga-betis",
+    "teamSide": "home",
+    "sortOrder": 5,
+    "opponent": "Gil Vicente",
+    "venue": "A",
+    "finalScore": "2-1",
+    "goalsScored": 1,
+    "outcome": "L"
+  },
+  {
+    "id": "formmatch-md-2-liverpool-1",
+    "formId": "form-md-2-psg-liverpool",
+    "teamSide": "away",
+    "sortOrder": 1,
+    "opponent": "Manchester City",
+    "venue": "A",
+    "finalScore": "4-0",
+    "goalsScored": 0,
+    "outcome": "L"
+  },
+  {
+    "id": "formmatch-md-2-liverpool-2",
+    "formId": "form-md-2-psg-liverpool",
+    "teamSide": "away",
+    "sortOrder": 2,
+    "opponent": "Brighton & Hove Albion",
+    "venue": "A",
+    "finalScore": "2-1",
+    "goalsScored": 1,
+    "outcome": "L"
+  },
+  {
+    "id": "formmatch-md-2-liverpool-3",
+    "formId": "form-md-2-psg-liverpool",
+    "teamSide": "away",
+    "sortOrder": 3,
+    "opponent": "Galatasaray",
+    "venue": "H",
+    "finalScore": "4-0",
+    "goalsScored": 4,
+    "outcome": "W"
+  },
+  {
+    "id": "formmatch-md-2-liverpool-4",
+    "formId": "form-md-2-psg-liverpool",
+    "teamSide": "away",
+    "sortOrder": 4,
+    "opponent": "Tottenham Hotspur",
+    "venue": "H",
+    "finalScore": "1-1",
+    "goalsScored": 1,
+    "outcome": "D"
+  },
+  {
+    "id": "formmatch-md-2-liverpool-5",
+    "formId": "form-md-2-psg-liverpool",
+    "teamSide": "away",
+    "sortOrder": 5,
+    "opponent": "Galatasaray",
+    "venue": "A",
+    "finalScore": "1-0",
+    "goalsScored": 0,
+    "outcome": "L"
+  },
+  {
+    "id": "formmatch-md-2-psg-1",
+    "formId": "form-md-2-psg-liverpool",
+    "teamSide": "home",
+    "sortOrder": 1,
+    "opponent": "Toulouse",
+    "venue": "H",
+    "finalScore": "3-1",
+    "goalsScored": 3,
+    "outcome": "W"
+  },
+  {
+    "id": "formmatch-md-2-psg-2",
+    "formId": "form-md-2-psg-liverpool",
+    "teamSide": "home",
+    "sortOrder": 2,
+    "opponent": "Nice",
+    "venue": "A",
+    "finalScore": "0-4",
+    "goalsScored": 4,
+    "outcome": "W"
+  },
+  {
+    "id": "formmatch-md-2-psg-3",
+    "formId": "form-md-2-psg-liverpool",
+    "teamSide": "home",
+    "sortOrder": 3,
+    "opponent": "Chelsea",
+    "venue": "A",
+    "finalScore": "0-3",
+    "goalsScored": 3,
+    "outcome": "W"
+  },
+  {
+    "id": "formmatch-md-2-psg-4",
+    "formId": "form-md-2-psg-liverpool",
+    "teamSide": "home",
+    "sortOrder": 4,
+    "opponent": "Chelsea",
+    "venue": "H",
+    "finalScore": "5-2",
+    "goalsScored": 5,
+    "outcome": "W"
+  },
+  {
+    "id": "formmatch-md-2-psg-5",
+    "formId": "form-md-2-psg-liverpool",
+    "teamSide": "home",
+    "sortOrder": 5,
+    "opponent": "Monaco",
+    "venue": "H",
+    "finalScore": "1-3",
+    "goalsScored": 1,
+    "outcome": "L"
   }
-];
+] as unknown as MatchdayFormMatchRecord[];

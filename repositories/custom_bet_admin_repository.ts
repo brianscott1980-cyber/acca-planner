@@ -19,11 +19,29 @@ export async function persistCustomBetRemote(customBet: CustomBetRecord) {
   }
 }
 
+export async function persistCustomBetStakeLedgerRemote(
+  stakeLedgerRow: LedgerTransactionRecord,
+) {
+  if (!supabase) {
+    throw new Error("Supabase is not configured.");
+  }
+
+  const { error } = await supabase
+    .from("ledger_transactions")
+    .upsert(mapKeysToSnakeCase(stakeLedgerRow), { onConflict: "id" });
+
+  if (error) {
+    throw new Error(`Failed to upsert custom bet stake ledger: ${error.message}`);
+  }
+}
+
 export async function persistCustomBetOutcomeRemote({
   outcomeRow,
+  stakeLedgerRow,
   settlementLedgerRow,
 }: {
   outcomeRow: CustomBetOutcomeRow;
+  stakeLedgerRow: LedgerTransactionRecord | null;
   settlementLedgerRow: LedgerTransactionRecord | null;
 }) {
   if (!supabase) {
@@ -38,13 +56,25 @@ export async function persistCustomBetOutcomeRemote({
     throw new Error(`Failed to persist custom bet outcome: ${outcomeError.message}`);
   }
 
+  if (stakeLedgerRow) {
+    const { error: stakeLedgerError } = await supabase
+      .from("ledger_transactions")
+      .upsert(mapKeysToSnakeCase(stakeLedgerRow), { onConflict: "id" });
+
+    if (stakeLedgerError) {
+      throw new Error(
+        `Failed to upsert custom bet stake ledger: ${stakeLedgerError.message}`,
+      );
+    }
+  }
+
   if (settlementLedgerRow) {
     const { error: ledgerError } = await supabase
       .from("ledger_transactions")
       .upsert(mapKeysToSnakeCase(settlementLedgerRow), { onConflict: "id" });
 
     if (ledgerError) {
-      console.error(
+      throw new Error(
         `Failed to upsert custom bet settlement ledger: ${ledgerError.message}`,
       );
     }

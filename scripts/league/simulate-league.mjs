@@ -66,22 +66,56 @@ async function main() {
     );
   }
 
+  const shouldRebuildForDate = rest.includes("--rebuild");
+  const dateArgs = rest.filter((value) => value !== "--rebuild");
   const simulatedAt =
     command === "reset"
       ? new Date()
-      : parseShortDateTime(rest.join(" ").trim());
+      : parseShortDateTime(dateArgs.join(" ").trim());
   const updatedAt = new Date();
+
+  if (command === "date" && !shouldRebuildForDate) {
+    await mkdir(path.join(ROOT, "data"), { recursive: true });
+    await writeFile(
+      path.join(ROOT, "data", "league_data_meta.ts"),
+      renderLeagueDataMeta({
+        simulatedAtIso: simulatedAt.toISOString(),
+        updatedAtIso: updatedAt.toISOString(),
+      }),
+    );
+
+    console.log(
+      `Simulated league date set to ${simulatedAt.toISOString()}. Existing simulation, vote, outcome, and ledger data preserved.`,
+    );
+    return;
+  }
+
   const [
     { users },
-    { matchdaySchedule },
+    { matchdayGameWeeks },
+    { matchdayProposals },
+    { matchdayBetLines },
+    { matchdayForms },
+    { matchdayFormMatches },
     { marketAnalysisSnapshotRows },
     { marketAnalysisSelectionRows },
   ] = await Promise.all([
     loadTsModule("data/users.ts"),
-    loadTsModule("services/matchday_schedule_service.ts"),
+    loadTsModule("data/matchday_game_weeks.ts"),
+    loadTsModule("data/matchday_proposals.ts"),
+    loadTsModule("data/matchday_bet_lines.ts"),
+    loadTsModule("data/matchday_forms.ts"),
+    loadTsModule("data/matchday_form_matches.ts"),
     loadTsModule("data/market_analysis_snapshots.ts"),
     loadTsModule("data/market_analysis_selections.ts"),
   ]);
+  const matchdaySchedule = buildMatchdayScheduleFromRows({
+    matchdayGameWeeks,
+    matchdayProposals,
+    matchdayBetLines,
+    matchdayForms,
+    matchdayFormMatches,
+  });
   const matchdaySimulations = buildMatchdaySimulations({
     users,
     gameWeeks: matchdaySchedule,
@@ -135,6 +169,111 @@ async function main() {
       `Prepared ${matchdaySimulations.length} matchday simulations.`,
     ].join(" "),
   );
+}
+
+function buildMatchdayScheduleFromRows({
+  matchdayGameWeeks,
+  matchdayProposals,
+  matchdayBetLines,
+  matchdayForms,
+  matchdayFormMatches,
+}) {
+  const proposalById = new Map(matchdayProposals.map((proposal) => [proposal.id, proposal]));
+  const formsById = new Set(matchdayForms.map((form) => form.id));
+  const formMatchesByFormId = new Map();
+
+  for (const formMatch of matchdayFormMatches) {
+    const existingRows = formMatchesByFormId.get(formMatch.formId) ?? [];
+    existingRows.push(formMatch);
+    formMatchesByFormId.set(formMatch.formId, existingRows);
+  }
+
+  const betLinesByProposalEntityId = new Map();
+  for (const betLine of matchdayBetLines) {
+    const existingRows = betLinesByProposalEntityId.get(betLine.proposalEntityId) ?? [];
+    existingRows.push(betLine);
+    betLinesByProposalEntityId.set(betLine.proposalEntityId, existingRows);
+  }
+
+  return matchdayGameWeeks.map((gameWeek) => ({
+    id: gameWeek.id,
+    slug: gameWeek.slug,
+    name: gameWeek.name,
+    description: gameWeek.description,
+    windowStartIso: gameWeek.windowStartIso,
+    windowEndIso: gameWeek.windowEndIso,
+    startsIn: gameWeek.startsIn,
+    votesByUserId: gameWeek.votesByUserId,
+    simulatedSlip: gameWeek.simulatedSlip,
+    proposals: gameWeek.proposalIds
+      .map((proposalEntityId) => proposalById.get(proposalEntityId) ?? null)
+      .filter((proposal) => proposal !== null)
+      .map((proposal) => {
+        const proposalBetLines =
+          betLinesByProposalEntityId.get(proposal.id)?.slice().sort(
+            (left, right) => left.sortOrder - right.sortOrder,
+          ) ?? [];
+
+        return {
+          id: proposal.proposalId,
+          riskLevel: proposal.riskLevel,
+          title: proposal.title,
+          summary: proposal.summary,
+          legs: proposal.legs,
+          statusLabel: proposal.statusLabel,
+          cashoutWatchList: proposal.cashoutWatchList,
+          aiRecommended: proposal.aiRecommended,
+          betLines: proposalBetLines.map((betLine) => ({
+            label: betLine.label,
+            scheduleNote: betLine.scheduleNote,
+            aiReasoning: betLine.aiReasoning,
+            form: betLine.formId
+              ? composeBetLineForm({
+                  formId: betLine.formId,
+                  hasForm: formsById.has(betLine.formId),
+                  formMatchesByFormId,
+                })
+              : undefined,
+            formNote: betLine.formNote,
+            odds: betLine.odds,
+            marketId: betLine.marketId,
+          })),
+        };
+      }),
+  }));
+}
+
+function composeBetLineForm({ formId, hasForm, formMatchesByFormId }) {
+  if (!hasForm) {
+    return undefined;
+  }
+
+  const orderedMatches =
+    formMatchesByFormId.get(formId)?.slice().sort((left, right) => left.sortOrder - right.sortOrder) ??
+    [];
+
+  return {
+    home: {
+      matches: orderedMatches
+        .filter((matchRecord) => matchRecord.teamSide === "home")
+        .map(mapFormMatchRecord),
+    },
+    away: {
+      matches: orderedMatches
+        .filter((matchRecord) => matchRecord.teamSide === "away")
+        .map(mapFormMatchRecord),
+    },
+  };
+}
+
+function mapFormMatchRecord(matchRecord) {
+  return {
+    opponent: matchRecord.opponent,
+    venue: matchRecord.venue,
+    finalScore: matchRecord.finalScore,
+    goalsScored: matchRecord.goalsScored,
+    outcome: matchRecord.outcome,
+  };
 }
 
 function parseShortDateTime(input) {

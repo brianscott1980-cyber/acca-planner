@@ -1,6 +1,7 @@
 import {
   persistCustomBetOutcomeRemote,
   persistCustomBetRemote,
+  persistCustomBetStakeLedgerRemote,
 } from "../repositories/custom_bet_admin_repository";
 import {
   getCurrentAppDataSnapshot,
@@ -17,37 +18,72 @@ export async function markCustomBetAsStaked({
   stakeAmount,
   placedDecimalOdds,
   placedAtIso,
+  placedProposalRank,
+  isFreeStake = false,
 }: {
   customBetId: string;
   stakeAmount: number;
   placedDecimalOdds: number;
   placedAtIso: string;
+  placedProposalRank: 1 | 2 | 3;
+  isFreeStake?: boolean;
 }) {
   const snapshot = getCurrentAppDataSnapshot();
   const currentCustomBet = getCustomBetById(customBetId);
+  const existingStakeLedgerRow =
+    snapshot.ledgerData.find(
+      (entry) => entry.kind === "stake" && entry.customBetId === customBetId,
+    ) ?? null;
 
   if (!currentCustomBet) {
     throw new Error(`Custom bet ${customBetId} was not found.`);
   }
 
+  const placedProposal = currentCustomBet.proposedBets.find(
+    (proposedBet) => proposedBet.rank === placedProposalRank,
+  );
+
+  if (!placedProposal) {
+    throw new Error("Select a valid proposed bet option before marking placement.");
+  }
+
   const nextCustomBet = {
     ...currentCustomBet,
     state: "staked" as const,
+    isFreeStake: Boolean(isFreeStake || currentCustomBet.customBetType === "free_bet_offer"),
+    placedProposalRank,
+    placedMarket: placedProposal.market,
+    placedSelection: placedProposal.selection,
     stakeAmount,
     placedDecimalOdds,
     placedAtIso,
   };
+  const isFreeBetOffer = Boolean(nextCustomBet.isFreeStake);
+  const stakeLedgerRow: LedgerTransactionRecord = {
+    id: existingStakeLedgerRow?.id ?? `stake-custom-bet-${customBetId}`,
+    title: isFreeBetOffer ? "Custom Bet Free Offer" : "Custom Bet Placed",
+    dateIso: placedAtIso,
+    amount: isFreeBetOffer ? 0 : -Math.abs(stakeAmount),
+    kind: "stake",
+    customBetId,
+  };
 
   if (shouldUseRemoteAppData()) {
     await persistCustomBetRemote(nextCustomBet);
+
+    await persistCustomBetStakeLedgerRemote(stakeLedgerRow);
   }
 
-  setCurrentAppDataSnapshot({
+  const nextSnapshot = {
     ...snapshot,
     customBets: snapshot.customBets.map((customBet) =>
       customBet.id === customBetId ? nextCustomBet : customBet,
     ),
-  });
+    ledgerData: upsertById(snapshot.ledgerData, stakeLedgerRow),
+  };
+
+  setCurrentAppDataSnapshot(nextSnapshot);
+  setCurrentLedgerTransactions(nextSnapshot.ledgerData);
 
   return nextCustomBet;
 }
@@ -69,6 +105,10 @@ export async function setCustomBetOutcome({
 }) {
   const snapshot = getCurrentAppDataSnapshot();
   const currentCustomBet = getCustomBetById(customBetId);
+  const existingStakeLedgerRow =
+    snapshot.ledgerData.find(
+      (entry) => entry.kind === "stake" && entry.customBetId === customBetId,
+    ) ?? null;
 
   if (!currentCustomBet) {
     throw new Error(`Custom bet ${customBetId} was not found.`);
@@ -119,6 +159,23 @@ export async function setCustomBetOutcome({
 
   const shouldCreateSettlementLedger =
     outcomeStatus === "won" || outcomeStatus === "cashed_out";
+  const stakedAmount = Number(currentCustomBet.stakeAmount);
+
+  if (!Number.isFinite(stakedAmount) || stakedAmount <= 0) {
+    throw new Error("Custom bet stake amount is missing. Mark it as placed again first.");
+  }
+
+  const isFreeBetOffer = Boolean(
+    currentCustomBet.isFreeStake || currentCustomBet.customBetType === "free_bet_offer",
+  );
+  const stakeLedgerRow: LedgerTransactionRecord = {
+    id: existingStakeLedgerRow?.id ?? `stake-custom-bet-${customBetId}`,
+    title: isFreeBetOffer ? "Custom Bet Free Offer" : "Custom Bet Placed",
+    dateIso: currentCustomBet.placedAtIso ?? outcomeAtIso,
+    amount: isFreeBetOffer ? 0 : -Math.abs(stakedAmount),
+    kind: "stake",
+    customBetId,
+  };
   const settlementLedgerRow: LedgerTransactionRecord | null = shouldCreateSettlementLedger
     ? {
         id: `settlement-custom-bet-${customBetId}`,
@@ -136,13 +193,19 @@ export async function setCustomBetOutcome({
     await persistCustomBetRemote(nextCustomBet);
     await persistCustomBetOutcomeRemote({
       outcomeRow,
+      stakeLedgerRow,
       settlementLedgerRow,
     });
   }
 
-  const ledgerWithoutExistingSettlement = snapshot.ledgerData.filter(
-    (entry) => !(entry.kind === "settlement" && entry.customBetId === customBetId),
-  );
+  const ledgerWithStake = upsertById(snapshot.ledgerData, stakeLedgerRow);
+  const ledgerWithoutExistingSettlement = ledgerWithStake.filter((entry) => {
+    if (entry.kind === "settlement" && entry.customBetId === customBetId) {
+      return false;
+    }
+
+    return true;
+  });
   const nextSnapshot = {
     ...snapshot,
     customBets: snapshot.customBets.map((customBet) =>

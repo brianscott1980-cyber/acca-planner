@@ -3,6 +3,7 @@ create table if not exists public.custom_bets (
   slug text,
   title text,
   state text check (state in ('pending', 'staked')),
+  custom_bet_type text check (custom_bet_type in ('standard', 'free_bet_offer')),
   sport text check (sport in ('horse_racing', 'football', 'golf')),
   bookmaker text check (bookmaker in ('Ladbrokes')),
   event_name text,
@@ -21,6 +22,10 @@ create table if not exists public.custom_bets (
   event_start_iso timestamptz,
   event_end_iso timestamptz,
   suggested_stake_amount numeric(12, 2),
+  is_free_stake boolean,
+  placed_proposal_rank integer check (placed_proposal_rank in (1, 2, 3)),
+  placed_market text,
+  placed_selection text,
   stake_amount numeric(12, 2),
   placed_decimal_odds numeric(10, 2),
   placed_at_iso timestamptz,
@@ -47,6 +52,11 @@ alter table public.custom_bets add column if not exists outcome_value_amount num
 alter table public.custom_bets add column if not exists outcome_at_iso timestamptz;
 alter table public.custom_bets add column if not exists outcome_summary text;
 alter table public.custom_bets add column if not exists outcome_submitted_by text;
+alter table public.custom_bets add column if not exists custom_bet_type text check (custom_bet_type in ('standard', 'free_bet_offer'));
+alter table public.custom_bets add column if not exists is_free_stake boolean;
+alter table public.custom_bets add column if not exists placed_proposal_rank integer check (placed_proposal_rank in (1, 2, 3));
+alter table public.custom_bets add column if not exists placed_market text;
+alter table public.custom_bets add column if not exists placed_selection text;
 
 grant select on public.custom_bets to authenticated;
 

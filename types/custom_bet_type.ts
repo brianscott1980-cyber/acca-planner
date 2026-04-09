@@ -1,6 +1,7 @@
 export type CustomBetSport = "horse_racing" | "football" | "golf";
 export type CustomBetBookmaker = "Ladbrokes";
 export type CustomBetState = "pending" | "staked";
+export type CustomBetType = "standard" | "free_bet_offer";
 
 export type CustomBetRecommendation = {
   rank: 1 | 2 | 3;
@@ -74,6 +75,7 @@ export type CustomBetRecord = {
   slug: string;
   title: string;
   state: CustomBetState;
+  customBetType?: CustomBetType;
   sport: CustomBetSport;
   bookmaker: CustomBetBookmaker;
   eventName: string;
@@ -92,6 +94,10 @@ export type CustomBetRecord = {
   eventStartIso: string;
   eventEndIso?: string;
   suggestedStakeAmount?: number;
+  isFreeStake?: boolean;
+  placedProposalRank?: 1 | 2 | 3;
+  placedMarket?: string;
+  placedSelection?: string;
   stakeAmount?: number;
   placedDecimalOdds?: number;
   placedAtIso?: string;

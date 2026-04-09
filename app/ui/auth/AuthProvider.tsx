@@ -13,6 +13,7 @@ import type { HubUser } from "../../../types/user_type";
 import { supabase } from "../../../lib/supabase/client";
 import { shouldUseRemoteAppData } from "../../../services/app_data_service";
 import { getMemberForSupabaseUser } from "../../../services/authentication_service";
+import { getMemberById } from "../../../repositories/user_repository";
 
 type AuthContextValue = {
   authUser: User | null;
@@ -92,11 +93,15 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const authUser = requiresSupabaseAuth ? authUserState : null;
   const isLoading = requiresSupabaseAuth ? isLoadingState : false;
+  const localMemberId = process.env.NEXT_PUBLIC_LOCAL_MEMBER_ID?.trim() || "brian-scott";
+  const localMember = requiresSupabaseAuth ? null : getMemberById(localMemberId);
 
   const value = useMemo<AuthContextValue>(
     () => ({
       authUser,
-      member: getMemberForSupabaseUser(authUser),
+      member: requiresSupabaseAuth
+        ? getMemberForSupabaseUser(authUser)
+        : localMember,
       isLoading,
       isConfigured: !requiresSupabaseAuth || Boolean(supabaseClient),
       async signOut() {
@@ -107,7 +112,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         await supabaseClient.auth.signOut();
       },
     }),
-    [authUser, isLoading, requiresSupabaseAuth, supabaseClient],
+    [authUser, isLoading, localMember, requiresSupabaseAuth, supabaseClient],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

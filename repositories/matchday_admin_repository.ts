@@ -84,12 +84,14 @@ export async function persistMatchdayOutcomeRemote({
   slipRow,
   legResultRows,
   outcomeRow,
+  stakeLedgerRow,
   settlementLedgerRow,
 }: {
   metaRow: LeagueDataMetaRecord;
   slipRow: LeagueSimulationSlipRow;
   legResultRows: LeagueSimulationLegResultRow[];
   outcomeRow: MatchdayOutcomeRow;
+  stakeLedgerRow: LedgerTransactionRecord | null;
   settlementLedgerRow: LedgerTransactionRecord | null;
 }) {
   if (!supabase) {
@@ -136,13 +138,25 @@ export async function persistMatchdayOutcomeRemote({
     );
   }
 
+  if (stakeLedgerRow) {
+    const { error: stakeLedgerError } = await supabase
+      .from("ledger_transactions")
+      .upsert(mapKeysToSnakeCase(stakeLedgerRow), { onConflict: "id" });
+
+    if (stakeLedgerError) {
+      throw new Error(
+        `Failed to upsert stake ledger for ${slipRow.gameWeekId}: ${stakeLedgerError.message}`,
+      );
+    }
+  }
+
   if (settlementLedgerRow) {
     const { error: ledgerError } = await supabase
       .from("ledger_transactions")
       .upsert(mapKeysToSnakeCase(settlementLedgerRow), { onConflict: "id" });
 
     if (ledgerError) {
-      console.error(
+      throw new Error(
         `Failed to upsert settlement ledger for ${slipRow.gameWeekId}: ${ledgerError.message}`,
       );
     }
@@ -158,7 +172,7 @@ export async function persistPlacedMatchdayBetRemote({
   metaRow: LeagueDataMetaRecord;
   simulationRow: LeagueMatchdaySimulationRow;
   slipRow: LeagueSimulationSlipRow;
-  ledgerTransactionRow: LedgerTransactionRecord;
+  ledgerTransactionRow: LedgerTransactionRecord | null;
 }) {
   if (!supabase) {
     throw new Error("Supabase is not configured.");
@@ -192,14 +206,16 @@ export async function persistPlacedMatchdayBetRemote({
     );
   }
 
-  const { error: ledgerError } = await supabase
-    .from("ledger_transactions")
-    .upsert(mapKeysToSnakeCase(ledgerTransactionRow), { onConflict: "id" });
+  if (ledgerTransactionRow) {
+    const { error: ledgerError } = await supabase
+      .from("ledger_transactions")
+      .upsert(mapKeysToSnakeCase(ledgerTransactionRow), { onConflict: "id" });
 
-  if (ledgerError) {
-    console.error(
-      `Failed to upsert ledger transaction for ${simulationRow.gameWeekId}: ${ledgerError.message}`,
-    );
+    if (ledgerError) {
+      throw new Error(
+        `Failed to upsert ledger transaction for ${simulationRow.gameWeekId}: ${ledgerError.message}`,
+      );
+    }
   }
 }
 

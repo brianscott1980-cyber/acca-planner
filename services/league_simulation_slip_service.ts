@@ -31,6 +31,7 @@ export function getSimulationSlipRecord(slipId: string): LeagueSimulationSlipRec
     proposalId: slipRow.proposalId,
     timelineLabel: slipRow.timelineLabel,
     stake: slipRow.stake,
+    isFreeStake: Boolean(slipRow.isFreeStake),
     placedDecimalOdds,
     stakePlacedAt: slipRow.stakePlacedAt,
     settledAt: slipRow.settledAt,

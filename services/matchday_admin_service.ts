@@ -120,12 +120,14 @@ export async function markMatchdayBetAsPlaced({
   stakeAmount,
   placedDecimalOdds,
   placedAtIso,
+  isFreeStake = false,
   placedByDisplayName,
 }: {
   gameWeekId: string;
   stakeAmount: number;
   placedDecimalOdds: number;
   placedAtIso: string;
+  isFreeStake?: boolean;
   placedByDisplayName?: string;
 }) {
   const currentSnapshot = getCurrentAppDataSnapshot();
@@ -172,6 +174,7 @@ export async function markMatchdayBetAsPlaced({
   const slipRow: LeagueSimulationSlipRow = {
     ...existingSlipRow,
     stake: stakeAmount,
+    isFreeStake: Boolean(isFreeStake),
     placedDecimalOdds,
     stakePlacedAt: placedAtIso,
     settledAt: nextSettledAtIso,
@@ -182,11 +185,15 @@ export async function markMatchdayBetAsPlaced({
     ) ?? null;
   const ledgerTransactionRow: LedgerTransactionRecord = {
     id: existingStakeLedgerRow?.id ?? `stake-${gameWeekId}`,
-    title: placedByDisplayName
-      ? `${placedByDisplayName} Market Bet Placed`
-      : "Market Bet Placed",
+    title: slipRow.isFreeStake
+      ? placedByDisplayName
+        ? `${placedByDisplayName} Market Bet Free Offer`
+        : "Market Bet Free Offer"
+      : placedByDisplayName
+        ? `${placedByDisplayName} Market Bet Placed`
+        : "Market Bet Placed",
     dateIso: placedAtIso,
-    amount: -Math.abs(stakeAmount),
+    amount: slipRow.isFreeStake ? 0 : -Math.abs(stakeAmount),
     kind: "stake",
     gameWeekId,
     proposalId: slipRow.proposalId,
@@ -343,6 +350,19 @@ export async function setMatchdayBetOutcome({
         proposalId: existingSlipRow.proposalId,
       }
     : null;
+  const existingStakeLedgerRow =
+    currentSnapshot.ledgerData.find(
+      (entry) => entry.kind === "stake" && entry.gameWeekId === gameWeekId,
+    ) ?? null;
+  const stakeLedgerRow: LedgerTransactionRecord = {
+    id: existingStakeLedgerRow?.id ?? `stake-${gameWeekId}`,
+    title: slipRow.isFreeStake ? "Market Bet Free Offer" : "Market Bet Placed",
+    dateIso: slipRow.stakePlacedAt,
+    amount: slipRow.isFreeStake ? 0 : -Math.abs(slipRow.stake),
+    kind: "stake",
+    gameWeekId,
+    proposalId: existingSlipRow.proposalId,
+  };
 
   if (shouldUseRemoteAppData()) {
     await persistMatchdayOutcomeRemote({
@@ -350,6 +370,7 @@ export async function setMatchdayBetOutcome({
       slipRow,
       legResultRows,
       outcomeRow,
+      stakeLedgerRow,
       settlementLedgerRow,
     });
   }
@@ -360,6 +381,7 @@ export async function setMatchdayBetOutcome({
     slipRow,
     legResultRows,
     outcomeRow,
+    stakeLedgerRow,
     settlementLedgerRow,
   });
 
@@ -369,6 +391,7 @@ export async function setMatchdayBetOutcome({
   return {
     slipRow,
     outcomeRow,
+    stakeLedgerRow,
     settlementLedgerRow,
   };
 }
@@ -454,8 +477,14 @@ function applyPlacedBetToSnapshot({
   metaRow: LeagueDataMetaRecord;
   simulationRow: LeagueMatchdaySimulationRow;
   slipRow: LeagueSimulationSlipRow;
-  ledgerTransactionRow: LedgerTransactionRecord;
+  ledgerTransactionRow: LedgerTransactionRecord | null;
 }) {
+  const ledgerData = ledgerTransactionRow
+    ? upsertById(snapshot.ledgerData, ledgerTransactionRow)
+    : snapshot.ledgerData.filter(
+        (entry) => !(entry.kind === "stake" && entry.gameWeekId === simulationRow.gameWeekId),
+      );
+
   return {
     ...snapshot,
     leagueDataMeta: upsertById(snapshot.leagueDataMeta, metaRow),
@@ -464,7 +493,7 @@ function applyPlacedBetToSnapshot({
       simulationRow,
     ),
     leagueDataSlips: upsertById(snapshot.leagueDataSlips, slipRow),
-    ledgerData: upsertById(snapshot.ledgerData, ledgerTransactionRow),
+    ledgerData,
   };
 }
 
@@ -474,6 +503,7 @@ function applyMatchdayOutcomeToSnapshot({
   slipRow,
   legResultRows,
   outcomeRow,
+  stakeLedgerRow,
   settlementLedgerRow,
 }: {
   snapshot: AppDataSnapshot;
@@ -481,11 +511,21 @@ function applyMatchdayOutcomeToSnapshot({
   slipRow: LeagueSimulationSlipRow;
   legResultRows: LeagueSimulationLegResultRow[];
   outcomeRow: MatchdayOutcomeRow;
+  stakeLedgerRow: LedgerTransactionRecord | null;
   settlementLedgerRow: LedgerTransactionRecord | null;
 }) {
-  const ledgerWithoutExistingSettlement = snapshot.ledgerData.filter(
-    (entry) => !(entry.kind === "settlement" && entry.gameWeekId === slipRow.gameWeekId),
-  );
+  const ledgerWithStake = stakeLedgerRow
+    ? upsertById(snapshot.ledgerData, stakeLedgerRow)
+    : snapshot.ledgerData.filter(
+        (entry) => !(entry.kind === "stake" && entry.gameWeekId === slipRow.gameWeekId),
+      );
+  const ledgerWithoutExistingSettlement = ledgerWithStake.filter((entry) => {
+    if (entry.kind === "settlement" && entry.gameWeekId === slipRow.gameWeekId) {
+      return false;
+    }
+
+    return true;
+  });
 
   return {
     ...snapshot,

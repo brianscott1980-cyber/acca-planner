@@ -21,11 +21,10 @@ import {
 import { MiniSparkline } from "./MiniSparkline";
 import { getMemberCount } from "../../../repositories/user_repository";
 import { getCurrentMatchdayNumber } from "../../../services/game_week_service";
-import { getSimulatedNow } from "../../../services/league_simulation_service";
+import { getSimulatedNow, isUsingSimulatedClock } from "../../../services/league_simulation_service";
 import { getUserInitials } from "../../../services/user_service";
 import { trackEvent } from "../../../lib/analytics";
 import { withBasePath } from "../../../lib/site";
-import { shouldUseLocalAppData } from "../../../services/app_data_service";
 import { useAuth } from "../auth/AuthProvider";
 
 type HubAppShellProps = {
@@ -82,7 +81,7 @@ export function HubAppShell({ children }: HubAppShellProps) {
   const initialSimulatedNowRef = useRef<Date | null>(null);
   const mountedAtRef = useRef<number | null>(null);
   const currentMatchdayNumber = getCurrentMatchdayNumber();
-  const usesLocalAppData = shouldUseLocalAppData();
+  const usesSimulatedClock = isUsingSimulatedClock();
   const roiToneClass =
     ledgerSummary.roiPercentage < 0 ? "is-negative" : "is-positive";
   const canInstallApp = Boolean(installPromptEvent);
@@ -467,13 +466,13 @@ export function HubAppShell({ children }: HubAppShellProps) {
           <div
             className="hub-header-datetime"
             aria-label={
-              usesLocalAppData
+              usesSimulatedClock
                 ? "Current simulated date and time"
                 : "Current date and time"
             }
           >
             <p className="hub-label">
-              {usesLocalAppData ? "Simulated Time" : "Current Time"}
+              {usesSimulatedClock ? "Simulated Time" : "Current Time"}
             </p>
             <p className="hub-header-datetime-value">
               {formatHeaderDateTime(simulatedNow)}

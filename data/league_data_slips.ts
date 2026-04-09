@@ -1,18 +1,32 @@
 import type { LeagueSimulationSlipRow } from "../types/league_simulation_type";
 
-export const leagueDataSlips: LeagueSimulationSlipRow[] = [
+export const leagueDataSlips = [
   {
-    "id": "slip-md-1-balanced",
-    "simulationId": "sim-md-1",
+    "id": "slip-md-1",
+    "simulationId": "simulation-md-1",
     "gameWeekId": "md-1",
-    "proposalId": "proposal-md-1-balanced",
-    "timelineLabel": "Matchday 1 Bet Placed",
+    "proposalId": "balanced",
+    "timelineLabel": "Balanced Accumulator",
     "stake": 19,
-    "placedDecimalOdds": 4.41,
-    "stakePlacedAt": "2026-04-03T22:34:00.000Z",
-    "settledAt": "2026-04-05T19:50:00.000Z",
+    "stakePlacedAt": "2026-04-03T22:34:00+00:00",
+    "settledAt": "2026-04-04T15:35:00+00:00",
     "settlementKind": "settled",
     "returnAmount": 0,
-    "status": "loss"
+    "status": "loss",
+    "placedDecimalOdds": 3.6
+  },
+  {
+    "id": "slip-md-2",
+    "simulationId": "simulation-md-2",
+    "gameWeekId": "md-2",
+    "proposalId": "safe",
+    "timelineLabel": "Defensive Accumulator",
+    "stake": 16,
+    "stakePlacedAt": "2026-04-09T12:42:00+00:00",
+    "settledAt": "2026-04-09T12:42:00+00:00",
+    "settlementKind": "settled",
+    "returnAmount": 0,
+    "status": "loss",
+    "placedDecimalOdds": 3.77
   }
-];
+] as unknown as LeagueSimulationSlipRow[];

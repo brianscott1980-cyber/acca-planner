@@ -41,6 +41,9 @@ function CustomBetView({ customBet }: { customBet: CustomBetRecord }) {
   const { member: currentUser } = useAuth();
   const isAdminUser = currentUser?.role === "admin";
   const [currentCustomBet, setCurrentCustomBet] = useState(customBet);
+  const isFreeBetOffer = Boolean(
+    currentCustomBet.isFreeStake || currentCustomBet.customBetType === "free_bet_offer",
+  );
   const [stakeAmount, setStakeAmount] = useState(
     currentCustomBet.stakeAmount ? currentCustomBet.stakeAmount.toFixed(2) : "",
   );
@@ -51,6 +54,10 @@ function CustomBetView({ customBet }: { customBet: CustomBetRecord }) {
   );
   const [placedAt, setPlacedAt] = useState(() =>
     toDateTimeLocalValue(currentCustomBet.placedAtIso ?? new Date().toISOString()),
+  );
+  const [isFreeStake, setIsFreeStake] = useState(isFreeBetOffer);
+  const [placedProposalRank, setPlacedProposalRank] = useState<string>(
+    String(currentCustomBet.placedProposalRank ?? 1),
   );
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -106,15 +113,20 @@ function CustomBetView({ customBet }: { customBet: CustomBetRecord }) {
     const nextStakeAmount = Number.parseFloat(stakeAmount);
     const nextPlacedDecimalOdds = Number.parseFloat(placedDecimalOdds);
     const nextPlacedAtIso = fromDateTimeLocalValue(placedAt);
+    const nextPlacedProposalRank = Number.parseInt(placedProposalRank, 10);
+    const hasPlacedProposal = proposedBets.some(
+      (proposedBet) => proposedBet.rank === nextPlacedProposalRank,
+    );
 
     if (
       !Number.isFinite(nextStakeAmount) ||
       nextStakeAmount <= 0 ||
       !Number.isFinite(nextPlacedDecimalOdds) ||
       nextPlacedDecimalOdds <= 1 ||
-      !nextPlacedAtIso
+      !nextPlacedAtIso ||
+      !hasPlacedProposal
     ) {
-      setErrorMessage("Enter a valid stake, odds, and placement date/time.");
+      setErrorMessage("Enter valid stake, odds, placement date/time, and chosen option.");
       return;
     }
 
@@ -128,6 +140,8 @@ function CustomBetView({ customBet }: { customBet: CustomBetRecord }) {
         stakeAmount: nextStakeAmount,
         placedDecimalOdds: nextPlacedDecimalOdds,
         placedAtIso: nextPlacedAtIso,
+        placedProposalRank: nextPlacedProposalRank as 1 | 2 | 3,
+        isFreeStake,
       });
 
       setCurrentCustomBet(nextCustomBet);
@@ -205,6 +219,9 @@ function CustomBetView({ customBet }: { customBet: CustomBetRecord }) {
                     {formatCustomBetSport(currentCustomBet.sport)}
                   </span>
                   <span className="hub-ai-tag">AI Custom Bet</span>
+                  {isFreeBetOffer ? (
+                    <span className="hub-tag hub-tag-primary">Free Bet Offer</span>
+                  ) : null}
                   <span className="hub-tag hub-tag-muted">
                     {formatCustomBetState(currentCustomBet.state)}
                   </span>
@@ -294,6 +311,10 @@ function CustomBetView({ customBet }: { customBet: CustomBetRecord }) {
                             </span>
                             {isBestOption ? (
                               <span className="hub-tag hub-tag-primary">Best Option</span>
+                            ) : null}
+                            {currentCustomBet.state === "staked" &&
+                            currentCustomBet.placedProposalRank === proposedBet.rank ? (
+                              <span className="hub-tag hub-tag-balanced">Placed</span>
                             ) : null}
                           </span>
                         </span>
@@ -485,6 +506,14 @@ function CustomBetView({ customBet }: { customBet: CustomBetRecord }) {
                   <span className="hub-metric-label">Top Selection</span>
                   <span className="hub-metric-value">{currentCustomBet.recommendedSelection}</span>
                 </div>
+                {currentCustomBet.state === "staked" ? (
+                  <div>
+                    <span className="hub-metric-label">Chosen Bet</span>
+                    <span className="hub-metric-value">
+                      {currentCustomBet.placedSelection ?? "N/A"}
+                    </span>
+                  </div>
+                ) : null}
                 {currentCustomBet.suggestedStakeAmount !== undefined ? (
                   <div>
                     <span className="hub-metric-label">Suggested Stake</span>
@@ -504,6 +533,12 @@ function CustomBetView({ customBet }: { customBet: CustomBetRecord }) {
                   <span className="hub-metric-label">Sport</span>
                   <span className="hub-metric-value">{formatCustomBetSport(currentCustomBet.sport)}</span>
                 </div>
+                <div>
+                  <span className="hub-metric-label">Type</span>
+                  <span className="hub-metric-value">
+                    {formatCustomBetType(currentCustomBet.customBetType)}
+                  </span>
+                </div>
               </div>
             </div>
 
@@ -515,7 +550,9 @@ function CustomBetView({ customBet }: { customBet: CustomBetRecord }) {
                 </div>
                 <div className="hub-proposal-metrics hub-proposal-metrics-stacked">
                   <div>
-                    <span className="hub-metric-label">Stake</span>
+                    <span className="hub-metric-label">
+                      {isFreeBetOffer ? "Free Stake" : "Stake"}
+                    </span>
                     <span className="hub-metric-value">
                       {currentCustomBet.stakeAmount !== undefined
                         ? formatCurrency(currentCustomBet.stakeAmount, {
@@ -529,6 +566,18 @@ function CustomBetView({ customBet }: { customBet: CustomBetRecord }) {
                     <span className="hub-metric-label">Placed Odds</span>
                     <span className="hub-metric-value">
                       {currentCustomBet.placedDecimalOdds?.toFixed(2) ?? "N/A"}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="hub-metric-label">Chosen Selection</span>
+                    <span className="hub-metric-value">
+                      {currentCustomBet.placedSelection ?? "N/A"}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="hub-metric-label">Chosen Market</span>
+                    <span className="hub-metric-value">
+                      {currentCustomBet.placedMarket ?? "N/A"}
                     </span>
                   </div>
                   <div>
@@ -559,7 +608,9 @@ function CustomBetView({ customBet }: { customBet: CustomBetRecord }) {
                           minimumFractionDigits: 2,
                           maximumFractionDigits: 2,
                         })}.`
-                      : "Lost with no return."}
+                      : isFreeBetOffer
+                        ? "Lost with no return. This free stake did not debit the pot."
+                        : "Lost with no return."}
                 </p>
                 {currentCustomBet.outcomeAtIso ? (
                   <p className="hub-subtitle">
@@ -597,8 +648,12 @@ function CustomBetView({ customBet }: { customBet: CustomBetRecord }) {
                   Mark Bet Placed
                 </h2>
                 <p className="hub-subtitle">
-                  Record the actual stake, placed odds, and placement time to move this
+                  Record the stake, placed odds, and placement time to move this
                   recommendation into the staked state.
+                </p>
+                <p className="hub-subtitle">
+                  Enable free offer when this stake is promotional and should not debit the
+                  ledger.
                 </p>
               </div>
 
@@ -614,7 +669,9 @@ function CustomBetView({ customBet }: { customBet: CustomBetRecord }) {
 
             <form className="auth-form" onSubmit={handleMarkPlaced}>
               <label className="auth-field">
-                <span className="hub-label">Actual Stake</span>
+                <span className="hub-label">
+                  {isFreeStake ? "Free Stake Amount" : "Actual Stake"}
+                </span>
                 <input
                   className="auth-input"
                   type="number"
@@ -638,6 +695,21 @@ function CustomBetView({ customBet }: { customBet: CustomBetRecord }) {
                 />
               </label>
               <label className="auth-field">
+                <span className="hub-label">Chosen Option</span>
+                <select
+                  className="auth-input"
+                  value={placedProposalRank}
+                  onChange={(event) => setPlacedProposalRank(event.target.value)}
+                  required
+                >
+                  {proposedBets.map((proposedBet) => (
+                    <option key={proposedBet.rank} value={String(proposedBet.rank)}>
+                      {proposedBet.rank}. {proposedBet.selection} ({proposedBet.market})
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="auth-field">
                 <span className="hub-label">Placed At</span>
                 <input
                   className="auth-input"
@@ -646,6 +718,17 @@ function CustomBetView({ customBet }: { customBet: CustomBetRecord }) {
                   onChange={(event) => setPlacedAt(event.target.value)}
                   required
                 />
+              </label>
+              <label className="auth-field">
+                <span className="hub-label">Stake Type</span>
+                <div className="auth-input" style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+                  <input
+                    type="checkbox"
+                    checked={isFreeStake}
+                    onChange={(event) => setIsFreeStake(event.target.checked)}
+                  />
+                  <span>Free offer (no ledger debit)</span>
+                </div>
               </label>
               <button
                 className="hub-primary-button hub-admin-placement-button"
@@ -853,6 +936,10 @@ function formatCustomBetSport(sport: CustomBetRecord["sport"]) {
   }
 
   return "Golf";
+}
+
+function formatCustomBetType(customBetType: CustomBetRecord["customBetType"]) {
+  return customBetType === "free_bet_offer" ? "Free Bet Offer" : "Standard";
 }
 
 function renderCustomBetSportIcon(sport: CustomBetRecord["sport"]): ReactNode {

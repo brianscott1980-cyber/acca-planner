@@ -46,6 +46,7 @@ async function main() {
     kind: entry.kind,
     game_week_id: entry.gameWeekId ?? null,
     proposal_id: entry.proposalId ?? null,
+    custom_bet_id: entry.customBetId ?? null,
     updated_at: new Date().toISOString(),
   }));
 

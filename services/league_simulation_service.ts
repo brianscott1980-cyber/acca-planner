@@ -1,5 +1,4 @@
 import { getMatchdaySchedule } from "./matchday_schedule_service";
-import { shouldUseRemoteAppData } from "./app_data_service";
 import { getLeagueSimulatedAtIso, getLeagueUpdatedAtIso } from "../repositories/league_meta_repository";
 import { getLeagueMatchdaySimulationRows, getLeagueMatchdaySimulationRowByGameWeekId } from "../repositories/league_simulation_repository";
 import { getLeagueSimulationBetLineOddsRows } from "../repositories/league_simulation_odds_repository";
@@ -24,8 +23,21 @@ export function getLeagueData(): LeagueDataRecord {
   };
 }
 
+export function isUsingSimulatedClock() {
+  const configuredClockMode = process.env.NEXT_PUBLIC_CLOCK_MODE?.trim().toLowerCase();
+
+  if (configuredClockMode) {
+    return configuredClockMode === "simulated";
+  }
+
+  // Backward compatibility for older local setups.
+  return process.env.SIMULATED_CLOCK === "1";
+}
+
 export function getSimulatedNow() {
-  if (shouldUseRemoteAppData()) {
+  const useSimulatedClock = isUsingSimulatedClock();
+
+  if (!useSimulatedClock) {
     return new Date();
   }
 

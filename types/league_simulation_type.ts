@@ -41,6 +41,7 @@ export type LeagueSimulationSlipRow = {
   proposalId: string;
   timelineLabel: string;
   stake: number;
+  isFreeStake?: boolean;
   placedDecimalOdds?: number;
   stakePlacedAt: string;
   settledAt: string;
@@ -76,6 +77,7 @@ export type LeagueSimulationSlipRecord = {
   proposalId: string;
   timelineLabel: string;
   stake: number;
+  isFreeStake?: boolean;
   placedDecimalOdds?: number;
   stakePlacedAt: string;
   settledAt: string;

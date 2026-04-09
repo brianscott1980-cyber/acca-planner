@@ -149,7 +149,7 @@ function buildTimelineEntries(): TimelineEntry[] {
           dateRange: formatTimelineDateTime(simulation.simulatedSlip.stakePlacedAt),
           status: "placed",
           label: simulation.simulatedSlip.timelineLabel,
-          stakeLabel: "Stake",
+          stakeLabel: simulation.simulatedSlip.isFreeStake ? "Free Stake" : "Stake",
           stake: formatCurrency(simulation.simulatedSlip.stake, {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2,
@@ -197,6 +197,7 @@ function buildTimelineEntries(): TimelineEntry[] {
             simulation.simulatedSlip.settlementKind === "cashout"
               ? "cashout"
               : simulation.simulatedSlip.status,
+          stakeLabel: simulation.simulatedSlip.isFreeStake ? "Free Stake" : "Stake",
           stake: formatCurrency(simulation.simulatedSlip.stake, {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2,
@@ -444,16 +445,32 @@ function TimelineMatchday({ entry }: { entry: TimelineEntry }) {
 
 function getCustomBetTimelineEntries(): TimelineEntry[] {
   return getCustomBets().flatMap((customBet) => {
+    const isFreeBetOffer = Boolean(
+      customBet.isFreeStake || customBet.customBetType === "free_bet_offer",
+    );
+    const placedSelection =
+      customBet.placedSelection ??
+      customBet.proposedBets.find((proposedBet) => proposedBet.rank === customBet.placedProposalRank)
+        ?.selection ??
+      customBet.recommendedSelection;
+    const placedMarket =
+      customBet.placedMarket ??
+      customBet.proposedBets.find((proposedBet) => proposedBet.rank === customBet.placedProposalRank)
+        ?.market ??
+      customBet.recommendedMarket;
     const baseEntry: TimelineEntry = {
       id: `custom-bet-${customBet.id}`,
       title: customBet.timelineTitle,
       dateRange: formatTimelineDateTime(customBet.placedAtIso ?? customBet.generatedAtIso),
       status: customBet.state === "staked" ? "placed" : "generated",
-      label: `${formatCustomBetSport(customBet.sport)} · ${customBet.eventName}`,
+      label:
+        customBet.state === "staked"
+          ? `${formatCustomBetType(customBet.customBetType)} · ${placedSelection}`
+          : `${formatCustomBetType(customBet.customBetType)} · ${formatCustomBetSport(customBet.sport)} · ${customBet.eventName}`,
       stakeLabel: "Event",
       stake: `${customBet.eventName}\n${customBet.competitionName}`,
       multilineStake: true,
-      oddsLabel: customBet.state === "staked" ? "Stake" : "Recommendation",
+      oddsLabel: customBet.state === "staked" ? (isFreeBetOffer ? "Free Stake" : "Stake") : "Recommendation",
       odds:
         customBet.state === "staked"
           ? customBet.stakeAmount !== undefined
@@ -468,7 +485,7 @@ function getCustomBetTimelineEntries(): TimelineEntry[] {
         customBet.state === "staked"
           ? customBet.placedDecimalOdds?.toFixed(2) ?? customBet.decimalOdds.toFixed(2)
           : customBet.decimalOdds.toFixed(2),
-      outcomeLabel: customBet.state === "staked" ? "Staked" : "Custom Bet",
+      outcomeLabel: customBet.state === "staked" ? (isFreeBetOffer ? "Free Bet Placed" : "Staked") : "Custom Bet",
       timestampIso: customBet.placedAtIso ?? customBet.generatedAtIso,
       customBetId: customBet.id,
       iconKind: customBet.sport,
@@ -489,7 +506,11 @@ function getCustomBetTimelineEntries(): TimelineEntry[] {
         ? customBet.outcomeValueAmount ?? 0
         : 0;
     const returnTone =
-      outcomeStatus === "cashout" && customBet.stakeAmount
+      outcomeStatus === "cashout" && isFreeBetOffer
+        ? outcomeValue > 0
+          ? "positive"
+          : "neutral"
+        : outcomeStatus === "cashout" && customBet.stakeAmount
         ? getCashoutReturnTone(outcomeValue, customBet.stakeAmount)
         : undefined;
     const outcomeEntry: TimelineEntry = {
@@ -497,8 +518,8 @@ function getCustomBetTimelineEntries(): TimelineEntry[] {
       title: `${customBet.title} Outcome`,
       dateRange: formatTimelineDateTime(customBet.outcomeAtIso),
       status: outcomeStatus,
-      label: `${formatCustomBetSport(customBet.sport)} · ${customBet.eventName}`,
-      stakeLabel: "Stake",
+      label: `${formatCustomBetType(customBet.customBetType)} · ${formatCustomBetSport(customBet.sport)} · ${customBet.eventName}`,
+      stakeLabel: isFreeBetOffer ? "Free Stake" : "Stake",
       stake:
         customBet.stakeAmount !== undefined
           ? formatCurrency(customBet.stakeAmount, {
@@ -506,8 +527,8 @@ function getCustomBetTimelineEntries(): TimelineEntry[] {
               maximumFractionDigits: 2,
             })
           : "N/A",
-      oddsLabel: "Placed Odds",
-      odds: customBet.placedDecimalOdds?.toFixed(2) ?? customBet.decimalOdds.toFixed(2),
+      oddsLabel: "Chosen Bet",
+      odds: `${placedSelection} · ${placedMarket}`,
       returnLabel: "Return",
       returnValue: formatCurrency(outcomeValue, {
         minimumFractionDigits: 2,
@@ -539,6 +560,10 @@ function formatCustomBetSport(sport: "horse_racing" | "football" | "golf") {
   }
 
   return "Golf";
+}
+
+function formatCustomBetType(customBetType?: "standard" | "free_bet_offer") {
+  return customBetType === "free_bet_offer" ? "Free Bet Offer" : "Custom Bet";
 }
 
 function getInitialDepositTimelineEntries(): TimelineEntry[] {

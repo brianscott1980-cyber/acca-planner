@@ -435,6 +435,10 @@ function AccumulatorCard({
     votingLocked && simulation?.simulatedSlip.proposalId === card.id
       ? simulation.simulatedSlip.placedDecimalOdds
       : undefined;
+  const isFreeStakeApplied =
+    votingLocked && simulation?.simulatedSlip.proposalId === card.id
+      ? Boolean(simulation.simulatedSlip.isFreeStake)
+      : false;
   const hasPlacedDecimalOdds =
     typeof currentPlacedDecimalOdds === "number" &&
     Number.isFinite(currentPlacedDecimalOdds);
@@ -458,6 +462,7 @@ function AccumulatorCard({
   const [placedAt, setPlacedAt] = useState(() =>
     toDateTimeLocalValue(new Date().toISOString()),
   );
+  const [isFreeStake, setIsFreeStake] = useState(isFreeStakeApplied);
   const [placementStatusMessage, setPlacementStatusMessage] = useState<string | null>(null);
   const [placementErrorMessage, setPlacementErrorMessage] = useState<string | null>(null);
   const [isSubmittingPlacement, setIsSubmittingPlacement] = useState(false);
@@ -663,6 +668,7 @@ function AccumulatorCard({
         stakeAmount: nextStakeAmount,
         placedDecimalOdds: nextPlacedDecimalOdds,
         placedAtIso: nextPlacedAtIso,
+        isFreeStake,
         placedByDisplayName: currentUser?.displayName,
       });
 
@@ -804,7 +810,7 @@ function AccumulatorCard({
               <div>
                 <span className="hub-metric-label">Stake</span>
                 <span className="hub-metric-value">
-                  £{actualStake}
+                  {isFreeStakeApplied ? `Free £${actualStake}` : `£${actualStake}`}
                 </span>
               </div>
               <div className="hub-metric-divider" />
@@ -961,6 +967,10 @@ function AccumulatorCard({
                   Record the actual stake, placed odds, and placement time to move this
                   matchday into the placed state.
                 </p>
+                <p className="hub-subtitle">
+                  Enable free offer when the bookmaker stake is promotional and should not debit
+                  the ledger.
+                </p>
               </div>
 
               <button
@@ -975,7 +985,9 @@ function AccumulatorCard({
 
             <form className="auth-form" onSubmit={handleMarkPlaced}>
               <label className="auth-field">
-                <span className="hub-label">Actual Stake</span>
+                <span className="hub-label">
+                  {isFreeStake ? "Free Stake Amount" : "Actual Stake"}
+                </span>
                 <input
                   className="auth-input"
                   type="number"
@@ -1007,6 +1019,17 @@ function AccumulatorCard({
                   onChange={(event) => setPlacedAt(event.target.value)}
                   required
                 />
+              </label>
+              <label className="auth-field">
+                <span className="hub-label">Stake Type</span>
+                <div className="auth-input" style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+                  <input
+                    type="checkbox"
+                    checked={isFreeStake}
+                    onChange={(event) => setIsFreeStake(event.target.checked)}
+                  />
+                  <span>Free offer (no ledger debit)</span>
+                </div>
               </label>
               <button
                 className="hub-primary-button hub-admin-placement-button"
@@ -1249,7 +1272,9 @@ function getMatchdayBannerCopy({
   }
 
   if (viewState === "placed") {
-    return `Stake committed: £${simulatedSlip?.stake.toFixed(2) ?? "0.00"}${
+    const stakePrefix = simulatedSlip?.isFreeStake ? "Free stake committed" : "Stake committed";
+
+    return `${stakePrefix}: £${simulatedSlip?.stake.toFixed(2) ?? "0.00"}${
       simulatedSlip?.placedDecimalOdds ? ` at ${simulatedSlip.placedDecimalOdds.toFixed(2)}` : ""
     }. The open legs now determine whether this matchday reaches a full result or an earlier cashout.`;
   }
