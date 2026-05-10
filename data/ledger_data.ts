@@ -2,6 +2,18 @@ import type { LedgerTransactionRecord } from "../types/ledger_type";
 
 export const ledgerData = [
   {
+    "id": "adjustment-current-2026-05-10",
+    "title": "Current Balance Adjustment",
+    "dateIso": "2026-05-10T00:00:00+00:00",
+    "amount": 59.75,
+    "kind": "settlement",
+    "gameWeekId": null,
+    "proposalId": null,
+    "createdAt": "2026-05-10T11:20:41.823699+00:00",
+    "updatedAt": "2026-05-10T11:20:41.558+00:00",
+    "customBetId": null
+  },
+  {
     "id": "deposit-alasdair-head",
     "title": "Alasdair Head",
     "dateIso": "2026-03-23T09:00:00+00:00",
@@ -9,8 +21,8 @@ export const ledgerData = [
     "kind": "deposit",
     "gameWeekId": null,
     "proposalId": null,
-    "createdAt": "2026-04-01T23:36:01.976724+00:00",
-    "updatedAt": "2026-04-01T23:36:01.689+00:00",
+    "createdAt": "2026-04-15T21:09:54.048004+00:00",
+    "updatedAt": "2026-05-10T11:20:41.552+00:00",
     "customBetId": null
   },
   {
@@ -21,8 +33,8 @@ export const ledgerData = [
     "kind": "deposit",
     "gameWeekId": null,
     "proposalId": null,
-    "createdAt": "2026-04-01T23:36:01.976724+00:00",
-    "updatedAt": "2026-04-01T23:36:01.688+00:00",
+    "createdAt": "2026-04-15T21:09:54.048004+00:00",
+    "updatedAt": "2026-05-10T11:20:41.558+00:00",
     "customBetId": null
   },
   {
@@ -33,8 +45,8 @@ export const ledgerData = [
     "kind": "deposit",
     "gameWeekId": null,
     "proposalId": null,
-    "createdAt": "2026-04-01T23:36:01.976724+00:00",
-    "updatedAt": "2026-04-01T23:36:01.689+00:00",
+    "createdAt": "2026-04-15T21:09:54.048004+00:00",
+    "updatedAt": "2026-05-10T11:20:41.558+00:00",
     "customBetId": null
   },
   {
@@ -45,8 +57,8 @@ export const ledgerData = [
     "kind": "deposit",
     "gameWeekId": null,
     "proposalId": null,
-    "createdAt": "2026-04-01T23:36:01.976724+00:00",
-    "updatedAt": "2026-04-01T23:36:01.689+00:00",
+    "createdAt": "2026-04-15T21:09:54.048004+00:00",
+    "updatedAt": "2026-05-10T11:20:41.558+00:00",
     "customBetId": null
   },
   {
@@ -57,8 +69,8 @@ export const ledgerData = [
     "kind": "deposit",
     "gameWeekId": null,
     "proposalId": null,
-    "createdAt": "2026-04-01T23:36:01.976724+00:00",
-    "updatedAt": "2026-04-01T23:36:01.689+00:00",
+    "createdAt": "2026-04-15T21:09:54.048004+00:00",
+    "updatedAt": "2026-05-10T11:20:41.558+00:00",
     "customBetId": null
   },
   {
@@ -69,8 +81,8 @@ export const ledgerData = [
     "kind": "deposit",
     "gameWeekId": null,
     "proposalId": null,
-    "createdAt": "2026-04-01T23:36:01.976724+00:00",
-    "updatedAt": "2026-04-01T23:36:01.689+00:00",
+    "createdAt": "2026-04-15T21:09:54.048004+00:00",
+    "updatedAt": "2026-05-10T11:20:41.558+00:00",
     "customBetId": null
   },
   {
@@ -81,9 +93,69 @@ export const ledgerData = [
     "kind": "deposit",
     "gameWeekId": null,
     "proposalId": null,
-    "createdAt": "2026-04-01T23:36:01.976724+00:00",
-    "updatedAt": "2026-04-01T23:36:01.689+00:00",
+    "createdAt": "2026-04-15T21:09:54.048004+00:00",
+    "updatedAt": "2026-05-10T11:20:41.558+00:00",
     "customBetId": null
+  },
+  {
+    "id": "settlement-masters-2026",
+    "title": "Masters EW Return (2nd)",
+    "dateIso": "2026-04-12T22:00:00+00:00",
+    "amount": 12.5,
+    "kind": "settlement",
+    "gameWeekId": null,
+    "proposalId": null,
+    "createdAt": "2026-04-15T21:09:54.048004+00:00",
+    "updatedAt": "2026-05-10T11:20:41.558+00:00",
+    "customBetId": "custom-bet-2026-04-09-masters-tournament-win"
+  },
+  {
+    "id": "stake-custom-bet-custom-bet-2026-04-09-masters-tournament-win",
+    "title": "Custom Bet Placed (Each Way £5 EW)",
+    "dateIso": "2026-04-09T13:45:00+00:00",
+    "amount": -10,
+    "kind": "stake",
+    "gameWeekId": null,
+    "proposalId": null,
+    "createdAt": "2026-04-15T21:09:54.048004+00:00",
+    "updatedAt": "2026-05-10T11:20:41.558+00:00",
+    "customBetId": "custom-bet-2026-04-09-masters-tournament-win"
+  },
+  {
+    "id": "stake-custom-bet-custom-bet-2026-04-11-grand-national-win",
+    "title": "Custom Bet Free Offer",
+    "dateIso": "2026-04-09T18:05:00+00:00",
+    "amount": 0,
+    "kind": "stake",
+    "gameWeekId": null,
+    "proposalId": null,
+    "createdAt": "2026-04-15T21:09:54.048004+00:00",
+    "updatedAt": "2026-05-10T11:20:41.558+00:00",
+    "customBetId": "custom-bet-2026-04-11-grand-national-win"
+  },
+  {
+    "id": "stake-custom-bet-europa-2026-builder",
+    "title": "Custom Bet: Europa League Builder",
+    "dateIso": "2026-04-09T16:40:00+00:00",
+    "amount": -8,
+    "kind": "stake",
+    "gameWeekId": null,
+    "proposalId": null,
+    "createdAt": "2026-04-15T21:09:54.048004+00:00",
+    "updatedAt": "2026-05-10T11:20:41.558+00:00",
+    "customBetId": "custom-bet-2026-04-09-porto-bologna-bet-builder"
+  },
+  {
+    "id": "stake-custom-bet-national-2026-outright",
+    "title": "Custom Bet: Grand National",
+    "dateIso": "2026-04-11T16:00:00+00:00",
+    "amount": -8,
+    "kind": "stake",
+    "gameWeekId": null,
+    "proposalId": null,
+    "createdAt": "2026-04-15T21:09:54.048004+00:00",
+    "updatedAt": "2026-05-10T11:20:41.558+00:00",
+    "customBetId": "custom-bet-2026-04-11-grand-national-win"
   },
   {
     "id": "stake-md-1",
@@ -93,8 +165,8 @@ export const ledgerData = [
     "kind": "stake",
     "gameWeekId": "md-1",
     "proposalId": "balanced",
-    "createdAt": "2026-04-03T23:04:14.817713+00:00",
-    "updatedAt": "2026-04-09T12:57:11.083+00:00",
+    "createdAt": "2026-04-15T21:09:54.048004+00:00",
+    "updatedAt": "2026-05-10T11:20:41.558+00:00",
     "customBetId": null
   },
   {
@@ -105,8 +177,8 @@ export const ledgerData = [
     "kind": "stake",
     "gameWeekId": "md-2",
     "proposalId": "safe",
-    "createdAt": "2026-04-09T12:56:16.504933+00:00",
-    "updatedAt": "2026-04-09T12:57:11.083+00:00",
+    "createdAt": "2026-04-15T21:09:54.048004+00:00",
+    "updatedAt": "2026-05-10T11:20:41.558+00:00",
     "customBetId": null
   }
 ] as unknown as LedgerTransactionRecord[];

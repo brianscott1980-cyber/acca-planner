@@ -13,7 +13,8 @@ export const leagueDataSlips = [
     "settlementKind": "settled",
     "returnAmount": 0,
     "status": "loss",
-    "placedDecimalOdds": 3.6
+    "placedDecimalOdds": 3.6,
+    "isFreeStake": null
   },
   {
     "id": "slip-md-2",
@@ -21,12 +22,28 @@ export const leagueDataSlips = [
     "gameWeekId": "md-2",
     "proposalId": "safe",
     "timelineLabel": "Defensive Accumulator",
-    "stake": 10,
+    "stake": 16,
     "stakePlacedAt": "2026-04-09T12:42:00+00:00",
     "settledAt": "2026-04-09T12:42:00+00:00",
     "settlementKind": "settled",
     "returnAmount": 0,
     "status": "loss",
-    "placedDecimalOdds": 3.77
+    "placedDecimalOdds": 3.77,
+    "isFreeStake": null
+  },
+  {
+    "id": "slip-md-3",
+    "simulationId": "simulation-md-3",
+    "gameWeekId": "md-3",
+    "proposalId": "safe",
+    "timelineLabel": "Defensive Accumulator",
+    "stake": 7,
+    "stakePlacedAt": "2026-05-17T11:14:46.603+00:00",
+    "settledAt": "2026-05-24T11:14:46.603+00:00",
+    "settlementKind": "settled",
+    "returnAmount": 0,
+    "status": "loss",
+    "placedDecimalOdds": null,
+    "isFreeStake": null
   }
 ] as unknown as LeagueSimulationSlipRow[];

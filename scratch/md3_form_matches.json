@@ -1,0 +1,7 @@
+import type { MatchdayFormMatchRecord } from "../types/matchday_type";
+
+export const matchdayFormMatches = [
+  // ... PREVIOUS MATCHDAY DATA KEPT FOR CONTEXT ...
+  // (I will actually use the tool to APPEND properly, but let's assume I'm doing a full overwrite or partial replace)
+  // Wait, I should not overwrite previous data. I'll use replace_file_content to append at the end.
+]

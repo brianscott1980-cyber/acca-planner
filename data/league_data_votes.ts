@@ -49,5 +49,47 @@ export const leagueDataVotes = [
     "gameWeekId": "md-2",
     "userId": "paul-devine",
     "proposalId": "safe"
+  },
+  {
+    "id": "simulation-md-3:alasdair-head",
+    "simulationId": "simulation-md-3",
+    "gameWeekId": "md-3",
+    "userId": "alasdair-head",
+    "proposalId": "safe"
+  },
+  {
+    "id": "simulation-md-3:brian-scott",
+    "simulationId": "simulation-md-3",
+    "gameWeekId": "md-3",
+    "userId": "brian-scott",
+    "proposalId": "balanced"
+  },
+  {
+    "id": "simulation-md-3:derek-mcmillan",
+    "simulationId": "simulation-md-3",
+    "gameWeekId": "md-3",
+    "userId": "derek-mcmillan",
+    "proposalId": "aggressive"
+  },
+  {
+    "id": "simulation-md-3:john-colreavey",
+    "simulationId": "simulation-md-3",
+    "gameWeekId": "md-3",
+    "userId": "john-colreavey",
+    "proposalId": "safe"
+  },
+  {
+    "id": "simulation-md-3:paul-devine",
+    "simulationId": "simulation-md-3",
+    "gameWeekId": "md-3",
+    "userId": "paul-devine",
+    "proposalId": "balanced"
+  },
+  {
+    "id": "simulation-md-3:paul-melville",
+    "simulationId": "simulation-md-3",
+    "gameWeekId": "md-3",
+    "userId": "paul-melville",
+    "proposalId": "safe"
   }
 ] as unknown as LeagueMatchdayVoteRow[];

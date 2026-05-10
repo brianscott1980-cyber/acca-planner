@@ -16,5 +16,13 @@ export const leagueDataMatchdaySimulations = [
     "betPlacedAtIso": "2026-04-09T12:42:00+00:00",
     "selectedProposalId": "safe",
     "slipId": "slip-md-2"
+  },
+  {
+    "id": "simulation-md-3",
+    "gameWeekId": "md-3",
+    "voteResolvedAtIso": "2026-05-10T11:14:46.603+00:00",
+    "betPlacedAtIso": "2026-05-17T11:14:46.603+00:00",
+    "selectedProposalId": "safe",
+    "slipId": "slip-md-3"
   }
 ] as unknown as LeagueMatchdaySimulationRow[];
